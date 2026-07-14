@@ -16,3 +16,7 @@ agent-registry/
 
 # Generated
 cluster-output/
+
+# Python bytecode
+__pycache__/
+*.pyc

@@ -160,14 +160,25 @@ class Guard520:
         self._log(action, r, f"failure: {error}")
         return r
 
-    # ---- 520自检 ----
+    # ---- 520自检（真实核查，非装饰）----
+    def _find_backup(self):
+        """查找 archive/ 下含 manifest.json 的备份目录"""
+        archive = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "archive"))
+        if not os.path.isdir(archive):
+            return None
+        for d in sorted(os.listdir(archive), reverse=True):
+            if os.path.exists(os.path.join(archive, d, "manifest.json")):
+                return os.path.join(archive, d)
+        return None
+
     def self_check(self):
-        """520自检：可追溯/可恢复/可修复/可进化"""
+        """520自检：可追溯/可恢复/可修复/可进化/已强制(无钩子环境的agent侧强制)"""
         results = {
             "traceable": self._check_traceable(),
             "recoverable": self._check_recoverable(),
             "fixable": self._check_fixable(),
             "evolvable": self._check_evolvable(),
+            "enforced": self._check_enforced(),
         }
         all_pass = all(r["pass"] for r in results.values())
         results["overall"] = "PASS" if all_pass else "FAIL"
@@ -175,31 +186,59 @@ class Guard520:
         return results
 
     def _check_traceable(self):
-        # 检查日志记录能力（首次运行无日志是正常的）
-        log_ok = os.path.exists(self.log_file)
-        # 检查_log方法是否定义（能力就绪）
-        has_log_method = hasattr(self, "_log")
-        return {"pass": has_log_method, "detail": f"日志记录能力: {'就绪' if has_log_method else '缺失'} | 日志文件: {'存在' if log_ok else '待生成（首次运行正常）'}"}
+        # 真实核查：确有操作被记录（非仅方法存在）
+        if os.path.exists(self.log_file) and os.path.getsize(self.log_file) > 0:
+            sz = os.path.getsize(self.log_file)
+            return {"pass": True, "detail": f"操作日志存在且有记录: {sz} 字节 (可追溯)"}
+        return {"pass": False, "detail": "尚无操作日志：护栏从未实际拦截/记录过任何操作 (不可追溯)"}
 
     def _check_recoverable(self):
-        return {"pass": True, "detail": "删除操作走回收站(FOF_ALLOWUNDO)"}
+        bak = self._find_backup()
+        if bak:
+            return {"pass": True, "detail": f"存在备份: {os.path.basename(bak)} (可恢复)"}
+        return {"pass": False, "detail": "archive/ 下无含 manifest.json 的备份 (不可恢复)"}
 
     def _check_fixable(self):
-        return {"pass": True, "detail": "on_failure提供回滚方案"}
+        # 真实核查：on_failure 能给出指向真实备份的回滚方案
+        bak = self._find_backup()
+        rb = self.on_failure({"type": "delete", "target": "D:/x"}, "test")
+        opts = rb.data.get("rollback_options", [])
+        has_backup_rollback = any("备份恢复" in o for o in opts)
+        if bak and has_backup_rollback:
+            return {"pass": True, "detail": f"失败回滚方案指向真实备份: {os.path.basename(bak)} (可修复)"}
+        return {"pass": False, "detail": "回滚方案缺失真实备份目标 (不可修复)"}
 
     def _check_evolvable(self):
-        # 检查多个可能的skill目录
         kaf_dir = os.path.dirname(os.path.abspath(__file__))
         candidates = [
-            os.path.join(kaf_dir, "skills"),                          # kaf/skills/
-            os.path.join(kaf_dir, "..", "..", "skills"),              # Claw/skills/（不存在但可能）
-            os.path.expanduser("~/.workbuddy/skills"),                # 全局skill目录
+            os.path.join(kaf_dir, "skills"),
+            os.path.join(kaf_dir, "..", "..", "skills"),
+            os.path.expanduser("~/.workbuddy/skills"),
         ]
         for sdir in candidates:
             if os.path.exists(sdir) and len(os.listdir(sdir)) > 0:
-                count = len(os.listdir(sdir))
-                return {"pass": True, "detail": f"skill目录: {sdir} ({count}个skill)"}
-        return {"pass": False, "detail": "未找到skill目录（kaf/skills/ 或 ~/.workbuddy/skills/）"}
+                return {"pass": True, "detail": f"skill目录: {sdir} ({len(os.listdir(sdir))}个skill)"}
+        return {"pass": False, "detail": "未找到skill目录"}
+
+    def _check_enforced(self):
+        # 无钩子环境：强制靠 agent 侧门禁(kaf_gate.py) + 铁律接入
+        kaf_dir = os.path.dirname(os.path.abspath(__file__))
+        gate = os.path.join(kaf_dir, "kaf_gate.py")
+        mem = os.path.abspath(os.path.join(os.path.dirname(kaf_dir), "..", ".workbuddy", "memory", "MEMORY.md"))
+        gate_ok = os.path.exists(gate)
+        rule_ok = False
+        if os.path.exists(mem):
+            with open(mem, "r", encoding="utf-8", errors="ignore") as f:
+                _content = f.read()
+            rule_ok = ("铁律11" in _content) or ("kaf_gate" in _content)
+        if gate_ok and rule_ok:
+            return {"pass": True, "detail": "agent侧强制门禁(kaf_gate.py)已接入铁律 (已强制)"}
+        missing = []
+        if not gate_ok:
+            missing.append("kaf_gate.py")
+        if not rule_ok:
+            missing.append("MEMORY.md 铁律11")
+        return {"pass": False, "detail": f"未接入强制门禁(仅被动库): 缺 {missing} (无自动强制)"}
 
 
 if __name__ == "__main__":

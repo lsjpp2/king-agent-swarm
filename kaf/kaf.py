@@ -6,7 +6,7 @@ Usage:
     kaf init      — 初始化KAF（生成constitution.json + 注册指纹）
     kaf check     — 520自检（可追溯/可恢复/可修复/可进化）
     kaf verify    — 记忆完整性校验（指纹+drift检测）
-    kaf guard     — 启动运行时护栏（打印hook配置）
+    kaf guard     — 打印运行时护栏检查点说明
     kaf rotate <agent> — 宰相轮值
     kaf status    — 查看集群状态
 """
@@ -102,9 +102,9 @@ def cmd_verify():
 
 
 def cmd_guard():
-    """启动运行时护栏（打印hook配置）"""
+    """打印运行时护栏检查点说明"""
     print("=" * 50)
-    print("  KAF Guard — 运行时护栏配置")
+    print("  KAF Guard — 运行时护栏检查点")
     print("=" * 50)
 
     hooks = [
@@ -117,9 +117,12 @@ def cmd_guard():
     for event, desc in hooks:
         print(f"  {event:30s} → {desc}")
 
-    print("\n  护栏通过PreToolUse hook执行。")
-    print("  在WorkBuddy中：hook配置写入 ~/.workbuddy/hooks.json")
-    print("  在其他平台：参考 adapters/_template.py 实现register_hook")
+    print("\n  强制层接入方式：")
+    print("  - 有原生 hook 接口的平台：PreToolUse hook 自动调用上述检查点")
+    print("  - WorkBuddy 等无 hook 平台（已实测无 hooks.json/hook 字段）：")
+    print("    agent 侧强制门禁 kaf_gate.py —— 删/移/覆盖前 MUST 过此门禁并服从 BLOCK")
+    print("  参考 adapters/_template.py 实现各平台 register_hook；")
+    print("  adapters/workbuddy.py 已写实 agent 侧策略（不再写无人读取的 hooks.json）")
     return 0
 
 

@@ -49,19 +49,38 @@ class WorkBuddyAdapter(PlatformAdapter):
             f.write(value)
         return {"success": True}
 
-    def register_hook(self, event, callback):
-        """WorkBuddy hook注册（通过PreToolUse等机制）"""
-        # WorkBuddy作为类VS Code应用，hook通过配置文件注册
-        # 实际enforcement依赖平台hook能力
-        hooks_config = os.path.join(self.home, "hooks.json")
-        hooks = {}
-        if os.path.exists(hooks_config):
-            with open(hooks_config, "r", encoding="utf-8") as f:
-                hooks = json.load(f)
-        hooks.setdefault(event, []).append(callback.__name__ if callable(callback) else callback)
-        with open(hooks_config, "w", encoding="utf-8") as f:
-            json.dump(hooks, f, indent=2, ensure_ascii=False)
-        return {"success": True, "event": event}
+    def register_hook(self, event, callback=None):
+        """WorkBuddy 平台无原生 hook 接口（已实测：~/.workbuddy 无 hooks.json，
+        settings.json 无 hook 字段，app.asar 搜 PreToolUse/hook 零结果）。
+        因此 KAF 在此平台的强制层为 AGENT 侧门禁：agent 在每次破坏性操作前
+        必须调用 kaf_gate.py 并服从其结果。本方法返回该策略，不再写无人读取的 hooks.json。
+        """
+        gate = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "kaf_gate.py")
+        return {
+            "event": event,
+            "platform": "workbuddy",
+            "native_hook": False,
+            "enforcement": "agent_side_gate",
+            "gate_command": f'python "{gate}" check --op <delete|move|write> --target "<path>" [--confirmed]',
+            "rule": "破坏性操作前 MUST 跑 kaf_gate.py；BLOCK 则停止并展示清单，绝不可绕过",
+        }
+
+    def agent_side_gate(self, op, target, confirmed=False, script="", verified=False, content=""):
+        """实际调用门禁（agent 侧强制入口）。返回 blocked=True 时操作须停止。"""
+        import subprocess
+        import sys
+        gate = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "kaf_gate.py")
+        cmd = [sys.executable, gate, "check", "--op", op, "--target", target]
+        if confirmed:
+            cmd.append("--confirmed")
+        if script:
+            cmd += ["--script", script]
+        if verified:
+            cmd.append("--verified")
+        if content:
+            cmd += ["--content", content]
+        r = subprocess.run(cmd, capture_output=True, text=True)
+        return {"returncode": r.returncode, "stdout": r.stdout.strip(), "blocked": r.returncode == 1}
 
     def execute(self, action):
         """执行操作（通过WorkBuddy的Bash/Write等工具）"""
