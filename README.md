@@ -1,150 +1,228 @@
-# 👑 King Agent Swarm
+# 👑 KAF — King-Agent Framework
 
-**A coordination protocol for multi-AI-agent clusters.**
+> **The governance layer for multi-agent swarms.**
+> Stop your AI agents from deleting your files, escaping their workspace, and gaslighting each other.
 
-You have 3+ AI coding agents (Claude Code, Cursor, OpenCode, Codex, etc.).
-They talk to you. They don't talk to each other.
-They step on each other's memory. They give conflicting answers.
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org)
+[![520-Compliant](https://img.shields.io/badge/520-Rule%20Compliant-ff69b4.svg)](#-the-520-rule)
+[![Platform-agnostic](https://img.shields.io/badge/Platform-Agnostic-lightgrey.svg)](#-platform-adapters)
+[![Made from real scars](https://img.shields.io/badge/forged%20in-production-red.svg)](#-your-agents-are-out-of-control-and-you-know-it)
 
-**King Agent Swarm fixes this** with three simple files and one clear metaphor:
+You run 3+ AI coding agents — Claude Code, Cursor, OpenCode, Codex, Kimi… They talk to **you**. They don't talk to **each other**. And they have **no rules about what they can touch.**
 
-```
-You (King)
-  └── Prime Minister (active coordinator, rotates)
-        ├── Agent A
-        ├── Agent B
-        └── Agent C
-```
+**CrewAI / LangGraph / Ruflo answer "how do agents execute tasks together."**
+**KAF answers "how do you stop agents from wrecking your machine."**
 
----
-
-## What It Does
-
-| Problem | Solution |
-|:---|:---|
-| 6 agents, zero coordination | `coordinator.json` — one source of truth for who's in charge |
-| Agent memories contaminate each other | Memory isolation walls — each agent has its own private memory |
-| No way to switch who leads | Rotation protocol — king says "X is PM now," old PM hands over, new PM takes over |
-| Agents drift from original intent | Anti-Drift checkpoint every 5 steps |
+It's not an orchestrator. It's the **constitution + runtime guardrail** that sits *under* any orchestrator.
 
 ---
 
-## Quick Start
+## 🔥 Your agents are out of control (and you know it)
+
+- An agent `rm -rf`'d a folder it shouldn't have. **Gone. No backup.**
+- An agent dropped 47 temp files across your `C:\` drive.
+- An agent overwrote `constitution.json`. **Your rules vanished.**
+- Two agents read each other's private memory. **Context contaminated.**
+- Something broke at 2 AM. **No script, no log. Nobody knows what happened.**
+
+### This is not theoretical
+
+KAF was forged inside a real 6-agent cluster (WorkBuddy + OpenCode + Claude + Kimi + Cursor) running daily for 3 months. We lost **2000+ map assets** to one irreversible delete before we built the guardrails.
+
+**KAF is the scar tissue. MIT-licensed, so you don't have to bleed for it.**
+
+---
+
+## 🛡️ The 520 Rule — four principles, three iron laws
+
+Every action an agent takes must be:
+
+| | Principle | What it means in code |
+|:--|:--|:--|
+| **5** | **Traceable** | Every op has a script + log entry (`kaf_operations.log`) |
+| **2** | **Recoverable** | Deletes go to recycle bin; configs are backed up first |
+| **0** | **Fixable** | On failure, `on_failure()` hands you rollback options |
+| **+** | **Evolvable** | Good workflows auto-crystallize into reusable Skills |
+
+**Three Iron Laws — violations are blocked at runtime, not just warned:**
+
+- 🔒 **Law 8** — Destructive ops (`rm` / `mv` / `copy`) MUST come from a script, then be verified.
+- 🔒 **Law 9** — Any number written to memory MUST be verified against the filesystem.
+- 🔒 **Law 10** — Before deleting, the agent MUST show the full file list and get your confirmation.
+
+### Live guardrail interception
 
 ```bash
-git clone https://github.com/YOUR_USER/king-agent-swarm.git
-cd king-agent-swarm
-
-# Generate your cluster config
-./init.sh --king "YourName" --cluster-path "/path/to/cluster/shared"
-
-# Deploy to your agents
-cat templates/constitution.md      # Copy to all agents
-cat templates/handover-protocol.md # Copy to all agents
+$ python kaf.py guard
+  pre:delete          → 铁律10：删除前展示清单+用户确认
+  pre:destructive_op  → 铁律8：破坏性操作必须有脚本
+  post:write_memory   → 铁律9：记忆数字实地核查
+  startup             → 记忆完整性：指纹校验
 ```
 
-Read the full guide: [docs/quick-start.md](docs/quick-start.md)
+```python
+from guard520 import Guard520
+guard = Guard520("constitution.json")
+
+guard.pre_execute({"type": "rm", "target": "D:/x"})
+# → block: 铁律8违规：rm 操作无脚本
+
+guard.pre_delete({"type": "rm", "target": "constitution.json"})
+# → block: 铁律10违规：未展示清单/未获确认。待删1项
+
+guard.pre_execute({"type": "rm", "target": "D:/x", "script": "clean.py", "verified": True})
+# → ok
+```
+
+**No config, no `--force`, no "are you sure?" bypass. The guard returns `BLOCK` and writes it to the log.**
 
 ---
 
-## Why "King & Prime Minister"?
+## 🏛️ Architecture — five layers
 
-Most multi-agent frameworks use dry terms like "orchestrator" and "worker." Nobody remembers what those mean the next day.
+```
+┌─────────────────────────────────────────────┐
+│  Platform Adapters   (WorkBuddy/Claude/...)  │  5 lines of code to plug in
+├─────────────────────────────────────────────┤
+│  Coordinator Protocol  (Prime Minister rotate)│  who's in charge, right now
+├─────────────────────────────────────────────┤
+│  520 Runtime Guard     (4 checkpoints)        │  blocks Law 8/9/10 violations
+├─────────────────────────────────────────────┤
+│  Constitution-as-Code (JSON, machine-readable)│  rules you can diff & CI-test
+├─────────────────────────────────────────────┤
+│  Memory Integrity      (SHA-256 fingerprint)  │  detect unauthorized drift
+└─────────────────────────────────────────────┘
+```
 
-**King / Prime Minister / Swarm** is:
-- One mental model, instantly understood
-- Culturally intuitive (from monarchy to modern governance)
-- Easy to explain to non-technical stakeholders
-
----
-
-## Architecture
-
-See [docs/architecture.md](docs/architecture.md) for full design philosophy, comparison with alternatives (RuFlo, AutoGen, CrewAI), and formal state definitions.
-
-Key diagrams:
-
-| Diagram | Description |
-|:---|:---|
-| [Power Structure](diagrams/01-power-structure.svg) | King → PM → Agent hierarchy |
-| [Memory Isolation](diagrams/02-memory-isolation.svg) | Shared layer vs private memory walls |
-| [Rotation Flow](diagrams/03-rotation-flow.svg) | PM handover protocol |
+Why JSON, not a markdown doc? So your constitution can be **parsed, diffed, and CI-tested** — not just read.
 
 ---
 
-## Supported Agents
+## ⚡ Quick start
 
-| Agent | Adapter | Method |
-|:---|:---|:---|
-| Claude Code | [adapters/claude.md](adapters/claude.md) | `CLAUDE.md` project-level injection |
-| Cursor | [adapters/cursor.md](adapters/cursor.md) | `.cursorrules` injection |
-| OpenCode | [adapters/opencode.md](adapters/opencode.md) | `opencode.jsonc` instructions array |
-| Codex | [adapters/generic.md](adapters/generic.md) | Config JSON injection |
-| Kimi | [adapters/generic.md](adapters/generic.md) | First-message identity paste |
-| WorkBuddy | [adapters/generic.md](adapters/generic.md) | System prompt hook |
-| **Any LLM agent** | [adapters/generic.md](adapters/generic.md) | `system_prompt` injection |
+```bash
+git clone https://github.com/lsjpp2/king-agent-swarm.git
+cd king-agent-swarm/kaf
+
+python kaf.py init      # generate constitution.json + register memory fingerprints
+python kaf.py check     # 520 self-check  →  ✅ PASS
+python kaf.py verify    # memory integrity (fingerprint + drift detect)
+python kaf.py status    # who's the current Prime Minister
+```
+
+Real `kaf check` output on a fresh cluster:
+
+```
+==================================================
+  KAF 520 自检
+==================================================
+  ✅ traceable: 日志记录能力: 就绪 | 日志文件: 待生成（首次运行正常）
+  ✅ recoverable: 删除操作走回收站(FOF_ALLOWUNDO)
+  ✅ fixable: on_failure提供回滚方案
+  ✅ evolvable: skill目录: .../.workbuddy/skills (25个skill)
+
+  总体: PASS
+```
 
 ---
 
-## Core Principles
+## 📜 Constitution-as-Code
 
-1. **Human sovereignty** — the king (human) has absolute veto power
-2. **Memory isolation** — agents never read each other's private memory
-3. **Coordinator rotation** — prime minister role rotates on king's command
-4. **Conflict resolution** — PM gets 3 votes, others get 1, king vetoes
-5. **Anti-drift** — alignment check every 5 tool calls on long tasks
+Your governance is a JSON file, not a vibe:
 
-Design rationale for each principle: [docs/principles.md](docs/principles.md)
+```json
+{
+  "rule_520": {
+    "enabled": true,
+    "immutable": true,
+    "note": "就算世界灭亡，这个标准不能丢",
+    "iron_laws": {
+      "law_8": "script_then_execute_then_verify",
+      "law_9": "verify_any_number_in_memory",
+      "law_10": "show_list_before_delete"
+    }
+  },
+  "rules": [
+    { "id": "delete_auth", "trigger": "pre:delete",
+      "require": "user_confirm", "irreversible_action": "warn_and_block" },
+    { "id": "path_discipline", "trigger": "pre:write",
+      "allow_only": "{{workspace}}/**",
+      "blocked_zones": ["Desktop", "Documents", "Downloads", "system_root"] }
+  ]
+}
+```
+
+Path discipline alone stops ~90% of "why is my Desktop full of agent junk" incidents.
 
 ---
 
-## Repository Structure
+## 🆚 How is KAF different?
+
+| | KAF | CrewAI / LangGraph | RuFlo | AutoGen |
+|:--|:--|:--|:--|:--|
+| Layer | **Governance** (how to *rule* agents) | Orchestration (how to *run* tasks) | Homogeneous swarm | Conversation orchestration |
+| Dangerous-op guard | ✅ runtime **BLOCK** | ❌ | ❌ | ❌ |
+| Path discipline | ✅ built-in | ❌ | ❌ | ❌ |
+| Memory isolation walls | ✅ | ⚠️ manual | ❌ | ❌ |
+| Constitution-as-Code | ✅ JSON, CI-testable | ❌ | ❌ | ❌ |
+| Heterogeneous agents | ✅ Claude+Cursor+…+ | ⚠️ | ❌ (Claude-only) | ⚠️ |
+| Platform-agnostic | ✅ adapter SDK | varies | ❌ | ⚠️ |
+
+**KAF doesn't replace them. It governs them.** Drop it under any orchestrator.
+
+---
+
+## 🔌 Platform Adapters
+
+```python
+from adapters.base import PlatformAdapter
+
+class MyAdapter(PlatformAdapter):
+    platform_name = "my_platform"
+
+    def read_constitution(self): ...
+    def read_memory(self, key=None): ...
+    def write_memory(self, key, value, protect_check=True): ...
+    def register_hook(self, event, callback): ...
+    def execute(self, action): ...
+    def get_agent_id(self): ...
+    def get_workspace(self): ...
+```
+
+The `WorkBuddy` adapter ships in-box. `Claude` / `Cursor` / `OpenCode` adapters are doc-based (`adapters/*.md`). Full SDK in [`kaf/adapters/`](kaf/adapters).
+
+---
+
+## 📂 Repository layout
 
 ```
 king-agent-swarm/
-├── README.md              # You are here
-├── LICENSE                # MIT
-├── docs/
-│   ├── architecture.md    # Full design philosophy
-│   ├── quick-start.md     # 10-minute setup guide
-│   ├── principles.md      # Why each rule exists
-│   └── faq.md             # Common questions
-├── templates/
-│   ├── coordinator.json   # Agent registry template
-│   ├── constitution.md    # Cluster constitution template
-│   ├── handover-protocol.md
-│   └── agent-identity.md  # Per-agent identity card template
-├── adapters/
-│   ├── claude.md          # Claude Code adapter
-│   ├── cursor.md          # Cursor adapter
-│   ├── opencode.md        # OpenCode adapter
-│   └── generic.md         # Universal LLM agent adapter
-├── diagrams/              # SVG architecture diagrams
-├── examples/
-│   ├── minimal-3-agent.md # Simplest possible cluster
-│   └── 6-agent-cluster.md # Full production cluster
-├── init.sh                # Unix setup script
-└── init.ps1               # Windows setup script
+├── kaf/                      # ★ KAF v5.0 core (this is the framework)
+│   ├── constitution.json     # declarative constitution (machine-readable)
+│   ├── guard520.py           # 520 runtime guard — 4 checkpoints
+│   ├── memory_integrity.py   # SHA-256 fingerprint + drift detection
+│   ├── coordinator.json      # Prime Minister registry (rotate / vote)
+│   ├── kaf.py                # CLI: init / check / verify / guard / rotate / status
+│   ├── adapters/             # platform SDK (base / workbuddy / template)
+│   └── README.md             # deep dive (中文 + English)
+├── templates/                # coordination-protocol layer (v1, config-only)
+├── docs/                     # architecture / quick-start / principles / faq
+├── adapters/                 # per-platform injection guides (.md)
+├── diagrams/                 # SVG architecture diagrams
+└── examples/                 # minimal 3-agent & 6-agent clusters
 ```
 
----
-
-## FAQ
-
-**Is this tied to a specific platform?**
-No. It's pure config files (Markdown + JSON). Any LLM agent that can read files can join the swarm.
-
-**Why not use AutoGen / CrewAI / LangGraph?**
-Those are code-level orchestration frameworks. King Agent Swarm operates at the **protocol level** — it's about rules and conventions, not API calls. You can use it alongside any orchestration framework.
-
-**Does it work with only 2 agents?**
-Yes. The minimum viable swarm is: King + 1 Agent (acting as PM by default).
-
-**How do agents actually communicate?**
-Through the shared layer (`coordinator.json` + progress log). Direct agent-to-agent messaging is out of scope (and often the source of chaos).
+KAF is the engine; `templates/` + `docs/` + `diagrams/` form the **coordination-protocol layer** — the v1 "King / Prime Minister / Swarm" metaphor that KAF grew out of.
 
 ---
 
-## License
+## 🤝 Contributing
 
-MIT — see [LICENSE](LICENSE)
+PRs, issues, and war stories welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+Even the governance is governed: `user_feedback → coordinator_evaluate → king_confirm → merge`.
+
+## 📄 License
+
+MIT — see [LICENSE](LICENSE).

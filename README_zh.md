@@ -1,169 +1,227 @@
-# 👑 国王-Agent蜂群
+# 👑 KAF — 国王智能体框架
 
-**多 AI Agent 集群的协调协议。**
+> **多智能体集群的治理层。**
+> 别让你的 AI Agent 删了你的文件、越界乱建目录、还互相污染记忆。
 
-你有 3+ 个 AI 编程助手（Claude Code、Cursor、OpenCode、Codex 等）。
-它们都跟你说话，但彼此不沟通。
-它们互相污染记忆。它们给出的答案互相矛盾。
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org)
+[![520-Compliant](https://img.shields.io/badge/520-Rule%20Compliant-ff69b4.svg)](#-520-法则四原则三铁律)
+[![Platform-agnostic](https://img.shields.io/badge/Platform-Agnostic-lightgrey.svg)](#-平台适配器)
 
-**国王-Agent蜂群用三个文件和一组清晰的比喻解决这个问题：**
+你有 3+ 个 AI 编程助手 —— Claude Code、Cursor、OpenCode、Codex、Kimi…… 它们都跟你说话，彼此不沟通，而且**没有任何规则约束它们能碰什么**。
 
-```
-你（国王）
-  └── 宰相（当前协调者，可轮值）
-        ├── Agent A
-        ├── Agent B
-        └── Agent C
-```
+**CrewAI / LangGraph / Ruflo 解决"Agent 怎么一起执行任务"。**
+**KAF 解决"你怎么管住 Agent 别把机器搞炸"。**
 
----
-
-## 它解决什么问题
-
-| 问题 | 解决方案 |
-|:---|:---|
-| 6 个 Agent，零协调 | `coordinator.json` — 谁在负责，唯一真相源 |
-| Agent 记忆互相污染 | 记忆隔离墙 — 每个 Agent 有自己的私有记忆库 |
-| 无法切换负责人 | 轮值协议 — 国王说"X 现在做宰相"，旧宰相交接，新宰相接任 |
-| Agent 偏离原始意图 | Anti-Drift 检查点 — 长期任务每 5 步做一次对齐 |
+它不是编排器，而是架在任意编排器**之下**的**宪法 + 运行时护栏**。
 
 ---
 
-## 快速开始
+## 🔥 你的 Agent 已经失控了（你心里有数）
+
+- 某个 Agent `rm -rf` 了一个不该删的文件夹。**没了，没备份。**
+- 某个 Agent 在你的 `C:\` 盘丢了 47 个临时文件。
+- 某个 Agent 覆盖了 `constitution.json`。**你的规则没了。**
+- 两个 Agent 读了对方的私有记忆。**上下文被污染。**
+- 凌晨 2 点出了事。**没脚本、没日志，没人知道发生了什么。**
+
+### 这不是纸上谈兵
+
+KAF 诞生于一个真实运行 3 个月的 6-Agent 集群（WorkBuddy + OpenCode + Claude + Kimi + Cursor）。我们曾因一次不可逆删除，**丢了 2000+ 张地图素材**，之后才筑起这些护栏。
+
+**KAF 是伤疤长出的肉。MIT 协议开源，你不用再流血。**
+
+---
+
+## 🛡️ 520 法则：四原则，三铁律
+
+Agent 的每一个操作都必须满足：
+
+| | 原则 | 代码里的含义 |
+|:--|:--|:--|
+| **5** | **可追溯** | 每个操作有脚本 + 日志（`kaf_operations.log`） |
+| **2** | **可恢复** | 删除走回收站；配置改动前先备份 |
+| **0** | **可修复** | 失败时 `on_failure()` 给你回滚方案 |
+| **+** | **可进化** | 好工作流自动结晶成可复用 Skill |
+
+**三条铁律 —— 运行时直接拦截，不只是警告：**
+
+- 🔒 **铁律8** — 破坏性操作（`rm` / `mv` / `copy`）必须有脚本，且执行后验证。
+- 🔒 **铁律9** — 写进记忆的任何数字，必须对照文件系统实地核查。
+- 🔒 **铁律10** — 删除前，Agent 必须展示完整文件清单，并获得你确认。
+
+### 运行时护栏实时拦截
 
 ```bash
-git clone https://github.com/YOUR_USER/king-agent-swarm.git
-cd king-agent-swarm
-
-# 生成你的集群配置
-./init.sh --king "你的名字" --cluster-path "/path/to/集群共享目录"
-
-# 部署到你的 Agents
-cat templates/constitution.md      # 复制到所有 Agent
-cat templates/handover-protocol.md # 复制到所有 Agent
+$ python kaf.py guard
+  pre:delete          → 铁律10：删除前展示清单+用户确认
+  pre:destructive_op  → 铁律8：破坏性操作必须有脚本
+  post:write_memory   → 铁律9：记忆数字实地核查
+  startup             → 记忆完整性：指纹校验
 ```
 
-完整指南：[docs/quick-start.md](docs/quick-start.md)
+```python
+from guard520 import Guard520
+guard = Guard520("constitution.json")
+
+guard.pre_execute({"type": "rm", "target": "D:/x"})
+# → block: 铁律8违规：rm 操作无脚本
+
+guard.pre_delete({"type": "rm", "target": "constitution.json"})
+# → block: 铁律10违规：未展示清单/未获确认。待删1项
+
+guard.pre_execute({"type": "rm", "target": "D:/x", "script": "clean.py", "verified": True})
+# → ok
+```
+
+**没有配置项、没有 `--force`、没有"你确定吗"可以绕过。护栏返回 `BLOCK` 并写进日志。**
 
 ---
 
-## 为什么叫"国王 & 宰相"？
+## 🏛️ 架构：五层
 
-大多数多 Agent 框架用"orchestrator"和"worker"这种干巴巴的词。第二天没人记得它们是什么意思。
+```
+┌─────────────────────────────────────────────┐
+│  平台适配器   (WorkBuddy/Claude/...)          │  5 行代码接入
+├─────────────────────────────────────────────┤
+│  协调协议   (宰相轮值)                         │  此刻谁说了算
+├─────────────────────────────────────────────┤
+│  520 运行时护栏 (4 个检查点)                   │  拦截铁律8/9/10 违规
+├─────────────────────────────────────────────┤
+│  宪法即代码 (JSON，可机读)                     │  规则可 diff、可 CI 测试
+├─────────────────────────────────────────────┤
+│  记忆完整性 (SHA-256 指纹)                     │  检测未授权漂移
+└─────────────────────────────────────────────┘
+```
 
-**国王 / 宰相 / 蜂群** 是：
-- 一个心智模型，瞬间理解
-- 文化直觉（从君主制到现代治理）
-- 容易向非技术干系人解释
-
----
-
-## 架构
-
-完整设计理念、与竞品对比（RuFlo、AutoGen、CrewAI）和形式化状态定义，见 [docs/architecture.md](docs/architecture.md)。
-
-核心图解：
-
-| 图解 | 说明 |
-|:---|:---|
-| [权力结构](diagrams/01-power-structure.svg) | 国王 → 宰相 → Agent 层次 |
-| [记忆隔离墙](diagrams/02-memory-isolation.svg) | 共享层 vs 私有记忆墙 |
-| [宰相轮值流程](diagrams/03-rotation-flow.svg) | 宰相交接协议 |
+为什么用 JSON 而不是 markdown 文档？因为你的宪法要能**被解析、被 diff、被 CI 测试**，而不只是被读。
 
 ---
 
-## 支持的 Agent 平台
+## ⚡ 快速开始
 
-| Agent | 适配器 | 注入方式 |
-|:---|:---|:---|
-| Claude Code | [adapters/claude.md](adapters/claude.md) | `CLAUDE.md` 项目级注入 |
-| Cursor | [adapters/cursor.md](adapters/cursor.md) | `.cursorrules` 注入 |
-| OpenCode | [adapters/opencode.md](adapters/opencode.md) | `opencode.jsonc` instructions 数组 |
-| Codex | [adapters/generic.md](adapters/generic.md) | 配置 JSON 注入 |
-| Kimi | [adapters/generic.md](adapters/generic.md) | 首条消息粘贴身份 |
-| WorkBuddy | [adapters/generic.md](adapters/generic.md) | 系统提示词钩子 |
-| **任何 LLM Agent** | [adapters/generic.md](adapters/generic.md) | `system_prompt` 注入 |
+```bash
+git clone https://github.com/lsjpp2/king-agent-swarm.git
+cd king-agent-swarm/kaf
+
+python kaf.py init      # 生成 constitution.json + 注册记忆指纹
+python kaf.py check     # 520 自检  →  ✅ PASS
+python kaf.py verify    # 记忆完整性（指纹 + 漂移检测）
+python kaf.py status    # 当前谁是宰相
+```
+
+新集群真实 `kaf check` 输出：
+
+```
+==================================================
+  KAF 520 自检
+==================================================
+  ✅ traceable: 日志记录能力: 就绪 | 日志文件: 待生成（首次运行正常）
+  ✅ recoverable: 删除操作走回收站(FOF_ALLOWUNDO)
+  ✅ fixable: on_failure提供回滚方案
+  ✅ evolvable: skill目录: .../.workbuddy/skills (25个skill)
+
+  总体: PASS
+```
 
 ---
 
-## 核心原则
+## 📜 宪法即代码
 
-1. **人类主权** — 国王（人类）拥有一票否决权
-2. **记忆隔离** — Agent 之间永不读取对方的私有记忆
-3. **协调者轮值** — 宰相角色随国王指令流转
-4. **冲突决策** — 宰相=3票，其他 Agent 各1票，国王否决
-5. **Anti-Drift** — 长期任务每 5 次工具调用做一次对齐检查
+你的治理是一份 JSON，不是一句感觉：
 
-每条原则的设计理由：[docs/principles.md](docs/principles.md)
+```json
+{
+  "rule_520": {
+    "enabled": true,
+    "immutable": true,
+    "note": "就算世界灭亡，这个标准不能丢",
+    "iron_laws": {
+      "law_8": "script_then_execute_then_verify",
+      "law_9": "verify_any_number_in_memory",
+      "law_10": "show_list_before_delete"
+    }
+  },
+  "rules": [
+    { "id": "delete_auth", "trigger": "pre:delete",
+      "require": "user_confirm", "irreversible_action": "warn_and_block" },
+    { "id": "path_discipline", "trigger": "pre:write",
+      "allow_only": "{{workspace}}/**",
+      "blocked_zones": ["Desktop", "Documents", "Downloads", "system_root"] }
+  ]
+}
+```
+
+光是路径纪律这一条，就能挡掉约 90% 的"为什么我桌面全是 Agent 垃圾"事故。
 
 ---
 
-## 仓库结构
+## 🆚 KAF 有什么不同？
+
+| | KAF | CrewAI / LangGraph | RuFlo | AutoGen |
+|:--|:--|:--|:--|:--|
+| 层级 | **治理层**（怎么*管* Agent） | 编排层（怎么*跑*任务） | 同质蜂群 | 对话编排 |
+| 危险操作护栏 | ✅ 运行时**拦截** | ❌ | ❌ | ❌ |
+| 路径纪律 | ✅ 内置 | ❌ | ❌ | ❌ |
+| 记忆隔离墙 | ✅ | ⚠️ 手动 | ❌ | ❌ |
+| 宪法即代码 | ✅ JSON，可 CI 测 | ❌ | ❌ | ❌ |
+| 异构 Agent | ✅ Claude+Cursor+…+ | ⚠️ | ❌ (仅 Claude) | ⚠️ |
+| 跨平台 | ✅ 适配器 SDK | 各异 | ❌ | ⚠️ |
+
+**KAF 不取代它们，它治理它们。** 架在任意编排器之下即可。
+
+---
+
+## 🔌 平台适配器
+
+```python
+from adapters.base import PlatformAdapter
+
+class MyAdapter(PlatformAdapter):
+    platform_name = "my_platform"
+
+    def read_constitution(self): ...
+    def read_memory(self, key=None): ...
+    def write_memory(self, key, value, protect_check=True): ...
+    def register_hook(self, event, callback): ...
+    def execute(self, action): ...
+    def get_agent_id(self): ...
+    def get_workspace(self): ...
+```
+
+`WorkBuddy` 适配器已内置。`Claude` / `Cursor` / `OpenCode` 适配器为文档式（`adapters/*.md`）。完整 SDK 见 [`kaf/adapters/`](kaf/adapters)。
+
+---
+
+## 📂 仓库结构
 
 ```
 king-agent-swarm/
-├── README.md              # 英文说明
-├── README_zh.md           # 中文说明（本文件）
-├── LICENSE                # MIT
-├── docs/
-│   ├── architecture.md    # 完整设计理念
-│   ├── quick-start.md     # 10分钟搭建指南
-│   ├── principles.md      # 每条规则为什么存在
-│   └── faq.md             # 常见问题
-├── templates/
-│   ├── coordinator.json   # Agent 注册表模板
-│   ├── constitution.md    # 集群宪法模板
-│   ├── handover-protocol.md
-│   └── agent-identity.md  # 每 Agent 身份卡模板
-├── adapters/
-│   ├── claude.md          # Claude Code 适配器
-│   ├── cursor.md          # Cursor 适配器
-│   ├── opencode.md        # OpenCode 适配器
-│   └── generic.md         # 通用 LLM Agent 适配器
-├── diagrams/              # SVG 架构图解
-├── examples/
-│   ├── minimal-3-agent.md # 最简单的集群
-│   └── 6-agent-cluster.md # 完整生产集群
-├── init.sh                # Unix 初始化脚本
-└── init.ps1               # Windows 初始化脚本
+├── kaf/                      # ★ KAF v5.0 核心（这才是框架）
+│   ├── constitution.json     # 声明式宪法（可机读）
+│   ├── guard520.py           # 520 运行时护栏（4 检查点）
+│   ├── memory_integrity.py   # SHA-256 指纹 + 漂移检测
+│   ├── coordinator.json      # 宰相注册表（轮值 / 投票）
+│   ├── kaf.py                # CLI: init / check / verify / guard / rotate / status
+│   ├── adapters/             # 平台 SDK（base / workbuddy / template）
+│   └── README.md             # 深入解析（中文 + English）
+├── templates/                # 协调协议层（v1，纯配置）
+├── docs/                     # 架构 / 快速开始 / 原则 / FAQ
+├── adapters/                 # 各平台注入指南（.md）
+├── diagrams/                 # SVG 架构图
+└── examples/                 # 最小 3-Agent 与完整 6-Agent 集群
 ```
 
----
-
-## 常见问题
-
-**这个跟特定平台绑定吗？**
-不。它是纯配置文件（Markdown + JSON）。任何能读文件的 LLM Agent 都能加入蜂群。
-
-**为什么不用 AutoGen / CrewAI / LangGraph？**
-那些是代码级编排框架。国王-Agent蜂群在**协议层**运作——它是关于规则和约定，而不是 API 调用。你可以把它和任何编排框架一起使用。
-
-**只有 2 个 Agent 能用吗？**
-能。最小可行蜂群是：国王 + 1 个 Agent（默认兼任宰相）。
-
-**Agent 之间怎么实际通信？**
-通过共享层（`coordinator.json` + 进度日志）。Agent 对 Agent 的直接消息传递不在范围内（而且通常是混乱的根源）。
-
-**这个跟 RuFlo 比怎么样？**
-RuFlo 是成熟的同构蜂群（只支持 Claude Code 实例），5分钟就能搭好。国王-Agent蜂群支持异构 Agent（Claude + Cursor + OpenCode + ...），并在主权、记忆隔离、宰相轮值上有针对性设计。见 [docs/architecture.md](docs/architecture.md) 完整对比。
+KAF 是引擎；`templates/` + `docs/` + `diagrams/` 构成**协调协议层** —— KAF 脱胎自的 v1"国王 / 宰相 / 蜂群"隐喻。
 
 ---
 
-## 发版计划
+## 🤝 贡献
 
-- [x] v1.0 — 去个人化，MIT 协议，基本文档
-- [ ] v1.1 — `validate.sh` 配置校验脚本
-- [ ] v1.2 — `examples/6-agent-cluster.md` 完整生产配置
-- [ ] v2.0 — 实战验证后的 Anti-Drift 纠正机制
+欢迎 PR、Issue、和你的血泪史。见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
----
+连治理本身也被治理：`用户反馈 → 宰相评估 → 国王确认 → 合并`。
 
-## 贡献
+## 📄 许可证
 
-欢迎 PR、Issue、讨论。见 [CONTRIBUTING.md](CONTRIBUTING.md)。
-
----
-
-## 许可证
-
-MIT — 见 [LICENSE](LICENSE)
+MIT — 见 [LICENSE](LICENSE)。
