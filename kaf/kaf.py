@@ -4,7 +4,7 @@ KAF CLI — King-Agent Framework 命令行工具
 
 Usage:
     kaf init      — 初始化KAF（生成constitution.json + 注册指纹）
-    kaf check     — 520自检（可追溯/可恢复/可修复/可进化）
+    kaf check     — 520自检（可追溯/可恢复/可修复/可进化/已强制）
     kaf verify    — 记忆完整性校验（指纹+drift检测）
     kaf guard     — 打印运行时护栏检查点说明
     kaf rotate <agent> — 宰相轮值
@@ -62,7 +62,7 @@ def cmd_check():
     print("=" * 50)
 
     result = guard.self_check()
-    for k in ["traceable", "recoverable", "fixable", "evolvable"]:
+    for k in ["traceable", "recoverable", "fixable", "evolvable", "enforced"]:
         v = result.get(k, {})
         status = "✅" if v.get("pass") else "❌"
         print(f"  {status} {k}: {v.get('detail', '')}")

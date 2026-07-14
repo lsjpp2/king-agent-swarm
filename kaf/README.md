@@ -34,7 +34,7 @@ Platform Adapter       从绑定特定平台 → 5行代码接入任意平台
 # 初始化KAF
 python kaf.py init
 
-# 520自检（可追溯/可恢复/可修复/可进化）
+# 520自检（5项真核查：可追溯/可恢复/可修复/可进化/已强制）
 python kaf.py check
 
 # 记忆完整性校验（指纹+drift检测）
