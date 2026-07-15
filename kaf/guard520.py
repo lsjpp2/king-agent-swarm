@@ -221,9 +221,10 @@ class Guard520:
         return {"pass": False, "detail": "未找到skill目录"}
 
     def _check_enforced(self):
-        # 无钩子环境：强制靠 agent 侧门禁(kaf_gate.py) + 铁律接入
+        # 无钩子环境：强制靠 agent 侧门禁(kaf_gate.py) + 铁律接入 + 真在跑(审计日志)
         kaf_dir = os.path.dirname(os.path.abspath(__file__))
         gate = os.path.join(kaf_dir, "kaf_gate.py")
+        audit_log = os.path.join(kaf_dir, "kaf_gate_audit.log")
         mem = os.path.abspath(os.path.join(os.path.dirname(kaf_dir), "..", ".workbuddy", "memory", "MEMORY.md"))
         gate_ok = os.path.exists(gate)
         rule_ok = False
@@ -231,14 +232,25 @@ class Guard520:
             with open(mem, "r", encoding="utf-8", errors="ignore") as f:
                 _content = f.read()
             rule_ok = ("铁律11" in _content) or ("kaf_gate" in _content)
-        if gate_ok and rule_ok:
-            return {"pass": True, "detail": "agent侧强制门禁(kaf_gate.py)已接入铁律 (已强制)"}
+        exercised_ok = False
+        last_run = None
+        if os.path.exists(audit_log):
+            with open(audit_log, "r", encoding="utf-8", errors="ignore") as f:
+                _lines = [l.strip() for l in f if l.strip()]
+            exercised_ok = len(_lines) > 0
+            if _lines:
+                last_run = _lines[-1][:24]  # [ISO时间戳...]
+        if gate_ok and rule_ok and exercised_ok:
+            ts = f" 最近运行 {last_run}" if last_run else ""
+            return {"pass": True, "detail": f"agent侧强制门禁(kaf_gate.py)已接入铁律且真在跑(审计日志有记录){ts} (已强制)"}
         missing = []
         if not gate_ok:
             missing.append("kaf_gate.py")
         if not rule_ok:
             missing.append("MEMORY.md 铁律11")
-        return {"pass": False, "detail": f"未接入强制门禁(仅被动库): 缺 {missing} (无自动强制)"}
+        if not exercised_ok:
+            missing.append("kaf_gate_audit.log 无运行记录(门禁从未被调用=装饰)")
+        return {"pass": False, "detail": f"未真正强制: 缺 {missing}"}
 
 
 if __name__ == "__main__":

@@ -7,6 +7,7 @@ Usage:
     kaf check     — 520自检（可追溯/可恢复/可修复/可进化/已强制）
     kaf verify    — 记忆完整性校验（指纹+drift检测）
     kaf guard     — 打印运行时护栏检查点说明
+    kaf honest    — 诚实扫描（检测文档/代码残留的'自动拦截'假话）
     kaf rotate <agent> — 宰相轮值
     kaf status    — 查看集群状态
 """
@@ -46,6 +47,21 @@ def cmd_init():
         if os.path.exists(fp):
             h = mi.register(fp)
             print(f"  ✅ 注册指纹 {fname}: {h[:16]}...")
+
+    # 生成本地 coordinator.json（gitignored，不提交），使 status/rotate 可用
+    coord_file = os.path.join(os.getcwd(), "coordinator.json")
+    if not os.path.exists(coord_file):
+        coord_tmpl = {
+            "version": "5.0",
+            "current_coordinator": "king",
+            "coordinators": {
+                "king": {"title": "国王(人类)", "status": "active"},
+            },
+            "rotation_history": [],
+        }
+        with open(coord_file, "w", encoding="utf-8") as f:
+            json.dump(coord_tmpl, f, indent=2, ensure_ascii=False)
+        print(f"  ✅ 生成 coordinator.json（本地，已 gitignore）")
 
     print("\n  KAF初始化完成。")
     print("  下一步: kaf check  # 运行520自检")
@@ -186,6 +202,62 @@ def cmd_status():
     return 0
 
 
+# 历史假话黑名单（曾出现在 KAF 文档/代码里，制造"自动拦截"的虚假宣称）
+LIE_PHRASES = [
+    "运行时hook拦截",
+    "PreToolUse hook执行",
+    "护栏通过PreToolUse",
+    "写入 ~/.workbuddy/hooks.json",
+    "打印hook配置",
+    "自动拦截违规操作",
+    "hook自动拦截",
+]
+
+
+def cmd_honest():
+    """诚实扫描：检测文档/代码中残留的'自动拦截'假话（防宣称=实现回归）"""
+    kaf_dir = os.path.dirname(os.path.abspath(__file__))
+    parent = os.path.dirname(kaf_dir)
+    scan_dirs = [kaf_dir]
+    for d in ["docs"]:
+        p = os.path.join(parent, d)
+        if os.path.isdir(p):
+            scan_dirs.append(p)
+
+    hits = []
+    for base in scan_dirs:
+        for root, dirs, files in os.walk(base):
+            if ".git" in dirs:
+                dirs.remove(".git")
+            for fn in files:
+                if not fn.endswith((".py", ".md", ".json", ".txt")):
+                    continue
+                fp = os.path.join(root, fn)
+                if os.path.basename(fp) == "kaf.py":
+                    continue  # 跳过扫描器自身（含 LIE_PHRASES 定义与说明文本）
+                try:
+                    with open(fp, "r", encoding="utf-8", errors="ignore") as f:
+                        for i, line in enumerate(f, 1):
+                            for ph in LIE_PHRASES:
+                                if ph in line:
+                                    hits.append((fp, i, ph))
+                except Exception:
+                    pass
+
+    print("=" * 50)
+    print("  KAF 诚实扫描（防'宣称=实现'假话）")
+    print("=" * 50)
+    if not hits:
+        print("  ✅ 未发现残留假话（运行时hook拦截/自动拦截等）")
+        return 0
+    print(f"  ❌ 发现 {len(hits)} 处疑似假话：")
+    for fp, i, ph in hits:
+        print(f"    {fp}:{i}  «{ph}»")
+    print("\n  => 上述措辞会误导用户以为 KAF 在 hook-less 平台自动拦截；")
+    print("     请改为'有原生hook走hook，无hook平台走agent侧强制门禁kaf_gate.py'。")
+    return 1
+
+
 def main():
     if len(sys.argv) < 2:
         print(__doc__)
@@ -200,6 +272,8 @@ def main():
         return cmd_verify()
     elif cmd == "guard":
         return cmd_guard()
+    elif cmd == "honest":
+        return cmd_honest()
     elif cmd == "rotate":
         if len(sys.argv) < 3:
             print("  Usage: kaf rotate <agent_name>")

@@ -34,7 +34,7 @@ Platform Adapter       从绑定特定平台 → 5行代码接入任意平台
 # 初始化KAF
 python kaf.py init
 
-# 520自检（5项真核查：可追溯/可恢复/可修复/可进化/已强制）
+# 520自检（可追溯/可恢复/可修复/可进化）
 python kaf.py check
 
 # 记忆完整性校验（指纹+drift检测）
@@ -83,8 +83,7 @@ python kaf.py rotate claude
 ```
 kaf/
 ├── constitution.json      声明式宪法（可机器解析）
-├── guard520.py            520运行时护栏（5项真核查：可追溯/可恢复/可修复/可进化/已通电）
-├── kaf_gate.py            强制门禁（agent侧拦截删/移/覆盖，BLOCK退出码1）
+├── guard520.py            520运行时护栏（4个检查点）
 ├── memory_integrity.py    记忆完整性（SHA-256指纹+drift检测）
 ├── coordinator.json       宰相注册表（轮值/投票/handover）
 ├── kaf.py                 CLI入口（init/check/verify/guard/rotate/status）
