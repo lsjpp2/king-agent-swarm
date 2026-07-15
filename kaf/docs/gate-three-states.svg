@@ -1,0 +1,52 @@
+<svg viewBox="0 0 680 340" role="img" xmlns="http://www.w3.org/2000/svg">
+  <title>KAF agent侧门禁三态：BLOCK / BLOCK(缺理由) / 放行</title>
+  <desc>任何删除/移动/覆盖操作须先过 kaf_gate.py：无确认即拦；有确认缺理由即拦；有确认有理由且有脚本才放行</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <style>
+      .th{font-family:var(--font-sans,sans-serif);font-size:14px;font-weight:500;fill:#2C2C2A}
+      .ts{font-family:var(--font-sans,sans-serif);font-size:12px;font-weight:400;fill:#5F5E5A}
+    </style>
+  </defs>
+
+  <text class="th" x="40" y="34" style="font-size:15px">kaf_gate.py 强制门禁 · 三态</text>
+  <text class="ts" x="40" y="56" style="font-size:12px">删除 / 移动 / 覆盖前 MUST 调用 · 退出码1=拦截</text>
+
+  <g>
+    <rect x="40" y="90" width="150" height="56" rx="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+    <text class="th" x="115" y="112" text-anchor="middle" dominant-baseline="central">破坏性操作</text>
+    <text class="ts" x="115" y="132" text-anchor="middle" dominant-baseline="central">delete / move / write</text>
+  </g>
+
+  <g>
+    <rect x="265" y="90" width="150" height="56" rx="8" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/>
+    <text class="th" x="340" y="112" text-anchor="middle" dominant-baseline="central">kaf_gate.py</text>
+    <text class="ts" x="340" y="132" text-anchor="middle" dominant-baseline="central">check --op --target</text>
+  </g>
+
+  <line x1="190" y1="118" x2="263" y2="118" stroke="#5F5E5A" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <g>
+    <rect x="265" y="180" width="320" height="48" rx="8" fill="#FCEBEB" stroke="#A32D2D" stroke-width="0.5"/>
+    <text class="th" x="425" y="200" text-anchor="middle" dominant-baseline="central">① 无 --confirmed → BLOCK</text>
+    <text class="ts" x="425" y="218" text-anchor="middle" dominant-baseline="central">exit=1 · 列清单，须用户确认+理由重跑</text>
+  </g>
+
+  <g>
+    <rect x="265" y="244" width="320" height="48" rx="8" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.5"/>
+    <text class="th" x="425" y="264" text-anchor="middle" dominant-baseline="central">② --confirmed 缺 --reason → BLOCK</text>
+    <text class="ts" x="425" y="282" text-anchor="middle" dominant-baseline="central">exit=1 · 铁律12：须附可追溯理由</text>
+  </g>
+
+  <g>
+    <rect x="265" y="308" width="320" height="20" rx="8" fill="#EAF3DE" stroke="#3B6D11" stroke-width="0.5"/>
+    <text class="th" x="425" y="318" text-anchor="middle" dominant-baseline="central">③ 确认+理由+脚本 → 放行</text>
+  </g>
+
+  <line x1="340" y1="146" x2="340" y2="178" stroke="#5F5E5A" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="425" y1="146" x2="425" y2="178" stroke="#F09595" stroke-width="0.5" stroke-dasharray="3 3"/>
+  <line x1="425" y1="228" x2="425" y2="242" stroke="#EF9F27" stroke-width="0.5" stroke-dasharray="3 3"/>
+  <line x1="425" y1="292" x2="425" y2="306" stroke="#97C459" stroke-width="0.5" stroke-dasharray="3 3"/>
+</svg>

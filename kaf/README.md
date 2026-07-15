@@ -126,6 +126,21 @@ class MyAdapter(PlatformAdapter):
 
 **KAF不替代任何框架，而是给所有框架加一层治理。**
 
+## Agent 侧强制门禁（无 hook 平台的诚实适配）
+
+WorkBuddy 桌面端等无原生 PreToolUse hook 的客户端，强制层以 `kaf_gate.py` 落地：
+任何 `delete / move / write` 前 MUST 调用门禁，返回 BLOCK（退出码 1）即停，须 `--confirmed --reason` 重跑并写审计日志。
+
+![KAF 门禁三态](./docs/gate-three-states.svg)
+
+```bash
+# 删除前先过门禁（无 --confirmed → BLOCK，列出受影响清单）
+python kaf_gate.py check --op delete --target "/path/to/file"
+
+# 用户确认 + 附理由后放行
+python kaf_gate.py check --op delete --target "/path/to/file" --confirmed --reason "清理已推送的临时克隆，可从GitHub HEAD 还原"
+```
+
 ## 实战背景
 
 KAF源自真实的多Agent集群（WorkBuddy+OpenCode+Claude+Kimi+Cursor），经过3个月实战、踩过v4地图删除事故（历史地图2000+张不可逆丢失）后提炼。
