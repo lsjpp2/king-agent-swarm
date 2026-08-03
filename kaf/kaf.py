@@ -10,6 +10,9 @@ Usage:
     kaf honest    — 诚实扫描（检测文档/代码残留的'自动拦截'假话）
     kaf rotate <agent> — 宰相轮值
     kaf status    — 查看集群状态
+    kaf route "<task>" — 模型经济学路由：推荐 planner/worker + 成本估算
+    kaf review <file>  — 多视角审查：security/correctness/style/economics 叠加
+    kaf dispatch "<task>" [target_agent] — 路由落执行：推荐并派发到共享队列
 """
 import sys
 import os
@@ -195,8 +198,10 @@ def cmd_status():
     print(f"\n  Agents:")
     for aid, info in coord.get("coordinators", {}).items():
         status = info.get("status", "?")
+        role = info.get("role", "-")
+        tier = info.get("cost_tier", "-")
         marker = "👑" if aid == coord.get("current_coordinator") else "  "
-        print(f"    {marker} {aid:15s} | {info.get('title',''):30s} | {status}")
+        print(f"    {marker} {aid:15s} | {info.get('title',''):28s} | {role:8s} | {tier:8s} | {status}")
 
     print(f"\n  轮值历史: {len(coord.get('rotation_history', []))} 次")
     return 0
@@ -258,6 +263,102 @@ def cmd_honest():
     return 1
 
 
+def cmd_route(task_text):
+    """模型经济学路由（Economics Router）"""
+    from economics_router import EconomicsRouter
+    router = EconomicsRouter()
+    res = router.route(task_text)
+    if "error" in res:
+        print(f"  ❌ {res['error']}")
+        return 1
+    print("=" * 50)
+    print("  KAF 经济学路由")
+    print("=" * 50)
+    print(f"  任务类型: {res['task_type']}")
+    print(f"  推荐 Agent: {res['agent']} ({res['platform']})")
+    print(f"  角色: {res['role']} | 成本档: {res['cost_tier']}")
+    print(f"  相对成本估算: {res['est_relative_cost']}")
+    print(f"  理由: {res['reason']}")
+    return 0
+
+
+def cmd_review(file_path, perspectives=None):
+    """多视角审查编排（Multi-perspective Review）"""
+    from review import MultiReview
+    mr = MultiReview(perspectives)
+    out = mr.suggest(file_path)
+    if "error" in out:
+        print(f"  ❌ {out['error']}")
+        return 1
+    print("=" * 50)
+    print("  KAF 多视角审查")
+    print("=" * 50)
+    print(f"  产物: {out['artifact']}")
+    print(f"  审查视角数: {out['review_count']}")
+    print(f"  原则: {out['principle']}")
+    for t in out["tasks"]:
+        print(f"    - {t['perspective']}: {t['focus']}")
+    return 0
+
+
+def cmd_review_commit(findings_path):
+    """审查闭环（方向3）：消费 findings.json，BLOCK 结论写回共享铁律/review_findings.md。"""
+    from review import MultiReview
+    if not os.path.exists(findings_path):
+        print(f"  ❌ findings 文件不存在: {findings_path}")
+        return 1
+    with open(findings_path, "r", encoding="utf-8") as f:
+        results = json.load(f)
+    mr = MultiReview()
+    out = mr.commit(results)
+    print("=" * 50)
+    print("  KAF 审查闭环 (Review Commit)")
+    print("=" * 50)
+    print(f"  verdict: {out['verdict']}")
+    if out.get("written"):
+        print(f"  ✅ BLOCK 发现已写回共享 Field Guide: {mr.REVIEW_FINDINGS}")
+    else:
+        print(f"  无需写回（verdict={out['verdict']}）")
+    return 0
+
+
+def cmd_dispatch(task_text, target=None):
+    """路由落执行（Route → Dispatch）：先 route 推荐，再派发到共享队列。
+
+    v5.2 进化（方向2·路由落执行）：route 只推荐，dispatch 才真正交付。
+    """
+    from economics_router import EconomicsRouter
+    from adapters.workbuddy import WorkBuddyAdapter
+
+    router = EconomicsRouter()
+    res = router.route(task_text)
+    if "error" in res:
+        print(f"  ❌ {res['error']}")
+        return 1
+
+    assigned = target or res["agent"]
+    adapter = WorkBuddyAdapter()
+    r = adapter.dispatch(
+        task=task_text,
+        target_agent=assigned,
+        role=res["role"],
+        cost_tier=res["cost_tier"],
+        est_cost=res["est_relative_cost"],
+    )
+    print("=" * 50)
+    print("  KAF 路由落执行 (Dispatch)")
+    print("=" * 50)
+    print(f"  任务类型: {res['task_type']}")
+    print(f"  推荐 Agent: {res['agent']} ({res['platform']})  成本档: {res['cost_tier']}")
+    print(f"  实际派发至: {assigned}")
+    if r.get("success"):
+        print(f"  ✅ 已写入共享派发队列: {r['queue_path']}")
+        print(f"     票号: {r['ticket']['id']}  状态: {r['ticket']['status']}")
+    else:
+        print(f"  ❌ 派发失败: {r}")
+    return 0
+
+
 def main():
     if len(sys.argv) < 2:
         print(__doc__)
@@ -281,6 +382,33 @@ def main():
         return cmd_rotate(sys.argv[2])
     elif cmd == "status":
         return cmd_status()
+    elif cmd == "route":
+        if len(sys.argv) < 3:
+            print('  Usage: kaf route "<task>"')
+            return 1
+        return cmd_route(" ".join(sys.argv[2:]))
+    elif cmd == "review":
+        if len(sys.argv) < 3:
+            print("  Usage: kaf review <file> [perspective...]")
+            return 1
+        return cmd_review(sys.argv[2], sys.argv[3:] or None)
+    elif cmd == "review-commit":
+        if len(sys.argv) < 3:
+            print("  Usage: kaf review-commit <findings.json>")
+            return 1
+        return cmd_review_commit(sys.argv[2])
+    elif cmd == "dispatch":
+        if len(sys.argv) < 3:
+            print('  Usage: kaf dispatch "<task>" [target_agent]')
+            return 1
+        # 允许第二个位置参数指定 target agent
+        task = sys.argv[2]
+        target = sys.argv[3] if len(sys.argv) > 3 else None
+        # 若 task 含空格，sys.argv[2:] 可能是被拆开的；合并除最后的 target
+        if target is not None and len(sys.argv) > 4:
+            task = " ".join(sys.argv[2:-1])
+            target = sys.argv[-1]
+        return cmd_dispatch(task, target)
     else:
         print(f"  Unknown command: {cmd}")
         print(__doc__)

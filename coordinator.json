@@ -1,0 +1,93 @@
+{
+  "version": "5.2",
+  "current_coordinator": "workbuddy",
+  "shared_ledger_path": "D:/Agent集群共享/.memory_ledger.db",
+  "dispatch_queue": "D:/Agent集群共享/dispatch_queue.json",
+  "pricing_ref": "pricing.json",
+  "coordinators": {
+    "workbuddy": {
+      "title": "Prime Minister (当前宰相)",
+      "platform": "WorkBuddy",
+      "identity_file": "~/.workbuddy/IDENTITY.md",
+      "private_memory": "D:/WorkBuddy/Claw/.workbuddy/memory/",
+      "votes": 3,
+      "role": "planner",
+      "cost_tier": "balanced",
+      "capabilities": ["file_ops", "web_search", "skill_execution", "mcp_connectors"],
+      "status": "active"
+    },
+    "opencode": {
+      "title": "Technical Executor",
+      "platform": "OpenCode Desktop",
+      "identity_file": "D:/Agent集群共享/Agent身份/opencode.md",
+      "private_memory": "D:/软件/opencode专属记忆库/",
+      "votes": 1,
+      "role": "worker",
+      "cost_tier": "economy",
+      "capabilities": ["code_generation", "technical_execution"],
+      "status": "standby"
+    },
+    "claude": {
+      "title": "Deep Reasoner",
+      "platform": "Claude",
+      "identity_file": "D:/Agent集群共享/Agent身份/claude.md",
+      "private_memory": "C:/Users/山禾/.claude/",
+      "votes": 1,
+      "role": "planner",
+      "cost_tier": "frontier",
+      "capabilities": ["deep_reasoning", "long_context"],
+      "status": "standby"
+    },
+    "kimi": {
+      "title": "Chinese Long-text Specialist",
+      "platform": "Kimi",
+      "identity_file": "D:/Agent集群共享/Agent身份/kimi.md",
+      "private_memory": "C:/Users/山禾/AppData/Roaming/kimi/",
+      "votes": 1,
+      "role": "worker",
+      "cost_tier": "economy",
+      "capabilities": ["chinese_longtext", "web_search"],
+      "status": "standby"
+    },
+    "cursor": {
+      "title": "Code/IDE Agent",
+      "platform": "Cursor",
+      "identity_file": "D:/Agent集群共享/Agent身份/cursor.md",
+      "private_memory": "C:/Users/山禾/.cursor/",
+      "votes": 1,
+      "role": "worker",
+      "cost_tier": "balanced",
+      "capabilities": ["ide_integration", "code_editing"],
+      "status": "standby"
+    }
+  },
+  "rotation_history": [
+    {
+      "agent": "workbuddy",
+      "since": "2026-06-08",
+      "reason": "initial_appointment",
+      "appointed_by": "king"
+    }
+  ],
+  "handover_protocol": {
+    "state_file": "D:/Agent集群共享/handover_state.json",
+    "fields": ["active_tasks", "pending_decisions", "context_summary", "unresolved_issues"],
+    "ttl_seconds": 3600,
+    "acknowledgment_required": true
+  },
+  "voting_rules": {
+    "coordinator_votes": 3,
+    "agent_votes": 1,
+    "king_power": "veto_anything",
+    "conflict_resolution": "coordinator_decides_king_vetoes"
+  },
+  "anti_drift": {
+    "check_interval_steps": 5,
+    "checks": [
+      "task_aligned_with_king_instruction",
+      "no_cross_memory_read",
+      "need_king_confirmation",
+      "memory_synced_to_shared_board"
+    ]
+  }
+}

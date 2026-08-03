@@ -1,8 +1,8 @@
 {
-  "$schema": "https://kaf.dev/constitution/v1",
-  "version": "5.0",
+  "$schema": "https://kaf.dev/constitution/v2",
+  "version": "5.2",
   "name": "King-Agent Framework Constitution",
-  "effective_date": "2026-07-14",
+  "effective_date": "2026-08-04",
   "sovereign": {
     "id": "human",
     "title": "King",
@@ -26,7 +26,7 @@
   "memory_wall": {
     "isolation": "strict",
     "rule": "agents_must_not_read_others_private_memory",
-    "shared_layer": "{{shared_path}}",
+    "shared_layer": "D:/Agent集群共享/",
     "private_pattern": "{{agent_memory_path}}"
   },
   "rules": [
@@ -96,6 +96,47 @@
       "need_king_confirmation",
       "memory_synced"
     ]
+  },
+  "economics_routing": {
+    "enabled": true,
+    "source": "Cursor Agent Swarm 研究 · v5.2 方向1",
+    "principle": "质量相近但成本可差10倍；便宜模型干worker(占~80% token)，前沿模型只用于planner(占~2/3成本)",
+    "pricing_table": "projects/kaf/pricing.json",
+    "calibration": {
+      "enabled": true,
+      "usage_log": "projects/kaf/usage_log.json",
+      "recalibrate": "kaf calibrate",
+      "effect": "动态重算 ROLE_TOKEN_SHARE 写入 calibration.json，路由实时采纳"
+    },
+    "note": "路由不再靠硬编码权重，而读真实计价表；随真实用量自我校准"
+  },
+  "dispatch": {
+    "enabled": true,
+    "source": "Cursor Agent Swarm 研究 · v5.2 方向2",
+    "principle": "route 只推荐，dispatch 才真正交付；无原生跨 agent API 的平台走共享派发队列",
+    "queue": "D:/Agent集群共享/dispatch_queue.json",
+    "command": "kaf dispatch \"<task>\" [target_agent]",
+    "rule": "目标 agent 启动自检时读取队列并执行；执行完回写 status=done"
+  },
+  "review_loop": {
+    "enabled": true,
+    "source": "Cursor Agent Swarm 研究 · v5.2 方向3",
+    "principle": "低相关多视角叠加审查；任一 blocker 即否决并写回共享 Field Guide",
+    "command": "kaf review <file>  /  kaf review-commit <findings.json>",
+    "write_back": "D:/Agent集群共享/铁律/review_findings.md",
+    "rule": "BLOCK 结论 MUST 写回铁律/review_findings.md（Field Guide 双向化：agent 写给 agent）"
+  },
+  "shared_ledger": {
+    "enabled": true,
+    "source": "cursor/minisqlite 研究 · v5.2 方向4",
+    "principle": "结构化操作审计落在共享层，所有 agent 可读写同一本账",
+    "db": "D:/Agent集群共享/.memory_ledger.db",
+    "api": "open/execute/query (minisqlite 风格，零外部依赖)",
+    "dedup_with_memory_integrity": {
+      "memory_integrity": "每 agent 的文件指纹（防覆盖丢失）",
+      "memory_ledger": "共享操作审计（谁/何时/改了什么，可追溯）",
+      "rule": "指纹答'是否被篡改'，账本答'变更是否可追溯'，二者互补不重复"
+    }
   },
   "amendment": {
     "procedure": "king_confirm_required",

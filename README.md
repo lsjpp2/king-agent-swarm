@@ -34,6 +34,14 @@ KAF was forged inside a real 6-agent cluster (WorkBuddy + OpenCode + Claude + Ki
 
 ---
 
+```
+Constitution-as-Code   宪法从md文档 → 可解析JSON，规则可机器验证
+520 Runtime Guard      从事后检查 → 运行时强制（有原生hook走hook，无hook平台走agent侧门禁kaf_gate.py）
+Memory Integrity       从"丢失后恢复" → "写入前阻止覆盖"
+Platform Adapter       从绑定特定平台 → 5行代码接入任意平台
+```
+
+
 ## 🛡️ The 520 Rule — four principles, three iron laws
 
 Every action an agent takes must be:
@@ -216,6 +224,24 @@ king-agent-swarm/
 KAF is the engine; `templates/` + `docs/` + `diagrams/` form the **coordination-protocol layer** — the v1 "King / Prime Minister / Swarm" metaphor that KAF grew out of.
 
 ---
+
+## Agent 侧强制门禁（无 hook 平台的诚实适配）
+
+WorkBuddy 桌面端等无原生 PreToolUse hook 的客户端，强制层以 `kaf_gate.py` 落地：
+任何 `delete / move / write` 前 MUST 调用门禁，返回 BLOCK（退出码 1）即停，须 `--confirmed --reason` 重跑并写审计日志。
+
+![KAF 门禁三态](./docs/gate-three-states.svg)
+
+```bash
+# 删除前先过门禁（无 --confirmed → BLOCK，列出受影响清单）
+python kaf_gate.py check --op delete --target "/path/to/file"
+
+# 用户确认 + 附理由后放行
+python kaf_gate.py check --op delete --target "/path/to/file" --confirmed --reason "清理已推送的临时克隆，可从GitHub HEAD 还原"
+```
+
+## 实战背景
+
 
 ## 🤝 Contributing
 

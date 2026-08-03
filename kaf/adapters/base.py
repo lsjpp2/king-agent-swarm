@@ -36,3 +36,12 @@ class PlatformAdapter:
     def get_workspace(self):
         """获取当前工作区路径"""
         raise NotImplementedError
+
+    def dispatch(self, task, target_agent, role=None, cost_tier=None, est_cost=None):
+        """路由落执行：把任务派发给目标 agent。
+
+        v5.2 进化（方向2·路由落执行）：route 只推荐，dispatch 才真正交付。
+        本方法默认写入共享派发队列（D:/Agent集群共享/dispatch_queue.json），
+        目标 agent 在启动自检时读取并执行。无原生调用其他 agent API 的平台均走此路径。
+        """
+        raise NotImplementedError

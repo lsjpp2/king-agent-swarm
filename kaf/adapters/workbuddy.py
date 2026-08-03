@@ -88,6 +88,46 @@ class WorkBuddyAdapter(PlatformAdapter):
         # 这里返回操作描述，由调用方转发给agent
         return {"action": action, "platform": "workbuddy", "status": "forwarded"}
 
+    # v5.2 进化（方向2·路由落执行）：共享派发队列根目录
+    SHARED_ROOT = "D:/Agent集群共享"
+    DISPATCH_QUEUE = os.path.join(SHARED_ROOT, "dispatch_queue.json")
+
+    def dispatch(self, task, target_agent, role=None, cost_tier=None, est_cost=None):
+        """路由落执行：把任务派发给目标 agent。
+
+        v5.2 进化（方向2·路由落执行）：route 只推荐，dispatch 才真正交付。
+        本方法将任务票写入共享派发队列 D:/Agent集群共享/dispatch_queue.json，
+        目标 agent 在启动自检时读取并执行。无原生调用其他 agent API 的平台均走此路径。
+        """
+        import uuid
+        from datetime import datetime
+
+        ticket = {
+            "id": uuid.uuid4().hex[:12],
+            "task": task,
+            "assigned_to": target_agent,
+            "role": role,
+            "cost_tier": cost_tier,
+            "est_cost": est_cost,
+            "dispatched_by": self.get_agent_id(),
+            "dispatched_at": datetime.now().isoformat(timespec="seconds"),
+            "status": "queued",
+        }
+        # 读取已有队列（不存在则新建）
+        queue = []
+        if os.path.exists(self.DISPATCH_QUEUE):
+            try:
+                with open(self.DISPATCH_QUEUE, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                queue = data.get("queue", []) if isinstance(data, dict) else data
+            except (json.JSONDecodeError, ValueError):
+                queue = []
+        queue.append(ticket)
+        os.makedirs(os.path.dirname(self.DISPATCH_QUEUE), exist_ok=True)
+        with open(self.DISPATCH_QUEUE, "w", encoding="utf-8") as f:
+            json.dump({"queue": queue}, f, ensure_ascii=False, indent=2)
+        return {"success": True, "ticket": ticket, "queue_path": self.DISPATCH_QUEUE}
+
     def get_agent_id(self):
         identity_file = os.path.join(self.home, "IDENTITY.md")
         if os.path.exists(identity_file):
