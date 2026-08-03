@@ -162,13 +162,19 @@ class Guard520:
 
     # ---- 520自检（真实核查，非装饰）----
     def _find_backup(self):
-        """查找 archive/ 下含 manifest.json 的备份目录"""
-        archive = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "archive"))
-        if not os.path.isdir(archive):
-            return None
-        for d in sorted(os.listdir(archive), reverse=True):
-            if os.path.exists(os.path.join(archive, d, "manifest.json")):
-                return os.path.join(archive, d)
+        """查找 archive/ 下含 manifest.json 的备份目录（KAF 生成的备份）
+        混合解析：优先显式工作区路径(D:/WorkBuddy/Claw)，再退回可移植相对路径/cwd，
+        既保证本机 kaf check 真能定位备份(宣称=实现)，又兼容其他部署。"""
+        archive_candidates = [
+            "D:/WorkBuddy/Claw/archive",
+            os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "archive")),
+            os.path.join(os.getcwd(), "archive"),
+        ]
+        for archive in archive_candidates:
+            if os.path.isdir(archive):
+                for d in sorted(os.listdir(archive), reverse=True):
+                    if os.path.exists(os.path.join(archive, d, "manifest.json")):
+                        return os.path.join(archive, d)
         return None
 
     def self_check(self):
@@ -225,7 +231,12 @@ class Guard520:
         kaf_dir = os.path.dirname(os.path.abspath(__file__))
         gate = os.path.join(kaf_dir, "kaf_gate.py")
         audit_log = os.path.join(kaf_dir, "kaf_gate_audit.log")
-        mem = os.path.abspath(os.path.join(os.path.dirname(kaf_dir), "..", ".workbuddy", "memory", "MEMORY.md"))
+        mem_candidates = [
+            "D:/WorkBuddy/Claw/.workbuddy/memory/MEMORY.md",
+            os.path.join(os.getcwd(), ".workbuddy", "memory", "MEMORY.md"),
+            os.path.expanduser("~/.workbuddy/memory/MEMORY.md"),
+        ]
+        mem = next((m for m in mem_candidates if os.path.exists(m)), None)
         gate_ok = os.path.exists(gate)
         rule_ok = False
         if os.path.exists(mem):
