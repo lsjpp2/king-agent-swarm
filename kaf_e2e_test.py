@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-KAF v5.2 端到端闭环实测
-目的：验证 v5.2 四个进化方向不只是"写入侧"能跑，而是真正形成闭环——
+KAF v5.3 端到端闭环实测
+目的：验证 v5.3 四个进化方向 + 治理层不只是"写入侧"能跑，而是真正形成闭环——
   Loop1 路由落执行: dispatch 写队列 -> 消费者拉取 -> 真正执行 -> 置 done
   Loop2 审查闭环:   review-commit BLOCK -> 执行器读回铁律 -> 拦截违规动作
 全程调用真实模块(kaf.py / review.py)，消费者与执行器为闭环必需的"读取侧"。
@@ -11,11 +11,12 @@ KAF v5.2 端到端闭环实测
 import os, sys, json, subprocess
 from datetime import datetime
 
-KAF_DIR = r"D:\WorkBuddy\Claw\projects\kaf"
+KAF_DIR = os.path.dirname(os.path.abspath(__file__))
 SHARED_ROOT = r"D:/Agent集群共享"
 DISPATCH_QUEUE = os.path.join(SHARED_ROOT, "dispatch_queue.json")
 REVIEW_FINDINGS = os.path.join(SHARED_ROOT, "铁律", "review_findings.md")
-PY = r"C:/Users/山禾/.workbuddy/binaries/python/versions/3.13.12/python.exe"
+# v5.3：使用运行本测试的 Python 解释器（不再硬编码作者机器路径，远程复制可直接跑）
+PY = sys.executable
 OLD_TICKET = "4e483c6573cc"  # 上一轮遗留的测试工单，本测试不动它
 
 def run(cmd):

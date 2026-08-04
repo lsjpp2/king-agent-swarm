@@ -17,6 +17,14 @@ agent-registry/
 # Generated
 cluster-output/
 
+# Runtime logs (local only)
+kaf_gate_audit.log
+kaf/kaf_gate_audit.log
+kaf_operations.log
+
+# Personal deployer config (each user keeps own; example shipped as kaf_config.example.json)
+kaf_config.json
+
 # Python bytecode
 __pycache__/
 *.pyc

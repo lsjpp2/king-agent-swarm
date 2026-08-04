@@ -1,0 +1,71 @@
+<svg viewBox="0 0 680 480" xmlns="http://www.w3.org/2000/svg" style="font-family: system-ui, sans-serif;">
+  <defs>
+    <filter id="sh" x="-4%" y="-4%" width="108%" height="116%"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.18"/></filter>
+    <marker id="rk" markerWidth="9" markerHeight="9" refX="4" refY="4.5"><path d="M0,0 L9,4.5 L0,9 Z" fill="#8b949e"/></marker>
+    <marker id="rY" markerWidth="9" markerHeight="9" refX="4" refY="4.5"><path d="M0,0 L9,4.5 L0,9 Z" fill="#7be0a0"/></marker>
+  </defs>
+
+  <rect width="680" height="480" rx="14" fill="#0d1117"/>
+
+  <text x="340" y="36" text-anchor="middle" font-size="18" font-weight="800" fill="#f0f0f0">👑  King Resolution  (v5.3 · Deployer = King)</text>
+  <text x="340" y="58" text-anchor="middle" font-size="11" fill="#8b949e" font-style="italic">kaf/king.py:resolve_king() — 国王不再硬编码，而是当前部署者/使用者</text>
+
+  <!-- start -->
+  <rect x="290" y="74" width="160" height="38" rx="19" fill="#21262d" stroke="#f0c040" stroke-width="1.5"/>
+  <text x="370" y="98" text-anchor="middle" font-size="12" font-weight="700" fill="#f0c040">resolve_king()</text>
+
+  <!-- D1 env -->
+  <path d="M370 112 L370 132" stroke="#8b949e" stroke-width="2" fill="none" marker-end="url(#rk)"/>
+  <polygon points="370,136 308,176 432,176" fill="#1c2128" stroke="#f0c040" stroke-width="1.5"/>
+  <text x="370" y="159" text-anchor="middle" font-size="11" font-weight="700" fill="#f0c040">KAF_KING 已设?</text>
+  <text x="370" y="173" text-anchor="middle" font-size="9" fill="#8b949e">环境变量</text>
+  <path d="M432 156 L520 156 L520 250 L560 250" stroke="#7be0a0" stroke-width="2" fill="none" marker-end="url(#rY)"/>
+  <text x="470" y="148" font-size="10" fill="#7be0a0" font-weight="600">YES</text>
+
+  <!-- D2 config -->
+  <path d="M370 176 L370 206" stroke="#8b949e" stroke-width="2" fill="none" marker-end="url(#rk)"/>
+  <polygon points="370,210 308,250 432,250" fill="#1c2128" stroke="#58a6ff" stroke-width="1.5"/>
+  <text x="370" y="233" text-anchor="middle" font-size="11" font-weight="700" fill="#58a6ff">kaf_config.json</text>
+  <text x="370" y="247" text-anchor="middle" font-size="9" fill="#8b949e">含 king 字段?</text>
+  <path d="M432 230 L520 230 L520 250 L560 250" stroke="#7be0a0" stroke-width="2" fill="none" marker-end="url(#rY)"/>
+  <text x="470" y="222" font-size="10" fill="#7be0a0" font-weight="600">YES</text>
+
+  <!-- D3 author -->
+  <path d="M370 250 L370 280" stroke="#8b949e" stroke-width="2" fill="none" marker-end="url(#rk)"/>
+  <polygon points="370,284 308,324 432,324" fill="#1c2128" stroke="#a78bfa" stroke-width="1.5"/>
+  <text x="370" y="307" text-anchor="middle" font-size="11" font-weight="700" fill="#a78bfa">本地作者环境?</text>
+  <text x="370" y="321" text-anchor="middle" font-size="9" fill="#8b949e">USERPROFILE含山禾/USER=山禾</text>
+  <path d="M432 304 L520 304 L520 358 L560 358" stroke="#7be0a0" stroke-width="2" fill="none" marker-end="url(#rY)"/>
+  <text x="470" y="296" font-size="10" fill="#7be0a0" font-weight="600">YES</text>
+
+  <!-- D4 os user -->
+  <path d="M370 324 L370 354" stroke="#8b949e" stroke-width="2" fill="none" marker-end="url(#rk)"/>
+  <rect x="280" y="358" width="180" height="40" rx="10" fill="#1c2128" stroke="#f78166" stroke-width="1.5"/>
+  <text x="370" y="383" text-anchor="middle" font-size="11" font-weight="700" fill="#f78166">当前 OS 用户</text>
+  <text x="370" y="396" text-anchor="middle" font-size="9" fill="#8b949e">USERNAME / USER / operator</text>
+  <path d="M280 378 L200 378 L200 358 L160 358" stroke="#7be0a0" stroke-width="2" fill="none" marker-end="url(#rY)"/>
+
+  <!-- Outcomes -->
+  <rect x="540" y="226" width="120" height="48" rx="10" fill="#7be0a0" filter="url(#sh)"/>
+  <text x="600" y="246" text-anchor="middle" font-size="12" font-weight="800" fill="#1a1a2e">= KAF_KING</text>
+  <text x="600" y="264" text-anchor="middle" font-size="9" fill="#1a1a2e">显式覆盖</text>
+
+  <rect x="540" y="234" width="0" height="0"/>
+  <rect x="540" y="226" width="120" height="48" rx="10" fill="#7be0a0" filter="url(#sh)"/>
+  <text x="600" y="246" text-anchor="middle" font-size="12" font-weight="800" fill="#1a1a2e">= config.king</text>
+  <text x="600" y="264" text-anchor="middle" font-size="9" fill="#1a1a2e">部署者指定</text>
+
+  <rect x="120" y="334" width="120" height="48" rx="10" fill="#a78bfa" filter="url(#sh)"/>
+  <text x="180" y="354" text-anchor="middle" font-size="12" font-weight="800" fill="white">= 山禾</text>
+  <text x="180" y="372" text-anchor="middle" font-size="9" fill="#ede9fe">本地作者默认</text>
+
+  <rect x="120" y="342" width="0" height="0"/>
+  <rect x="120" y="334" width="120" height="48" rx="10" fill="#a78bfa" filter="url(#sh)"/>
+  <text x="180" y="354" text-anchor="middle" font-size="12" font-weight="800" fill="white">= OS user</text>
+  <text x="180" y="372" text-anchor="middle" font-size="9" fill="#ede9fe">远程新手默认</text>
+
+  <!-- bottom summary -->
+  <rect x="30" y="416" width="620" height="50" rx="10" fill="#161b22" stroke="#f0c040" stroke-width="1"/>
+  <text x="46" y="438" font-size="11" font-weight="700" fill="#f0c040">📌 原则：国王 = 使用者。本地山禾当然是国王；远程复制后"你"就是国王。</text>
+  <text x="46" y="456" font-size="10" fill="#8b949e">自检：python king.py  →  本机打印"山禾"，未配置环境回退当前 OS 用户。</text>
+</svg>

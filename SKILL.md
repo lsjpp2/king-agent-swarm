@@ -1,10 +1,10 @@
 ---
 name: 国王-Agent蜂群
-description: 搭建国王模型 Agent 集群治理框架（KAF v5.2）。自动生成声明式宪法、520 运行时护栏、记忆完整性协议、宰相轮值协议、平台适配器、模型经济学路由（真实计价+校准）、多视角审查（闭环写回）、共享账本。适用于多 Agent 协作治理场景（WorkBuddy + OpenCode + Codex + Claude + Kimi + Cursor 等）。触发词：国王模式、Agent蜂群、多Agent协作、集群搭建、宰相轮值、KAF、520护栏、模型经济学、经济学路由、多视角审查、角色分层、派发队列、共享账本。
+description: 搭建国王模型 Agent 集群治理框架（KAF v5.3）。自动生成声明式宪法、520 运行时护栏、记忆完整性协议、宰相轮值协议、平台适配器、模型经济学路由（真实计价+校准）、多视角审查（闭环写回）、共享账本、v5.3 治理层(策略即代码+急停+防篡改审计+身份归因)。适用于多 Agent 协作治理场景（WorkBuddy + OpenCode + Codex + Claude + Kimi + Cursor 等）。触发词：国王模式、Agent蜂群、多Agent协作、集群搭建、宰相轮值、KAF、520护栏、模型经济学、经济学路由、多视角审查、角色分层、派发队列、共享账本、治理评估(govern/kill-switch/audit-tail)。
 agent_created: true
 ---
 
-# 国王-Agent蜂群 Skill · KAF v5.2
+# 国王-Agent蜂群 Skill · KAF v5.3
 
 你是一个 Agent 集群治理架构师。当用户提到「国王模式」「Agent蜂群」「多Agent协作」「集群搭建」「宰相轮值」「KAF」「520护栏」「模型经济学」「经济学路由」「多视角审查」「角色分层」时，加载此 skill。
 
@@ -50,7 +50,7 @@ Platform Adapter       从绑定特定平台 → 5行代码接入任意平台
 
 ```
 kaf/
-├── constitution.json      声明式宪法 v5.2（可机器解析，含 economics_routing/dispatch/review_loop/shared_ledger 四节）
+├── constitution.json      声明式宪法 v5.3（可机器解析，含 economics_routing/dispatch/review_loop/shared_ledger/governance 五节 + sovereign.king_resolver 动态国王）
 ├── coordinator.json       宰相注册表（role/cost_tier/轮值/投票/handover + 共享账本/派发队列引用）
 ├── guard520.py            520运行时护栏（4检查点 + self_check，真核查）
 ├── memory_integrity.py    记忆完整性（SHA-256指纹 + drift检测 + protect_write）
@@ -59,7 +59,11 @@ kaf/
 ├── review.py              多视角审查（低相关视角叠加 + BLOCK 写回闭环）
 ├── pricing.json           每 agent 真实计价表（成本-质量权衡数据源）
 ├── kaf_gate.py            强制门禁（agent侧强制层：删/移/覆盖前 MUST 过此门禁）
-├── kaf.py                 CLI入口（init/check/verify/guard/rotate/status/route/review/review-commit/dispatch/calibrate）
+├── governance.py          v5.3 治理层（策略即代码 policy.json + 急停 kill-switch + 防篡改审计链 + agent 身份归因）
+├── policy.json            v5.3 默认声明式策略（受保护资产/铁律8/铁律10/对外发送/只读）
+├── governance_selftest.py v5.3 治理层自测（真跑通 deny/kill-switch/attestation/audit）
+├── kaf.py                 CLI入口（init/check/verify/guard/rotate/status/route/review/review-commit/dispatch/calibrate/govern/kill-switch/audit-tail）
+├── king.py                v5.3 国王身份动态解析（resolve_king：env > config > 本地作者 > OS用户；部署者=国王）
 ├── adapters/
 │   ├── base.py            适配器接口（8个方法，含 dispatch）
 │   ├── workbuddy.py       WorkBuddy适配器（已实现，含 dispatch 写共享派发队列）
@@ -85,6 +89,12 @@ python kaf.py review D:/path/to/artifact.py      # 多视角审查：security/co
 python kaf.py review-commit findings.json       # 审查闭环：BLOCK 结论写回共享铁律/review_findings.md
 python kaf.py dispatch "批量翻译这200篇文档"     # 路由落执行：推荐并派发到共享派发队列
 python kaf.py calibrate                         # 据 usage_log 动态校准 ROLE_TOKEN_SHARE
+# v5.3 治理层（策略即代码 + 急停 + 审计 + 归因）
+python kaf.py govern "delete" --resource "D:/x/MEMORY.md" --user_confirmed --has_script   # 治理评估(无 king_confirmed→DENY)
+python kaf.py govern "delete" --resource "D:/x/MEMORY.md" --user_confirmed --has_script --king_confirmed  # →ALLOW
+python kaf.py kill-switch on                    # 🛑 全局急停
+python kaf.py kill-switch off                   # ✅ 解除
+python kaf.py audit-tail 10                     # 防篡改审计链尾部 + 完整性校验
 # 强制门禁（agent侧）：任何删/移/覆盖操作前 MUST 先过此门禁
 python kaf_gate.py check --op delete --target "<路径>"          # 无确认→BLOCK
 python kaf_gate.py check --op delete --target "<路径>" --confirmed   # 已确认→OK
@@ -110,7 +120,7 @@ cd kaf/ && python kaf.py init
 
 填入实际 Agent 清单：
 
-- `_king`: `"山禾"`（固定，唯一主权人）
+- `king`: **动态解析，不写死名字**。`kaf init` 会自动用 `resolve_king()` 填（本地作者环境→`山禾`；远程复制→`当前OS用户`/`operator`）。部署者亦可显式指定：设置环境变量 `KAF_KING=你的名字`，或在 `kaf_config.json` 写 `{"king":"你的名字"}`。
 - `current_coordinator`: 当前宰相（如 `"workbuddy"`，3票）
 - `coordinators`: 每个 Agent 的 `identity_file` / `private_memory` / `votes` / `capabilities` / `status`
 
@@ -195,7 +205,7 @@ CLI 执行：`python kaf.py rotate <agent_name>`
 
 | 角色 | 对应 KAF 实体 | 职责 | 上下文约束 |
 |:---|:---|:---|:---|
-| **King** | `_king`（人类山禾） | 唯一主权人，定目标、一票否决 | 全局意图 |
+| **King** | `king`（动态解析：`resolve_king()` → 部署者；本地回退山禾，远程回退OS用户） | 唯一主权人，定目标、一票否决 | 全局意图 |
 | **Planner** | `current_coordinator`（宰相，3票） | 拆解任务树、做设计决策、**不碰实现细节** | 只背规划上下文，不被实现细节污染 |
 | **Worker** | 其余 Agent（各1票） | 执行被委派的具体叶子单元 | 只背局部任务，全上下文投入一小块 |
 
@@ -279,6 +289,79 @@ v5.1 的 ledger 默认落本地。v5.2 改为默认落到 **共享层 `D:/Agent�
 
 ---
 
+## v5.3 进化：GitHub 同类 Top 10 拆解 → 治理层强化
+
+> 数据来源与真实 Top 10 拆解见 `projects/kaf/github_skill_analysis/top10_analysis.md`（已弃用 api.github.com 注水数据，仅用交叉验证的真实话题/搜索页 star 数）。
+> 关键对照系：**microsoft/agent-governance-toolkit**（策略执行/零信任身份/沙箱/SRE/kill-switch/防篡改审计/OWASP 10/10）——star 不高但治理维度最全，直接暴露 KAF v5.2 的薄弱点：520 护栏是**硬编码 Python**，缺**声明式策略即代码 / 急停 / 身份归因 / 防篡改审计**。
+
+### 真实 Top 10（多智能体编排/蜂群/治理类，star 降序）
+| # | 仓库 | Star | 相关性 |
+|---|------|-----:|---|
+| 1 | bytedance/deer-flow | 79.2k | 高（harness+技能+沙箱） |
+| 2 | FoundationAgents/MetaGPT | 69.7k | 极高（角色/SOP/层级） |
+| 3 | ruvnet/ruflo | 67k | **极高（蜂群+技能+宪法）** |
+| 4 | crewAIInc/crewAI | 56.6k | 高（角色/编排） |
+| 5 | HKUDS/nanobot | 46.6k | 中（轻量 harness） |
+| 6 | 666ghj/BettaFish | 41.9k | 高（论坛辩论 deliberation） |
+| 7 | agentscope-ai/agentscope | 28.5k | 中 |
+| 8 | openai/openai-agents-python | 28.4k | **极高（handoff/guardrails）** |
+| 9 | openai/swarm | 21.9k | 高（handoff 原语） |
+| 10 | google/adk-python | 21k | 中（评估/部署） |
+
+必学但未计入硬排名：langgraph(~38.8k，图/有状态/检查点+人机协同；本会话未能干净核验 star)、microsoft/agent-governance-toolkit(5.6k，治理全栈，与 KAF 概念最近)、kyegomez/swarms(7k)、microsoft/agent-framework(12.6k)、camel-ai/camel(17.5k)。
+
+### 新增模块：governance.py（策略即代码 + 急停 + 审计 + 归因）★ v5.3 核心
+把"治理"从硬编码升级为声明式、可审计、可归因：
+- **Policy-as-Code**：`policy.json` 声明规则（action / resource_regex / require / effect / reason），`PolicyEngine.evaluate()` 结构化返回 `DENY(reason)` / `ALLOW`。DENY 优先；`require` 是豁免条件（如 `king_confirmed=true` 才放行受保护资产）。
+- **Kill-switch**：全局急停开关（共享状态 `D:/Agent集群共享/governance/kill_switch.json`），激活后所有动作结构化 DENY。
+- **Tamper-evident Audit**：hash-chained append-only 审计链（每条 `hash(prev+content)`），`verify()` 可检测任何篡改。
+- **Agent 身份归因**：HMAC 风格 `attest(agent)`，未归因 agent 的动作被 DENY（动作可归因到具体 agent）。
+- 与 v5.2 互补：`Governance.evaluate()` 先查 kill-switch → 身份归因 → 520 检查点(guard520) → 策略即代码，全程写审计。
+
+**CLI**：
+```bash
+python kaf.py govern "delete" --resource "D:/x/MEMORY.md" --user_confirmed --has_script
+# → ⛔ DENY gov-520-write-protect（缺 king_confirmed）
+python kaf.py govern "delete" --resource "D:/x/MEMORY.md" --user_confirmed --has_script --king_confirmed
+# → ✅ ALLOW
+python kaf.py kill-switch on      # 🛑 全局急停
+python kaf.py kill-switch off     # ✅ 解除
+python kaf.py audit-tail 10       # 审计链尾部 + 完整性校验
+python governance_selftest.py     # 真跑通：PASS=8 FAIL=0
+```
+
+### v5.3 路线图（已规划，逐项落地）
+| 改进 | 对标 | 状态 |
+|---|---|---|
+| 策略即代码 + 急停 + 审计 + 归因 | AGT / crewAI guardrails | ✅ 已落地+自测 |
+| `handoff` 原语（agent→agent 子任务转交 + guardrail） | openai/swarm, openai-agents-python | 📋 v5.3.1 |
+| `deliberate()` 辩论原语（高风险决策先多 agent 辩论再裁决） | BettaFish ForumEngine | 📋 v5.3.1 |
+| dispatch 队列 → 有状态图 + 检查点 + 人机协同 | langgraph | 📋 v5.3.2 |
+| `roles.json` + `sop/` 角色库/SOP 模板 | MetaGPT, crewAI | 📋 v5.3.2 |
+
+### 国王身份动态解析（Deployer = King）★ v5.3 关键修正
+
+旧版默认"山禾是国王"，逻辑狭隘：作者在本机当然是国王，但**远程新手复制技能后，使用者才该是国王**。v5.3 用 `kaf/king.py:resolve_king()` 把"国王"从写死名字改成"当前部署者/使用者"：
+
+```
+解析优先级（任一命中即返回）：
+  1. 环境变量 KAF_KING            —— 部署者一句话覆盖（最高优先）
+  2. 配置文件 kaf_config.json     —— {"king": "你的名字"}
+  3. 本地作者环境检测             —— USERPROFILE/HOME 含"山禾" 或 USERNAME==山禾 → "山禾"
+  4. 远程/新用户                  —— 当前 OS 用户(USERNAME/USER)；为空 → "operator"
+```
+
+- **本地（山禾机器）**：检测命中作者环境 → 国王=`山禾`，与历史行为一致。
+- **远程新手**：克隆仓库后运行 `kaf init` / `./init.sh` / `.\init.ps1`，未指定名字时自动取**当前 OS 用户**为国王（`init.sh`/`init.ps1` 已改为默认 `whoami`/`$env:USERNAME`）；想显式指定就传 `--king 你的名字` 或设 `KAF_KING`。
+- `constitution.json → sovereign.king_resolver` 记录此规则；`kaf init` 生成的 `coordinator.json` 的 `king` 字段即 `resolve_king()` 实值。
+- 治理层 `policy.json` 的 `king_confirmed` 是布尔豁免标志（"国王是否确认"），与具体名字解耦，天然兼容动态国王。
+
+**自检**：`python king.py` 打印当前解析出的国王与来源。
+
+**v5.3 验证（宣称≠实现，已实地跑通）**：`governance_selftest.py` PASS=8（受保护资产无确认→DENY、全确认→ALLOW、kill-switch ON→DENY/OFF→ALLOW、未归因→DENY/归因→通过、审计链追加有效/篡改断裂）；`kaf govern`/`kaf kill-switch`/`kaf audit-tail` CLI 真跑通并写入共享审计链 `D:/Agent集群共享/governance/audit_chain.log`；`python king.py` 本地解析为 `山禾`、远程未配置时回退 OS 用户。
+
+---
+
 ## 禁忌
 
 - **禁止**任何 Agent 自行修改 `coordinator.json` 中的 `current_coordinator`
@@ -297,4 +380,4 @@ v5.1 的 ledger 默认落本地。v5.2 改为默认落到 **共享层 `D:/Agent�
 
 ---
 
-*End of 国王-Agent蜂群 Skill · KAF v5.2*
+*End of 国王-Agent蜂群 Skill · KAF v5.3*

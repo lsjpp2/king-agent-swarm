@@ -146,7 +146,12 @@ if ($ListAgents) {
     exit 0
 }
 
-if (-not $KingName -or -not $ClusterRoot) {
+if (-not $KingName) {
+    $KingName = $env:USERNAME
+    Log-Warn "未指定 -KingName，默认国王=当前OS用户: $KingName"
+}
+
+if (-not $ClusterRoot) {
     Write-Host "Usage: .\init.ps1 -KingName \"YourName\" -ClusterRoot \"D:\my-agent-cluster\" [-DefaultPM \"AgentName\"]"
     exit 1
 }

@@ -13,6 +13,9 @@ Usage:
     kaf route "<task>" — 模型经济学路由：推荐 planner/worker + 成本估算
     kaf review <file>  — 多视角审查：security/correctness/style/economics 叠加
     kaf dispatch "<task>" [target_agent] — 路由落执行：推荐并派发到共享队列
+    kaf govern "<action>" [--agent X --resource Y] — v5.3 治理评估：策略即代码+急停+审计
+    kaf kill-switch [on|off] — v5.3 全局急停开关
+    kaf audit-tail [N] — v5.3 防篡改审计链尾部 + 完整性校验
 """
 import sys
 import os
@@ -58,17 +61,21 @@ def cmd_init():
     # 生成本地 coordinator.json（gitignored，不提交），使 status/rotate 可用
     coord_file = os.path.join(os.getcwd(), "coordinator.json")
     if not os.path.exists(coord_file):
+        from king import resolve_king
+        king_name = resolve_king()  # v5.3：国王=当前部署者（本地回退山禾，远程回退OS用户）
         coord_tmpl = {
-            "version": "5.0",
+            "version": "5.3",
+            "king": king_name,
+            "king_resolver": "env:KAF_KING > kaf_config.json > 本地作者(山禾) > 当前OS用户/operator",
             "current_coordinator": "king",
             "coordinators": {
-                "king": {"title": "国王(人类)", "status": "active"},
+                "king": {"title": f"国王({king_name})", "status": "active"},
             },
             "rotation_history": [],
         }
         with open(coord_file, "w", encoding="utf-8") as f:
             json.dump(coord_tmpl, f, indent=2, ensure_ascii=False)
-        print(f"  ✅ 生成 coordinator.json（本地，已 gitignore）")
+        print(f"  ✅ 生成 coordinator.json（本地，已 gitignore）— 国王={king_name}")
 
     print("\n  KAF初始化完成。")
     print("  下一步: kaf check  # 运行520自检")
@@ -363,6 +370,87 @@ def cmd_dispatch(task_text, target=None):
     return 0
 
 
+def cmd_govern(argv):
+    """v5.3 治理评估：策略即代码 + 急停 + 身份归因 + 520检查点 + 防篡改审计。"""
+    from governance import Governance
+
+    action = None
+    agent = None
+    resource = None
+    context = {}
+    i = 0
+    while i < len(argv):
+        a = argv[i]
+        if a == "--agent":
+            agent = argv[i + 1]; i += 2; continue
+        if a == "--resource":
+            resource = argv[i + 1]; i += 2; continue
+        if a.startswith("--"):
+            # 形如 --user_confirmed / --king_confirmed / --has_script
+            key = a[2:]
+            val = argv[i + 1] if i + 1 < len(argv) and not argv[i + 1].startswith("--") else "true"
+            context[key] = (val.lower() in ("true", "1", "yes")) if isinstance(val, str) else val
+            i += (2 if val != "true" else 1)
+            continue
+        if action is None:
+            action = a
+        i += 1
+
+    if not action:
+        print('  Usage: kaf govern "<action>" [--agent X --resource Y --user_confirmed --king_confirmed --has_script]')
+        return 1
+
+    gov = Governance()
+    d = gov.evaluate(action, agent_id=agent, resource=resource, context=context)
+
+    print("=" * 50)
+    print("  KAF v5.3 Governance 评估")
+    print("=" * 50)
+    mark = "✅" if d else "⛔"
+    print(f"  {mark} 决策: {d.status.upper()}")
+    print(f"  动作: {action}")
+    if agent:
+        print(f"  Agent: {agent}")
+    if resource:
+        print(f"  资源: {resource}")
+    print(f"  触发规则: {d.rule_id}")
+    print(f"  原因: {d.reason}")
+    print(f"  审计链: {gov.state_dir}/audit_chain.log")
+    return 0 if d else 1
+
+
+def cmd_kill_switch(arg):
+    """v5.3 全局急停开关。"""
+    from governance import Governance
+    gov = Governance()
+    if arg == "on":
+        gov.set_kill_switch(True)
+        print("  🛑 kill-switch 已激活（全局急停：所有动作将被 DENY）")
+    elif arg == "off":
+        gov.set_kill_switch(False)
+        print("  ✅ kill-switch 已解除")
+    else:
+        print(f"  kill-switch 当前: {'ON 🛑' if gov.kill_switch_active() else 'off'}")
+    return 0
+
+
+def cmd_audit_tail(n=10):
+    """v5.3 防篡改审计链尾部 + 完整性校验。"""
+    from governance import Governance
+    gov = Governance()
+    ok, broken = gov.audit.verify()
+    print("=" * 50)
+    print("  KAF v5.3 Audit Chain")
+    print("=" * 50)
+    print(f"  完整性: {'✅ 有效' if ok else f'❌ 断裂于第 {broken} 条'}")
+    rows = gov.audit.tail(int(n))
+    if not rows:
+        print("  (审计链为空)")
+    for r in rows:
+        print(f"  {r}")
+    return 0 if ok else 1
+
+
 def main():
     if len(sys.argv) < 2:
         print(__doc__)
@@ -413,6 +501,17 @@ def main():
             task = " ".join(sys.argv[2:-1])
             target = sys.argv[-1]
         return cmd_dispatch(task, target)
+    elif cmd == "govern":
+        if len(sys.argv) < 3:
+            print('  Usage: kaf govern "<action>" [--agent X --resource Y --user_confirmed ...]')
+            return 1
+        return cmd_govern(sys.argv[2:])
+    elif cmd == "kill-switch":
+        arg = sys.argv[2] if len(sys.argv) > 2 else None
+        return cmd_kill_switch(arg)
+    elif cmd == "audit-tail":
+        n = sys.argv[2] if len(sys.argv) > 2 else 10
+        return cmd_audit_tail(n)
     else:
         print(f"  Unknown command: {cmd}")
         print(__doc__)

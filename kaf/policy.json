@@ -1,0 +1,47 @@
+{
+  "default_effect": "allow",
+  "attestation": {
+    "enabled": true,
+    "secret_env": "KAF_GOV_SECRET",
+    "secret": "kaf-shared-secret"
+  },
+  "rules": [
+    {
+      "id": "gov-520-write-protect",
+      "effect": "deny",
+      "match": {
+        "action": ["write", "delete", "move"],
+        "resource_regex": ".*(MEMORY\\.md|520|铁律|constitution\\.json)"
+      },
+      "require": { "king_confirmed": true },
+      "reason": "宪法/520/铁律/记忆为受保护资产，须国王显式确认(king_confirmed)方可写/删/移"
+    },
+    {
+      "id": "gov-destructive-needs-script",
+      "effect": "deny",
+      "match": { "action": ["delete", "move", "rm", "rmtree"] },
+      "require": { "has_script": true },
+      "reason": "破坏性操作须先写脚本(铁律8)"
+    },
+    {
+      "id": "gov-delete-needs-confirm",
+      "effect": "deny",
+      "match": { "action": ["delete", "rm", "rmtree"] },
+      "require": { "user_confirmed": true },
+      "reason": "删除前须展示清单并获用户确认(铁律10)"
+    },
+    {
+      "id": "gov-external-send-needs-approval",
+      "effect": "deny",
+      "match": { "action": ["send_email", "publish", "external_call"] },
+      "require": { "user_confirmed": true },
+      "reason": "对外发送/发布须用户确认"
+    },
+    {
+      "id": "gov-read-allow",
+      "effect": "allow",
+      "match": { "action": ["read", "list"] },
+      "reason": "只读操作默认放行"
+    }
+  ]
+}

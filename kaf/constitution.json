@@ -1,13 +1,15 @@
 {
   "$schema": "https://kaf.dev/constitution/v2",
-  "version": "5.2",
+  "version": "5.3",
   "name": "King-Agent Framework Constitution",
   "effective_date": "2026-08-04",
   "sovereign": {
     "id": "human",
     "title": "King",
     "powers": ["veto", "amend", "appoint_coordinator"],
-    "irrevocable": true
+    "irrevocable": true,
+    "king_resolver": "KAF_KING env > kaf_config.json > 本地作者环境(山禾) > 当前OS用户/operator",
+    "note": "国王身份动态解析，绝不硬编码某个名字。本地作者环境默认山禾；远程新手复制技能后默认'使用者即国王'(当前OS用户或operator)。部署者可用 KAF_KING 或 kaf_config.json 显式指定。"
   },
   "power_structure": {
     "type": "hierarchical",
@@ -137,6 +139,20 @@
       "memory_ledger": "共享操作审计（谁/何时/改了什么，可追溯）",
       "rule": "指纹答'是否被篡改'，账本答'变更是否可追溯'，二者互补不重复"
     }
+  },
+  "governance": {
+    "enabled": true,
+    "source": "GitHub 同类 Top 10 拆解 · microsoft/agent-governance-toolkit 对照系 · v5.3",
+    "principle": "治理从硬编码升级为声明式、可审计、可归因；与520运行时护栏互补",
+    "policy_file": "policy.json",
+    "components": {
+      "policy_as_code": "PolicyEngine.evaluate() 结构化 DENY(reason)/ALLOW；DENY优先；require为豁免条件",
+      "kill_switch": "共享状态急停(D:/Agent集群共享/governance/kill_switch.json)，激活即全局DENY",
+      "tamper_evident_audit": "hash链式append-only审计(audit_chain.log)，verify()可检测篡改",
+      "agent_attestation": "HMAC身份归因(attest)，未归因agent动作被DENY"
+    },
+    "evaluate_order": ["kill_switch", "attestation", "guard520", "policy_as_code"],
+    "protected_assets": "MEMORY.md/520/铁律/constitution.json 须 king_confirmed 方可写删移"
   },
   "amendment": {
     "procedure": "king_confirm_required",

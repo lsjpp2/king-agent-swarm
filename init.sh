@@ -148,7 +148,12 @@ main() {
         esac
     done
 
-    if [ -z "$KING_NAME" ] || [ -z "$CLUSTER_ROOT" ]; then
+    if [ -z "$KING_NAME" ]; then
+        KING_NAME="$(whoami)"
+        log_warn "未指定 --king，默认国王=当前OS用户: ${KING_NAME}"
+    fi
+
+    if [ -z "$CLUSTER_ROOT" ]; then
         echo "Usage: ./init.sh --king \"YourName\" --cluster-root \"/path/to/cluster\" [--default-pm \"AgentName\"]"
         exit 1
     fi
