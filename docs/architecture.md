@@ -15,11 +15,13 @@ King Agent Swarm solves these with **convention, not code**. It's a protocol spe
 
 ## Design Principles
 
-### 1. Human Sovereignty (King)
+### 1. Sovereignty (King) — whoever deploys, is King
 
-The human is always King. Every agent knows this. The King has absolute veto power over any agent decision.
+**v5.3 makes the King dynamic: `Deployer = King`.** The framework ships with **no hardcoded owner**. The person (or agent) who deploys it is, by default, in charge, and holds absolute veto over any agent decision.
 
-**Why this matters**: Most multi-agent frameworks make the agents "democratic." This sounds nice but means the human loses control. King Agent Swarm is explicitly hierarchical.
+Resolution order (`kaf/king.py:resolve_king()`): `KAF_KING env > kaf_config.json["king"] > local author env > current OS user`.
+
+**Why this matters**: Most multi-agent frameworks either make agents "democratic" (the human loses control) or hardcode a single owner (the framework can't be adopted by others). KAF is explicitly hierarchical **but owner-agnostic** — copy it, deploy it, you're King. No code change required. This is what makes it shareable, not someone's private tool.
 
 ### 2. Memory Isolation (Red Wall)
 
@@ -64,9 +66,9 @@ Long-running tasks (≥3 tool calls): every **5 steps**, the coordinating agent 
 
 | Framework | Approach | King Swarm's Difference |
 |:---|:---|:---|
-| **RuFlo Swarm** | Homogeneous Claude Code instances, shared memory | King Swarm: heterogeneous agents, memory isolation, human sovereignty |
+| **RuFlo Swarm** | Homogeneous Claude Code instances, shared memory | King Swarm: heterogeneous agents, memory isolation, owner-agnostic |
 | **AutoGen** | Code-level orchestration, Python-centric | King Swarm: protocol-level, platform-agnostic |
-| **CrewAI** | Role-based agents with defined workflows | King Swarm: human-led, not workflow-driven |
+| **CrewAI** | Role-based agents with defined workflows | King Swarm: deployer-led (not workflow-driven), copy-and-own |
 | **LangGraph** | Graph-based agent orchestration | King Swarm: simpler, convention-based, no graph DSL |
 
 **King Swarm is not a replacement for these** — it's a *coordination layer* that works alongside any of them.
@@ -99,10 +101,11 @@ This avoids the "telephone game" problem where messages get distorted as they pa
 
 ## Security Model
 
-- **King's commands are absolute** — no agent can override
+- **King's commands are absolute** — no agent can override (and the King is whoever deployed the framework, by default the current OS user / deployer)
 - **`coordinator.json` can only be modified by PM** (and King directly)
 - **Private memory is never shared** — agents must go through shared layer
 - **No agent can self-promote to PM** — only King can appoint
+- **All write operations pass through the Governance layer** (v5.3) with a tamper-evident audit chain, so violations are detectable after the fact, not just blocked in the moment
 
 ---
 

@@ -1,46 +1,51 @@
 # 👑 KAF — King-Agent Framework
 
 > **The governance layer for multi-agent swarms.**
-> Stop your AI agents from deleting your files, escaping their workspace, and gaslighting each other.
+> Give any collection of AI agents a constitution, runtime guardrails, and a clear chain of command — without locking you into one vendor or one "owner."
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org)
 [![520-Compliant](https://img.shields.io/badge/520-Rule%20Compliant-ff69b4.svg)](#-the-520-rule)
 [![Platform-agnostic](https://img.shields.io/badge/Platform-Agnostic-lightgrey.svg)](#-platform-adapters)
-[![Made from real scars](https://img.shields.io/badge/forged%20in-production-red.svg)](#-your-agents-are-out-of-control-and-you-know-it)
+[![Deployer is King](https://img.shields.io/badge/Deployer%3DKing-orange.svg)](#-who-is-the-king)
 
-You run 3+ AI coding agents — Claude Code, Cursor, OpenCode, Codex, Kimi… They talk to **you**. They don't talk to **each other**. And they have **no rules about what they can touch.**
+## What problem does KAF actually solve?
 
-**CrewAI / LangGraph / Ruflo answer "how do agents execute tasks together."**
-**KAF answers "how do you stop agents from wrecking your machine."**
+If you run **more than one** AI agent — coding agents (Claude Code, Cursor, OpenCode, Codex, Qwen, Kimi…), chat assistants, or CI bots — they each make decisions **independently**, with **no shared rules** about what they may touch.
 
-It's not an orchestrator. It's the **constitution + runtime guardrail** that sits *under* any orchestrator.
+That leads to predictable failure modes:
 
----
+- An agent deletes or overwrites something important and there's **no record of what happened**.
+- Two agents read each other's private context and **contaminate each other's reasoning**.
+- When a task spans agents, **nobody owns the outcome**.
+- Long-running work **drifts** away from the original intent, with no audit trail.
 
-## 🔥 Your agents are out of control (and you know it)
+**Other frameworks answer "how do agents execute tasks together" (orchestration).**
+**KAF answers "how do you govern agents so they stay safe, accountable, and aligned" — and it sits *under* any orchestrator you already use.**
 
-- An agent `rm -rf`'d a folder it shouldn't have. **Gone. No backup.**
-- An agent dropped 47 temp files across your `C:\` drive.
-- An agent overwrote `constitution.json`. **Your rules vanished.**
-- Two agents read each other's private memory. **Context contaminated.**
-- Something broke at 2 AM. **No script, no log. Nobody knows what happened.**
-
-### This is not theoretical
-
-KAF was forged inside a real 6-agent cluster (WorkBuddy + OpenCode + Claude + Kimi + Cursor) running daily for 3 months. We lost **2000+ map assets** to one irreversible delete before we built the guardrails.
-
-**KAF is the scar tissue. MIT-licensed, so you don't have to bleed for it.**
+It is not an orchestrator. It is the **constitution + runtime guardrail** layer.
 
 ---
+
+## Why teams adopt KAF
+
+- **Constitution-as-Code** — governance is a parseable JSON file you can diff, review, and CI-test. Not a vibe in a markdown doc.
+- **Runtime guardrails (the 520 Rule)** — destructive operations are blocked at execution time (not just warned), with a real audit log.
+- **Memory integrity** — private memory is isolated; shared memory is fingerprinted so unauthorized drift is detectable.
+- **Platform adapters** — plug in any agent platform in ~5 lines of code. No vendor lock-in.
+- **Tamper-evident audit chain** — every governance decision is hash-linked, so you can *prove* what happened.
+- **Whoever deploys it is King** — the framework ships with **no hardcoded owner**. The person (or agent) who runs it is, by default, in charge.
 
 ```
 Constitution-as-Code   宪法从md文档 → 可解析JSON，规则可机器验证
 520 Runtime Guard      从事后检查 → 运行时强制（有原生hook走hook，无hook平台走agent侧门禁kaf_gate.py）
 Memory Integrity       从"丢失后恢复" → "写入前阻止覆盖"
 Platform Adapter       从绑定特定平台 → 5行代码接入任意平台
+Governance Layer       v5.3 新增：策略即代码 + 急停(kill-switch) + 防篡改审计链 + 身份归因(HMAC)
+Dynamic King          v5.3 新增：部署者即国王，远程复制者默认自己称王，非硬编码某用户
 ```
 
+---
 
 ## 🛡️ The 520 Rule — four principles, three iron laws
 
@@ -87,11 +92,13 @@ guard.pre_execute({"type": "rm", "target": "D:/x", "script": "clean.py", "verifi
 
 ---
 
-## 🏛️ Architecture — five layers
+## 🏛️ Architecture — five layers (+ governance on top)
 
 ```
 ┌─────────────────────────────────────────────┐
-│  Platform Adapters   (WorkBuddy/Claude/...)  │  5 lines of code to plug in
+│  Governance Layer (v5.3)  策略即代码/急停/审计 │  所有写操作必经评估，hash链防篡改
+├─────────────────────────────────────────────┤
+│  Platform Adapters   (Claude/Cursor/...)     │  5 lines of code to plug in
 ├─────────────────────────────────────────────┤
 │  Coordinator Protocol  (Prime Minister rotate)│  who's in charge, right now
 ├─────────────────────────────────────────────┤
@@ -119,6 +126,16 @@ python kaf.py verify    # memory integrity (fingerprint + drift detect)
 python kaf.py status    # who's the current Prime Minister
 ```
 
+**You are King by default.** The framework does not assume any specific owner. If you deploy it, you're in charge:
+
+```bash
+# 默认：当前部署者（你）即国王
+python kaf.py status
+
+# 显式指定国王（可选）
+export KAF_KING=YourName        # 或 kaf_config.json 写 {"king":"YourName"}
+```
+
 Real `kaf check` output on a fresh cluster:
 
 ```
@@ -141,114 +158,75 @@ Your governance is a JSON file, not a vibe:
 
 ```json
 {
-  "rule_520": {
-    "enabled": true,
-    "immutable": true,
-    "note": "就算世界灭亡，这个标准不能丢",
-    "iron_laws": {
-      "law_8": "script_then_execute_then_verify",
-      "law_9": "verify_any_number_in_memory",
-      "law_10": "show_list_before_delete"
-    }
+  "version": "5.3",
+  "sovereign": { "king_resolver": "deployer" },
+  "governance": {
+    "kill_switch": true,
+    "audit_chain": true,
+    "attestation": "hmac"
   },
-  "rules": [
-    { "id": "delete_auth", "trigger": "pre:delete",
-      "require": "user_confirm", "irreversible_action": "warn_and_block" },
-    { "id": "path_discipline", "trigger": "pre:write",
-      "allow_only": "{{workspace}}/**",
-      "blocked_zones": ["Desktop", "Documents", "Downloads", "system_root"] }
-  ]
+  "guard520": { "law8_scripted": true, "law9_verify": true, "law10_confirm": true }
 }
 ```
 
-Path discipline alone stops ~90% of "why is my Desktop full of agent junk" incidents.
+Diff it. Review it in PR. Test it in CI. Roll back by `git revert`.
 
 ---
 
-## 🆚 How is KAF different?
+## 🔄 Who is the King?
 
-| | KAF | CrewAI / LangGraph | RuFlo | AutoGen |
-|:--|:--|:--|:--|:--|
-| Layer | **Governance** (how to *rule* agents) | Orchestration (how to *run* tasks) | Homogeneous swarm | Conversation orchestration |
-| Dangerous-op guard | ✅ runtime **BLOCK** | ❌ | ❌ | ❌ |
-| Path discipline | ✅ built-in | ❌ | ❌ | ❌ |
-| Memory isolation walls | ✅ | ⚠️ manual | ❌ | ❌ |
-| Constitution-as-Code | ✅ JSON, CI-testable | ❌ | ❌ | ❌ |
-| Heterogeneous agents | ✅ Claude+Cursor+…+ | ⚠️ | ❌ (Claude-only) | ⚠️ |
-| Platform-agnostic | ✅ adapter SDK | varies | ❌ | ⚠️ |
+**v5.3 makes the King dynamic — `Deployer = King`.** There is no hardcoded owner.
 
-**KAF doesn't replace them. It governs them.** Drop it under any orchestrator.
+Resolution order (`kaf/king.py:resolve_king()`):
+
+```
+KAF_KING env  >  kaf_config.json["king"]  >  local author env  >  current OS user
+```
+
+- **You deploy it** → you are King. No code change needed.
+- **Someone forks and deploys it** → *they* are King. The framework never imposes a foreign owner.
+- **Explicit override**: `KAF_KING=Alice` or `kaf_config.json {"king":"Bob"}`.
+
+This is deliberate: KAF is meant to be **copied, not adopted wholesale**. Whoever runs it owns their cluster.
 
 ---
 
-## 🔌 Platform Adapters
+## 🧩 Platform adapters
+
+A new platform is ~5 lines:
 
 ```python
-from adapters.base import PlatformAdapter
-
-class MyAdapter(PlatformAdapter):
-    platform_name = "my_platform"
-
-    def read_constitution(self): ...
-    def read_memory(self, key=None): ...
-    def write_memory(self, key, value, protect_check=True): ...
-    def register_hook(self, event, callback): ...
-    def execute(self, action): ...
-    def get_agent_id(self): ...
-    def get_workspace(self): ...
+class MyPlatformAdapter(AdapterBase):
+    name = "my-platform"
+    def list_sessions(self): ...
+    def read_trace(self, sid): ...
 ```
 
-The `WorkBuddy` adapter ships in-box. `Claude` / `Cursor` / `OpenCode` adapters are doc-based (`adapters/*.md`). Full SDK in [`kaf/adapters/`](kaf/adapters).
+See `adapters/` for Claude / Cursor / OpenCode / WorkBuddy / generic templates.
 
 ---
 
-## 📂 Repository layout
+## 🗺️ Diagrams
 
-```
-king-agent-swarm/
-├── kaf/                      # ★ KAF v5.0 core (this is the framework)
-│   ├── constitution.json     # declarative constitution (machine-readable)
-│   ├── guard520.py           # 520 runtime guard — 4 checkpoints
-│   ├── memory_integrity.py   # SHA-256 fingerprint + drift detection
-│   ├── coordinator.json      # Prime Minister registry (rotate / vote)
-│   ├── kaf.py                # CLI: init / check / verify / guard / rotate / status
-│   ├── adapters/             # platform SDK (base / workbuddy / template)
-│   └── README.md             # deep dive (中文 + English)
-├── templates/                # coordination-protocol layer (v1, config-only)
-├── docs/                     # architecture / quick-start / principles / faq
-├── adapters/                 # per-platform injection guides (.md)
-├── diagrams/                 # SVG architecture diagrams
-└── examples/                 # minimal 3-agent & 6-agent clusters
-```
-
-KAF is the engine; `templates/` + `docs/` + `diagrams/` form the **coordination-protocol layer** — the v1 "King / Prime Minister / Swarm" metaphor that KAF grew out of.
+See `diagrams/` — architecture (01), memory isolation (02), PM rotation (03), v5.3 governance flow (05), audit chain (06), shared state (07), king resolution (08), and an offline `index.html` tour.
 
 ---
 
-## Agent 侧强制门禁（无 hook 平台的诚实适配）
+## 📚 Docs
 
-WorkBuddy 桌面端等无原生 PreToolUse hook 的客户端，强制层以 `kaf_gate.py` 落地：
-任何 `delete / move / write` 前 MUST 调用门禁，返回 BLOCK（退出码 1）即停，须 `--confirmed --reason` 重跑并写审计日志。
+- `docs/architecture.md` — design philosophy
+- `docs/principles.md` — the 520 rule in depth
+- `docs/quick-start.md` — step-by-step
+- `docs/faq.md` — common questions
 
-![KAF 门禁三态](./docs/gate-three-states.svg)
-
-```bash
-# 删除前先过门禁（无 --confirmed → BLOCK，列出受影响清单）
-python kaf_gate.py check --op delete --target "/path/to/file"
-
-# 用户确认 + 附理由后放行
-python kaf_gate.py check --op delete --target "/path/to/file" --confirmed --reason "清理已推送的临时克隆，可从GitHub HEAD 还原"
-```
-
-## 实战背景
-
+---
 
 ## 🤝 Contributing
 
-PRs, issues, and war stories welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
+MIT-licensed. Fork it, deploy it, make it yours. PRs welcome — especially new platform adapters and governance policies.
 
-Even the governance is governed: `user_feedback → coordinator_evaluate → king_confirm → merge`.
+---
 
-## 📄 License
+## 📌 Version
 
-MIT — see [LICENSE](LICENSE).
+**Current: v5.3** — governance layer + dynamic King (Deployer=King). See `RELEASE_v5.3.md` for the full changelog and the advantage over v5.0/v5.1/v5.2.

@@ -1,6 +1,6 @@
 ---
 name: 国王-Agent蜂群
-description: 搭建国王模型 Agent 集群治理框架（KAF v5.3）。自动生成声明式宪法、520 运行时护栏、记忆完整性协议、宰相轮值协议、平台适配器、模型经济学路由（真实计价+校准）、多视角审查（闭环写回）、共享账本、v5.3 治理层(策略即代码+急停+防篡改审计+身份归因)。适用于多 Agent 协作治理场景（WorkBuddy + OpenCode + Codex + Claude + Kimi + Cursor 等）。触发词：国王模式、Agent蜂群、多Agent协作、集群搭建、宰相轮值、KAF、520护栏、模型经济学、经济学路由、多视角审查、角色分层、派发队列、共享账本、治理评估(govern/kill-switch/audit-tail)。
+description: 搭建 Agent 集群治理框架（KAF v5.3，平台无关、谁部署谁为王）。自动生成声明式宪法、520 运行时护栏、记忆完整性协议、宰相轮值协议、平台适配器、模型经济学路由（真实计价+校准）、多视角审查（闭环写回）、共享账本、v5.3 治理层(策略即代码+急停+防篡改审计+身份归因)、动态国王(Deployer=King，远程复制者默认自己称王)。适用于任何多 Agent 协作治理场景（Claude Code / Cursor / OpenCode / Codex / Qwen / Kimi / WorkBuddy 等任意组合）。触发词：国王模式、Agent蜂群、多Agent协作、集群搭建、宰相轮值、KAF、520护栏、模型经济学、经济学路由、多视角审查、角色分层、派发队列、共享账本、治理评估(govern/kill-switch/audit-tail)。
 agent_created: true
 ---
 
@@ -10,27 +10,31 @@ agent_created: true
 
 ---
 
-## 核心理念：KAF v5.2 = 代码化治理框架（含 4 个进化方向落地）
+## 核心理念：KAF v5.3 = 代码化治理框架（平台无关 + 部署者即国王）
 
-> v4 是 md 文档约定；**v5.0 是代码化框架**——宪法从 md 变成可机器解析的 JSON，护栏从事后检查变成运行时强制（有 hook 接口的平台走 hook；WorkBuddy 等无 hook 平台走 agent 侧强制门禁 `kaf_gate.py`），记忆从"丢失后恢复"变成"写入前阻止覆盖"。
+> v4 是 md 文档约定；**v5.0 是代码化框架**——宪法从 md 变成可机器解析的 JSON，护栏从事后检查变成运行时强制（有 hook 接口的平台走 hook；无 hook 平台走 agent 侧强制门禁 `kaf_gate.py`），记忆从"丢失后恢复"变成"写入前阻止覆盖"。
+> **v5.3 补两件事**：①治理层 Governance（策略即代码 + 急停 + 防篡改审计链 + 身份归因），所有写操作必经 `Governance.evaluate()`；②**动态国王 Deployer=King**——框架不再硬编码任何所有者，谁部署谁称王，远程复制者默认自己就是国王。
 
 ```
 Constitution-as-Code   宪法从md文档 → 可解析JSON，规则可机器验证
 520 Runtime Guard      从事后检查 → 运行时强制（hook 或 agent侧门禁 kaf_gate.py）
 Memory Integrity       从"丢失后恢复" → "写入前阻止覆盖"
 Platform Adapter       从绑定特定平台 → 5行代码接入任意平台
+Governance Layer       v5.3：策略即代码 + 急停(kill-switch) + 防篡改审计链 + 身份归因(HMAC)
+Dynamic King           v5.3：部署者即国王，远程复制者默认自己称王，非硬编码某用户
 ```
 
-**KAF 管"怎么治理 Agent"，CrewAI/LangGraph 管"怎么执行任务"——互补，不替代。**
+**KAF 管"怎么治理 Agent"，CrewAI/LangGraph 管"怎么执行任务"——互补，不替代。框架不绑定任何特定平台或所有者，复制即用、谁部署谁为王。**
 
 ---
 
-## 五层架构
+## 六层架构（v5.3 在五层之上加治理层）
 
 ```
 ┌─────────────────────────────────────────┐
-│  Platform Adapters  平台适配器            │
-│  WorkBuddy / Claude / OpenCode / ...    │
+│  Governance Layer  治理层(v5.3)          │  策略即代码/急停/审计链/身份归因
+├─────────────────────────────────────────┤
+│  Platform Adapters  平台适配器            │  5行代码接入任意平台
 ├─────────────────────────────────────────┤
 │  Coordinator Protocol  宰相轮值协议       │
 ├─────────────────────────────────────────┤
