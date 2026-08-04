@@ -52,6 +52,18 @@ python kaf/kaf.py check
 
 ## 校验
 
-- 远程 master tip = `f09f47720a0a30c532bf869ccd2aeb38ca982dff`（与本地一致）
-- v5.3 tag 指向该提交；本 Release 附完整优势说明
+- 远程 master tip = `8f251c1`（含本 Release 说明 + 文档去狭隘化提交）
+- v5.3 tag 指向 `f09f477`；文档去狭隘化在后续提交 `8f251c1`，均已推送并 SHA 回验一致
 - 共享归档：`D:/Agent集群共享/国王技能KAF/v5.3/`（git archive 真快照）、`KAF版本优势说明.md`
+
+---
+
+## 2026-08-04 补：文档去狭隘化（v5.3 发版后修正）
+
+发版后复核发现 **README / SKILL / architecture.md 的旧文案过于山禾中心化、且带创伤叙事（rm -rf / C盘散文件事故），不利于大众接受与推广**，已在本提交修正：
+
+- **去掉创伤叙事**：README 不再以"AI 删你文件"的事故堆砌为门面，改为"多 agent 协作的通用治理层"价值主张。
+- **去山禾中心化**：框架不再绑定"山禾的 6-agent 集群"；明确**平台无关、谁部署谁为王**。
+- **对齐 v5.3 代码**：说明 / 架构图 / SKILL 统一为"治理层 + 动态国王(Deployer=King)"，消除"代码进 v5.3、文档停 v5.0"的割裂。
+- 保留 `coordinator.json` / `kaf_config.example.json` 中的山禾路径作为**本机示例数据**（注释已声明绝不硬编码、远程回退 OS 用户），非狭隘叙事。
+

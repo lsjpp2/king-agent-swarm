@@ -7,6 +7,11 @@
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org)
 [![520-Compliant](https://img.shields.io/badge/520-Rule%20Compliant-ff69b4.svg)](#-520-法则四原则三铁律)
 [![Platform-agnostic](https://img.shields.io/badge/Platform-Agnostic-lightgrey.svg)](#-平台适配器)
+[![Governance v5.3](https://img.shields.io/badge/Governance-Layer%20v5.3-7c3aed.svg)](#-架构六层治理层在顶)
+[![Audit Chain](https://img.shields.io/badge/Audit-防篡改审计链-2d6cdf.svg)](#-治理层v53)
+[![Stars](https://img.shields.io/github/stars/lsjpp2/king-agent-swarm?style=social)](https://github.com/lsjpp2/king-agent-swarm/stargazers)
+[![MIT License](https://img.shields.io/github/license/lsjpp2/king-agent-swarm?color=green)](LICENSE)
+[![Latest Release](https://img.shields.io/github/v/release/lsjpp2/king-agent-swarm?label=Release)](https://github.com/lsjpp2/king-agent-swarm/releases)
 
 你有 3+ 个 AI 编程助手 —— Claude Code、Cursor、OpenCode、Codex、Kimi…… 它们都跟你说话，彼此不沟通，而且**没有任何规则约束它们能碰什么**。
 
@@ -78,7 +83,9 @@ guard.pre_execute({"type": "rm", "target": "D:/x", "script": "clean.py", "verifi
 
 ---
 
-## 🏛️ 架构：五层
+## 🏛️ 架构：六层（治理层在顶）
+
+![KAF v5.3 六层架构](diagrams/04-architecture.svg)
 
 ```
 ┌─────────────────────────────────────────────┐
@@ -190,6 +197,20 @@ class MyAdapter(PlatformAdapter):
 ```
 
 `WorkBuddy` 适配器已内置。`Claude` / `Cursor` / `OpenCode` 适配器为文档式（`adapters/*.md`）。完整 SDK 见 [`kaf/adapters/`](kaf/adapters)。
+
+---
+
+## 🗺️ 图解
+
+**治理流（v5.3）** —— 每个写操作都经 `Governance.evaluate()`：`急停 → 身份归因 → 520护栏 → 策略`，并写入防篡改审计链：
+
+![KAF v5.3 治理流](diagrams/05-governance-flow.svg)
+
+**国王解析** —— `部署者即国王`，不硬编码任何所有者：
+
+![KAF v5.3 国王解析](diagrams/08-king-resolution.svg)
+
+完整图解见 [`diagrams/`](diagrams/)：架构(01/04)、记忆隔离(02)、宰相轮值(03)、治理流(05)、审计链(06)、共享状态(07)、国王解析(08)，外加离线 [`index.html`](diagrams/index.html) 导览。
 
 ---
 

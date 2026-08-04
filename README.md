@@ -8,6 +8,11 @@
 [![520-Compliant](https://img.shields.io/badge/520-Rule%20Compliant-ff69b4.svg)](#-the-520-rule)
 [![Platform-agnostic](https://img.shields.io/badge/Platform-Agnostic-lightgrey.svg)](#-platform-adapters)
 [![Deployer is King](https://img.shields.io/badge/Deployer%3DKing-orange.svg)](#-who-is-the-king)
+[![Governance v5.3](https://img.shields.io/badge/Governance-Layer%20v5.3-7c3aed.svg)](#-architecture--six-layers--governance-on-top)
+[![Audit Chain](https://img.shields.io/badge/Audit-Tamper--Evident-2d6cdf.svg)](#-governance-layer-v53)
+[![Stars](https://img.shields.io/github/stars/lsjpp2/king-agent-swarm?style=social)](https://github.com/lsjpp2/king-agent-swarm/stargazers)
+[![MIT License](https://img.shields.io/github/license/lsjpp2/king-agent-swarm?color=green)](LICENSE)
+[![Latest Release](https://img.shields.io/github/v/release/lsjpp2/king-agent-swarm?label=Release)](https://github.com/lsjpp2/king-agent-swarm/releases)
 
 ## What problem does KAF actually solve?
 
@@ -92,7 +97,11 @@ guard.pre_execute({"type": "rm", "target": "D:/x", "script": "clean.py", "verifi
 
 ---
 
-## 🏛️ Architecture — five layers (+ governance on top)
+## 🏛️ Architecture — six layers (governance on top)
+
+![KAF v5.3 Layered Architecture](diagrams/04-architecture.svg)
+
+> Click any diagram to open it full-size on GitHub. All eight are in [`diagrams/`](diagrams/).
 
 ```
 ┌─────────────────────────────────────────────┐
@@ -208,7 +217,15 @@ See `adapters/` for Claude / Cursor / OpenCode / WorkBuddy / generic templates.
 
 ## 🗺️ Diagrams
 
-See `diagrams/` — architecture (01), memory isolation (02), PM rotation (03), v5.3 governance flow (05), audit chain (06), shared state (07), king resolution (08), and an offline `index.html` tour.
+**Governance flow (v5.3)** — every write action is evaluated: `kill-switch → agent attestation → 520 guard → policy`, and hash-linked to the audit chain:
+
+![KAF v5.3 Governance Flow](diagrams/05-governance-flow.svg)
+
+**King resolution** — `Deployer = King`, no hardcoded owner:
+
+![KAF v5.3 King Resolution](diagrams/08-king-resolution.svg)
+
+Full set in [`diagrams/`](diagrams/) — architecture (01/04), memory isolation (02), PM rotation (03), governance flow (05), audit chain (06), shared state (07), king resolution (08), plus an offline [`index.html`](diagrams/index.html) tour.
 
 ---
 

@@ -48,6 +48,23 @@ Dynamic King           v5.3：部署者即国王，远程复制者默认自己�
 
 ---
 
+## 🗺️ 架构图解（v5.3）
+
+本 skill 自带 `kaf/diagrams/`（SVG，可离线看）。关键三图：
+
+**① 六层架构（治理层在顶，国王动态解析）**
+![KAF v5.3 Layered Architecture](../diagrams/04-architecture.svg)
+
+**② 治理流（所有写操作必经 evaluate：急停→归因→520护栏→策略，并写入防篡改审计链）**
+![KAF v5.3 Governance Flow](../diagrams/05-governance-flow.svg)
+
+**③ 国王解析（部署者即国王，不硬编码任何所有者）**
+![KAF v5.3 King Resolution](../diagrams/08-king-resolution.svg)
+
+完整图解清单（01 权力结构 / 02 记忆隔离 / 03 宰相轮值 / 04 架构 / 05 治理流 / 06 审计链 / 07 共享状态 / 08 国王解析）+ 离线 `index.html` 导览，见技能根目录 `diagrams/`。
+
+---
+
 ## 本 skill 自带完整实现
 
 代码已随 skill 分发在 `kaf/` 子目录：

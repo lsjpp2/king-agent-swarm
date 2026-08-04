@@ -23,6 +23,26 @@ Resolution order (`kaf/king.py:resolve_king()`): `KAF_KING env > kaf_config.json
 
 **Why this matters**: Most multi-agent frameworks either make agents "democratic" (the human loses control) or hardcode a single owner (the framework can't be adopted by others). KAF is explicitly hierarchical **but owner-agnostic** — copy it, deploy it, you're King. No code change required. This is what makes it shareable, not someone's private tool.
 
+---
+
+## 🗺️ Diagrams (v5.3)
+
+See `../diagrams/` for the full SVG set. The three most relevant to this document:
+
+**Layered architecture** — Governance layer sits on top of the five classic layers; the King is resolved dynamically:
+
+![KAF v5.3 Architecture](../diagrams/04-architecture.svg)
+
+**Governance flow** — every write action passes `Governance.evaluate()`: `kill-switch → agent HMAC attestation → 520 guard → policy`, hash-linked to the audit chain:
+
+![KAF v5.3 Governance Flow](../diagrams/05-governance-flow.svg)
+
+**King resolution** — `Deployer = King`, no hardcoded owner:
+
+![KAF v5.3 King Resolution](../diagrams/08-king-resolution.svg)
+
+---
+
 ### 2. Memory Isolation (Red Wall)
 
 Each agent has a private memory. No agent reads another's private memory. Period.
