@@ -18,8 +18,12 @@ import sys
 import os
 import json
 
-# 确保能import同目录模块
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# 确保能 import 同目录模块 + 项目根(kaf/) 下的 economics_router / review
+_HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, _HERE)
+_PROJ_ROOT = os.path.dirname(_HERE)
+if _PROJ_ROOT not in sys.path:
+    sys.path.insert(0, _PROJ_ROOT)
 
 
 def cmd_init():
