@@ -1,6 +1,7 @@
 {
   "$schema": "https://kaf.dev/constitution/v2",
   "version": "5.4",
+  "code_status": "v5.3.1 地基已落地(①②⑤: anti_pattern_lib/retrieval_inject/deliberate_gate)，接 kaf_gate.py；随 v5.4.1 发布。③④+Loop 待 v5.4 代码范畴。",
   "name": "King-Agent Framework Constitution",
   "effective_date": "2026-08-07",
   "sovereign": {
@@ -158,13 +159,41 @@
     "enabled": true,
     "source": "Claw 会话清理事故 8f6d42dc 实证：防错强但同类错重复4+次 -> 缺智慧层",
     "principle": "经验从只写不读(坟场)变为可运行、可闭环、可对齐检验的智慧层；受治理层约束",
+    "code_base": "v5.3.1 地基已落地(kaf/cognition/)，接 kaf_gate.py；③④+Loop 为 v5.4 代码范畴",
     "components": {
-      "anti_pattern_lib": "anti_patterns.jsonl：pattern/trigger/correct/source；种子来自 8f6d42dc",
-      "retrieval_inject": "任务起点拉相关反模式+高置信经验进上下文",
-      "distillation": "经验蒸馏 {context,action,outcome,confidence}；低置信不注入",
-      "calibration_engine": "相似决策比对历史 outcome/confidence，标注误校准",
-      "deliberate_gate": "高利害动作前 deliberate() 自检，命中->正确替代或升国王确认",
-      "loop_driver": "交付质量闭环：候选->对齐检验->未达标修订->再检验->收敛"
+      "anti_pattern_lib": {
+        "desc": "anti_patterns.jsonl：id/name/trigger/wrong/why/right/severity/source",
+        "path": "kaf/cognition/anti_patterns.jsonl",
+        "seed_source": "Claw 会话清理事件 8f6d42dc（8 条真实种子）",
+        "implemented": true
+      },
+      "retrieval_inject": {
+        "desc": "任务起点拉相关反模式进上下文，输出「⚠️ 历史反模式」注入块",
+        "path": "kaf/cognition/retrieval_inject.py",
+        "wired_into": "kaf_gate.py retrieve 子命令 + __init__ 导出",
+        "implemented": true
+      },
+      "deliberate_gate": {
+        "desc": "高利害动作前 deliberate() 自检；命中 high 反模式->HOLD 软刹车(列清单+等你确认)",
+        "path": "kaf/cognition/deliberate.py",
+        "wired_into": "kaf_gate.py check（高利害动作前触发，不硬拦、不高于国王否决）",
+        "implemented": true
+      },
+      "distillation": {
+        "desc": "经验蒸馏 {context,action,outcome,confidence}；低置信不注入",
+        "path": "（v5.4 代码范畴，本包预留接口）",
+        "implemented": false
+      },
+      "calibration_engine": {
+        "desc": "相似决策比对历史 outcome/confidence，标注误校准",
+        "path": "（v5.4 代码范畴）",
+        "implemented": false
+      },
+      "loop_driver": {
+        "desc": "交付质量闭环：候选->对齐检验->未达标修订->再检验->收敛",
+        "path": "（v5.4 代码范畴）",
+        "implemented": false
+      }
     },
     "loop_driver": {
       "enabled": true,

@@ -79,7 +79,7 @@ Loop Driver            v5.4：后台自动对齐检验 → 修订 → 再检验 
 ```
 kaf/
 ├── constitution.json      声明式宪法 v5.4（可机器解析，含 economics_routing/dispatch/review_loop/shared_ledger/governance/cognition 六节 + sovereign.king_resolver 动态国王；cognition=进智脊柱规范）
-├── cognition/             v5.4 进智脊柱（anti_patterns.jsonl 种子 + 蒸馏/校准/门控/闭环模块，分阶段落地；规范见 docs/architecture_v5.4.md 与 diagrams/12~14）
+├── cognition/             v5.4 进智脊柱（★v5.3.1 已实现：anti_patterns.jsonl 种子 + retrieval_inject.py + deliberate.py + cognition_selftest.py；③④+Loop 待 v5.4 代码；规范见 docs/architecture_v5.4.md 与 diagrams/12~14）
 ├── coordinator.json       宰相注册表（role/cost_tier/轮值/投票/handover + 共享账本/派发队列引用）
 ├── guard520.py            520运行时护栏（4检查点 + self_check，真核查）
 ├── memory_integrity.py    记忆完整性（SHA-256指纹 + drift检测 + protect_write）
@@ -228,12 +228,12 @@ CLI 执行：`python kaf.py rotate <agent_name>`
 
 > v5.3 的"可进化"是假的：经验封装成 skill 但**只写不读 = 坟场**，同类错误照犯（实证：Claw 会话清理事件 `8f6d42dc`，数据零丢失但一刀切 / 数字反复 / 标题 bug 重复 4+ 次）。v5.4 把进智做成可运行、可闭环、可对齐检验的**智慧层**。完整规范与图解见 `docs/architecture_v5.4.md` + `diagrams/12~14`。
 
-**五零件**：
-1. **① 反模式库 Anti-pattern**：记录"绝对不要做" + 触发条件 + 正确替代。种子：`8f6d42dc`（Claw 会话清理事故：一刀切判备份 / 数字未实地核查 / 只改 title 未改 custom_title 致左列不显）。
-2. **② 检索注入 Retrieval Inject**：任务起点主动拉相关反模式 + 高置信经验进上下文（解决只写不读）。
-3. **③ 经验蒸馏 Distillation（带置信度）**：任务收尾压成 `{context, action, outcome, confidence}`；置信度随复核累积，低置信不注入防噪声。
-4. **④ 决策校准引擎 Calibration**：相似决策比对历史 `outcome / confidence`，标注本次是否误校准。
-5. **⑤ 元认知门控 deliberate()**：高利害动作（删 / 移 / 覆盖 / 对外发送）前自问"是否重蹈某条反模式"；命中→正确替代或升国王确认；不高于国王否决权。
+**五零件**（★ = v5.3.1 地基已实现并接 `kaf_gate.py`，随 v5.4.1 发布）：
+1. **★① 反模式库 Anti-pattern**（`kaf/cognition/anti_patterns.jsonl`，8 条 `8f6d42dc` 真实种子）：记录"绝对不要做" + 触发条件 + 正确替代。种子：`8f6d42dc`（Claw 会话清理事故：一刀切判备份 / 数字未实地核查 / 只改 title 未改 custom_title 致左列不显）。
+2. **★② 检索注入 Retrieval Inject**（`kaf/cognition/retrieval_inject.py`）：任务起点主动拉相关反模式进上下文（解决只写不读）；`kaf_gate.py retrieve` 子命令可输出「⚠️ 历史反模式」注入块。
+3. **③ 经验蒸馏 Distillation（带置信度）**：任务收尾压成 `{context, action, outcome, confidence}`；置信度随复核累积，低置信不注入防噪声。（v5.4 代码范畴，预留接口）
+4. **④ 决策校准引擎 Calibration**：相似决策比对历史 `outcome / confidence`，标注本次是否误校准。（v5.4 代码范畴）
+5. **★⑤ 元认知门控 deliberate()**（`kaf/cognition/deliberate.py`，接 `kaf_gate.py check`）：高利害动作（删 / 移 / 覆盖 / 归档 / 改名 / 批量写 / 发布）前自问"是否重蹈某条反模式"；命中 high→`DELIBERATE_HOLD` 软刹车（列清单 + 等你确认）；不高于国王否决权，不绕过 `kaf_gate.py`。
 
 **Loop Driver 闭环自修（v5.4 交付质量闭环）**：候选产出 → 后台对齐检验（逐条比对指令）→ 未达标自动修订 → 再检验 → 收敛交付。对齐度阈值三档（国王已确认 2026-08-07）：
 - **硬阈值**（可量化指令，如"归档 N 条且均经 conversation_search 零命中"）= 100% 对齐，差一项即修订，无需人工确认自动收敛；
@@ -241,7 +241,7 @@ CLI 执行：`python kaf.py rotate <agent_name>`
 - **国王兜底**（模糊，如"整理好看点"）= 不设自动阈值，跑 ≤1 轮基础对齐后**升国王确认**，不擅自定稿。
 - 约束：默认 ≤5 轮；触发 520 护栏 / kill-switch 立即中止交还国王；每轮基于上一候选物可逆副本，审计链记录差异。
 
-**落地节奏**：v5.3.1 先做地基 ①②⑤（反模式种子 + 检索注入 + deliberate 钩子）；v5.4 做 ③④ + Loop Driver（需经验沉淀才有意义）。**进智受治理层约束**：deliberate()/Loop 触发护栏即中止，不绕过强制门禁 `kaf_gate.py`。
+**落地节奏**：**★ v5.3.1 地基已落地**（①②⑤：反模式库种子 `anti_patterns.jsonl` + 检索注入 `retrieval_inject.py` + 元认知门控 `deliberate.py`，全部接 `kaf_gate.py`，自测 `cognition_selftest.py` 全 PASS），随 **v5.4.1** 发布；v5.4 代码范畴做 ③④ + Loop Driver（需经验沉淀才有意义）。**进智受治理层约束**：deliberate()/Loop 触发护栏即中止，不绕过强制门禁 `kaf_gate.py`。
 
 ---
 

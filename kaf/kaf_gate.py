@@ -32,8 +32,21 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from guard520 import Guard520, GuardResult
 from memory_integrity import MemoryIntegrity
 
+# 进智脊柱⑤：元认知门控（高利害动作前软刹车，接 5.3.1 地基）
+try:
+    from cognition.deliberate import Deliberate
+    from cognition.retrieval_inject import build_injection
+    _COG_OK = True
+except Exception:
+    _COG_OK = False
+
 AUDIT_LOG = os.path.join(os.path.dirname(os.path.abspath(__file__)), "kaf_gate_audit.log")
 DESTRUCTIVE = {"delete", "rm", "rmtree", "mv", "copy", "write"}
+# 进智自省触发集（与 deliberate.HIGH_STAKES 对齐）
+COG_HIGH_STAKES = {
+    "delete", "rm", "rmtree", "mv", "move", "write", "copy",
+    "archive", "rename", "batch_write", "publish",
+}
 
 
 def audit(op, target, status, confirmed, reason):
@@ -47,18 +60,33 @@ def audit(op, target, status, confirmed, reason):
 
 def main():
     p = argparse.ArgumentParser(description="KAF 强制门禁")
-    p.add_argument("action", choices=["check"], help="门禁动作")
-    p.add_argument("--op", required=True,
-                   choices=["delete", "rm", "move", "mv", "write", "copy", "rmtree"],
-                   help="操作类型")
+    p.add_argument("action", choices=["check", "retrieve"], help="门禁动作(check=强制门禁 / retrieve=输出历史反模式注入块)")
+    p.add_argument("--op", required=False, default="",
+                   choices=["", "delete", "rm", "move", "mv", "write", "copy", "rmtree"],
+                   help="操作类型(check 必填；retrieve 无需)")
     p.add_argument("--target", default="", help="目标路径")
     p.add_argument("--script", default="", help="破坏性操作的脚本路径(铁律8)")
     p.add_argument("--verified", action="store_true", help="操作已验证(铁律8)")
     p.add_argument("--confirmed", action="store_true", help="已展示清单并获用户确认(铁律10)")
     p.add_argument("--reason", default="", help="操作理由(铁律12：确认删除/移动/覆盖须可追溯)")
     p.add_argument("--content", default="", help="write 操作的新内容(用于520保护检查)")
+    p.add_argument("--task", default="", help="任务描述(供 deliberate 反模式匹配 / retrieve 检索)")
     p.add_argument("--constitution", default=None, help="constitution.json 路径")
     args = p.parse_args()
+
+    # 进智脊柱②：检索注入子命令（任务起点拉历史反模式进上下文）
+    if args.action == "retrieve":
+        if _COG_OK:
+            block = build_injection(args.task or args.target)
+            print(block or "（无命中历史反模式）")
+        else:
+            print("（cognition 模块不可用，跳过检索注入）")
+        return 0
+
+    # check 动作必须提供 --op
+    if not args.op:
+        print("BLOCK: check 动作须提供 --op <delete|rm|move|mv|write|copy|rmtree>")
+        return 1
 
     # 归一化别名：move→mv, rm/rmtree→delete，确保破坏性判定一致（修 move 绕过门禁的 bug）
     op = {"move": "mv", "rm": "delete", "rmtree": "delete"}.get(args.op, args.op)
@@ -72,6 +100,22 @@ def main():
         "verified": args.verified,
         "user_confirmed": args.confirmed,
     }
+
+    # --- 进智脊柱⑤：元认知门控(软刹车) ---
+    # 高利害动作前自省，命中历史反模式则降级为「列清单+等你确认」。
+    # 仅软提示(不返回非零)，520 护栏仍负责硬拦；不高于国王否决权。
+    if _COG_OK and op in COG_HIGH_STAKES:
+        cog = Deliberate()
+        v = cog.check(op, args.target, args.task or args.content or "")
+        if v.status == "HOLD":
+            print(f"DELIBERATE_HOLD: 命中历史反模式 [{v.matched}]")
+            print(f"  错误做法: {v.wrong}")
+            print(f"  正确替代: {v.right}")
+            print("  => 等同 520 软刹车：请先列清单并向用户确认后，再 --confirmed 执行。")
+            audit(op, args.target, "DELIBERATE_HOLD", args.confirmed, args.reason)
+        elif v.status == "WARN":
+            print(f"DELIBERATE_WARN: 注意历史反模式 [{v.matched}] —— 正确替代: {v.right}")
+            audit(op, args.target, "DELIBERATE_WARN", args.confirmed, args.reason)
 
     # --- write 操作：520 记忆保护(防止删除受保护段落) ---
     if op == "write" and args.target and args.content:
