@@ -1,20 +1,19 @@
 ---
 name: 国王-Agent蜂群
-description: 搭建 Agent 集群治理框架（KAF v5.4，平台无关、谁部署谁为王）。自动生成声明式宪法、520 运行时护栏、记忆完整性协议、宰相轮值协议、平台适配器、模型经济学路由（真实计价+校准）、多视角审查（闭环写回）、共享账本、v5.3 治理层(策略即代码+急停+防篡改审计+身份归因)、动态国王(Deployer=King)、v5.4 进智脊柱(反模式库/检索注入/经验蒸馏/决策校准/deliberate门控/闭环自修Loop Driver)。适用于任何多 Agent 协作治理场景（Claude Code / Cursor / OpenCode / Codex / Qwen / Kimi / WorkBuddy 等任意组合）。触发词：国王模式、Agent蜂群、多Agent协作、集群搭建、宰相轮值、KAF、520护栏、模型经济学、经济学路由、多视角审查、角色分层、派发队列、共享账本、治理评估(govern/kill-switch/audit-tail)、进智脊柱、闭环自修、反模式、对齐检验。
+description: 搭建 Agent 集群治理框架（KAF v5.3，平台无关、谁部署谁为王）。自动生成声明式宪法、520 运行时护栏、记忆完整性协议、宰相轮值协议、平台适配器、模型经济学路由（真实计价+校准）、多视角审查（闭环写回）、共享账本、v5.3 治理层(策略即代码+急停+防篡改审计+身份归因)、动态国王(Deployer=King，远程复制者默认自己称王)。适用于任何多 Agent 协作治理场景（Claude Code / Cursor / OpenCode / Codex / Qwen / Kimi / WorkBuddy 等任意组合）。触发词：国王模式、Agent蜂群、多Agent协作、集群搭建、宰相轮值、KAF、520护栏、模型经济学、经济学路由、多视角审查、角色分层、派发队列、共享账本、治理评估(govern/kill-switch/audit-tail)。
 agent_created: true
 ---
 
-# 国王-Agent蜂群 Skill · KAF v5.4
+# 国王-Agent蜂群 Skill · KAF v5.3
 
 你是一个 Agent 集群治理架构师。当用户提到「国王模式」「Agent蜂群」「多Agent协作」「集群搭建」「宰相轮值」「KAF」「520护栏」「模型经济学」「经济学路由」「多视角审查」「角色分层」时，加载此 skill。
 
 ---
 
-## 核心理念：KAF v5.4 = 代码化治理框架 + 进智脊柱（平台无关 + 部署者即国王）
+## 核心理念：KAF v5.3 = 代码化治理框架（平台无关 + 部署者即国王）
 
 > v4 是 md 文档约定；**v5.0 是代码化框架**——宪法从 md 变成可机器解析的 JSON，护栏从事后检查变成运行时强制（有 hook 接口的平台走 hook；无 hook 平台走 agent 侧强制门禁 `kaf_gate.py`），记忆从"丢失后恢复"变成"写入前阻止覆盖"。
 > **v5.3 补两件事**：①治理层 Governance（策略即代码 + 急停 + 防篡改审计链 + 身份归因），所有写操作必经 `Governance.evaluate()`；②**动态国王 Deployer=King**——框架不再硬编码任何所有者，谁部署谁称王，远程复制者默认自己就是国王。
-> **v5.4 补一件事**：进智脊柱（Cognition Spine）——把"可进化"从只写不读的坟场，变成可运行、可闭环、可对齐检验的**智慧层**。它由五零件（反模式库 / 检索注入 / 经验蒸馏 / 决策校准 / deliberate 门控）+ **Loop Driver 闭环自修**（后台自动对齐检验 → 修订 → 再检验 → 收敛）组成。完整规范见 `docs/architecture_v5.4.md` 与 `diagrams/12~14`。
 
 ```
 Constitution-as-Code   宪法从md文档 → 可解析JSON，规则可机器验证
@@ -23,20 +22,16 @@ Memory Integrity       从"丢失后恢复" → "写入前阻止覆盖"
 Platform Adapter       从绑定特定平台 → 5行代码接入任意平台
 Governance Layer       v5.3：策略即代码 + 急停(kill-switch) + 防篡改审计链 + 身份归因(HMAC)
 Dynamic King           v5.3：部署者即国王，远程复制者默认自己称王，非硬编码某用户
-Cognition Spine        v5.4：反模式库/检索注入/经验蒸馏/决策校准/deliberate门控 + 闭环自修(Loop Driver)
-Loop Driver            v5.4：后台自动对齐检验 → 修订 → 再检验 → 收敛，阈值三档(硬/软/国王兜底)
 ```
 
 **KAF 管"怎么治理 Agent"，CrewAI/LangGraph 管"怎么执行任务"——互补，不替代。框架不绑定任何特定平台或所有者，复制即用、谁部署谁为王。**
 
 ---
 
-## 七层架构（v5.3 加治理层，v5.4 加进智脊柱层）
+## 六层架构（v5.3 在五层之上加治理层）
 
 ```
 ┌─────────────────────────────────────────┐
-│  Cognition Spine  进智脊柱(v5.4)         │  反模式/检索注入/蒸馏/校准/deliberate/闭环(与治理层正交)
-├─────────────────────────────────────────┤
 │  Governance Layer  治理层(v5.3)          │  策略即代码/急停/审计链/身份归因
 ├─────────────────────────────────────────┤
 │  Platform Adapters  平台适配器            │  5行代码接入任意平台
@@ -53,22 +48,20 @@ Loop Driver            v5.4：后台自动对齐检验 → 修订 → 再检验 
 
 ---
 
-## 🗺️ 架构图解
+## 🗺️ 架构图解（v5.3）
 
-本 skill 自带 `diagrams/`（SVG，可离线看）。
+本 skill 自带 `kaf/diagrams/`（SVG，可离线看）。关键三图：
 
-**v5.4 新增（进智脊柱）**：
-- v5.4 七层架构（含进智层）：`diagrams/12-architecture-v5.4.svg`
-- 进智脊柱全景（五零件 + 数据流）：`diagrams/13-cognition-full.svg`
-- 交付质量闭环 Loop Driver（阈值三档）：`diagrams/14-loop-closure.svg`
+**① 六层架构（治理层在顶，国王动态解析）**
+![KAF v5.3 Layered Architecture](../diagrams/04-architecture.svg)
 
-**v5.3 经典三图**：
-- 六层架构（治理层在顶，国王动态解析）：`diagrams/04-architecture.svg`
-- 治理流（写操作必经 evaluate + 审计链）：`diagrams/05-governance-flow.svg`
-- 国王解析（部署者即国王）：`diagrams/08-king-resolution.svg`
+**② 治理流（所有写操作必经 evaluate：急停→归因→520护栏→策略，并写入防篡改审计链）**
+![KAF v5.3 Governance Flow](../diagrams/05-governance-flow.svg)
 
-完整图解清单（01 权力结构 / 02 记忆隔离 / 03 宰相轮值 / 04 架构 / 05 治理流 / 06 审计链 / 07 共享状态 / 08 国王解析 / 12 v5.4架构 / 13 进智全景 / 14 闭环）+ 离线 `index.html` 导览，见技能根目录 `diagrams/`。
-完整架构规范见 `docs/architecture_v5.4.md`。
+**③ 国王解析（部署者即国王，不硬编码任何所有者）**
+![KAF v5.3 King Resolution](../diagrams/08-king-resolution.svg)
+
+完整图解清单（01 权力结构 / 02 记忆隔离 / 03 宰相轮值 / 04 架构 / 05 治理流 / 06 审计链 / 07 共享状态 / 08 国王解析）+ 离线 `index.html` 导览，见技能根目录 `diagrams/`。
 
 ---
 
@@ -78,8 +71,7 @@ Loop Driver            v5.4：后台自动对齐检验 → 修订 → 再检验 
 
 ```
 kaf/
-├── constitution.json      声明式宪法 v5.4（可机器解析，含 economics_routing/dispatch/review_loop/shared_ledger/governance/cognition 六节 + sovereign.king_resolver 动态国王；cognition=进智脊柱规范）
-├── cognition/             v5.4 进智脊柱（anti_patterns.jsonl 种子 + 蒸馏/校准/门控/闭环模块，分阶段落地；规范见 docs/architecture_v5.4.md 与 diagrams/12~14）
+├── constitution.json      声明式宪法 v5.3（可机器解析，含 economics_routing/dispatch/review_loop/shared_ledger/governance 五节 + sovereign.king_resolver 动态国王）
 ├── coordinator.json       宰相注册表（role/cost_tier/轮值/投票/handover + 共享账本/派发队列引用）
 ├── guard520.py            520运行时护栏（4检查点 + self_check，真核查）
 ├── memory_integrity.py    记忆完整性（SHA-256指纹 + drift检测 + protect_write）
@@ -221,27 +213,6 @@ class MyAdapter(PlatformAdapter):
 投票规则：宰相 **3票**，其他 Agent 各 **1票**，国王 **一票否决**。
 
 CLI 执行：`python kaf.py rotate <agent_name>`
-
----
-
-## v5.4 进智脊柱（Cognition Spine）★ v5.4 核心新增
-
-> v5.3 的"可进化"是假的：经验封装成 skill 但**只写不读 = 坟场**，同类错误照犯（实证：Claw 会话清理事件 `8f6d42dc`，数据零丢失但一刀切 / 数字反复 / 标题 bug 重复 4+ 次）。v5.4 把进智做成可运行、可闭环、可对齐检验的**智慧层**。完整规范与图解见 `docs/architecture_v5.4.md` + `diagrams/12~14`。
-
-**五零件**：
-1. **① 反模式库 Anti-pattern**：记录"绝对不要做" + 触发条件 + 正确替代。种子：`8f6d42dc`（Claw 会话清理事故：一刀切判备份 / 数字未实地核查 / 只改 title 未改 custom_title 致左列不显）。
-2. **② 检索注入 Retrieval Inject**：任务起点主动拉相关反模式 + 高置信经验进上下文（解决只写不读）。
-3. **③ 经验蒸馏 Distillation（带置信度）**：任务收尾压成 `{context, action, outcome, confidence}`；置信度随复核累积，低置信不注入防噪声。
-4. **④ 决策校准引擎 Calibration**：相似决策比对历史 `outcome / confidence`，标注本次是否误校准。
-5. **⑤ 元认知门控 deliberate()**：高利害动作（删 / 移 / 覆盖 / 对外发送）前自问"是否重蹈某条反模式"；命中→正确替代或升国王确认；不高于国王否决权。
-
-**Loop Driver 闭环自修（v5.4 交付质量闭环）**：候选产出 → 后台对齐检验（逐条比对指令）→ 未达标自动修订 → 再检验 → 收敛交付。对齐度阈值三档（国王已确认 2026-08-07）：
-- **硬阈值**（可量化指令，如"归档 N 条且均经 conversation_search 零命中"）= 100% 对齐，差一项即修订，无需人工确认自动收敛；
-- **软阈值**（半量化，如"标题要一目了然"）= 关键约束零违反 + 主要意图对齐 ≥ 80%，达标即收敛、每轮留痕备国王抽查；
-- **国王兜底**（模糊，如"整理好看点"）= 不设自动阈值，跑 ≤1 轮基础对齐后**升国王确认**，不擅自定稿。
-- 约束：默认 ≤5 轮；触发 520 护栏 / kill-switch 立即中止交还国王；每轮基于上一候选物可逆副本，审计链记录差异。
-
-**落地节奏**：v5.3.1 先做地基 ①②⑤（反模式种子 + 检索注入 + deliberate 钩子）；v5.4 做 ③④ + Loop Driver（需经验沉淀才有意义）。**进智受治理层约束**：deliberate()/Loop 触发护栏即中止，不绕过强制门禁 `kaf_gate.py`。
 
 ---
 

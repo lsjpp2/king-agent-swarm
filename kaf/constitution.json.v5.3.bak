@@ -1,8 +1,8 @@
 {
   "$schema": "https://kaf.dev/constitution/v2",
-  "version": "5.4",
+  "version": "5.3",
   "name": "King-Agent Framework Constitution",
-  "effective_date": "2026-08-07",
+  "effective_date": "2026-08-04",
   "sovereign": {
     "id": "human",
     "title": "King",
@@ -153,30 +153,6 @@
     },
     "evaluate_order": ["kill_switch", "attestation", "guard520", "policy_as_code"],
     "protected_assets": "MEMORY.md/520/铁律/constitution.json 须 king_confirmed 方可写删移"
-  },
-  "cognition": {
-    "enabled": true,
-    "source": "Claw 会话清理事故 8f6d42dc 实证：防错强但同类错重复4+次 -> 缺智慧层",
-    "principle": "经验从只写不读(坟场)变为可运行、可闭环、可对齐检验的智慧层；受治理层约束",
-    "components": {
-      "anti_pattern_lib": "anti_patterns.jsonl：pattern/trigger/correct/source；种子来自 8f6d42dc",
-      "retrieval_inject": "任务起点拉相关反模式+高置信经验进上下文",
-      "distillation": "经验蒸馏 {context,action,outcome,confidence}；低置信不注入",
-      "calibration_engine": "相似决策比对历史 outcome/confidence，标注误校准",
-      "deliberate_gate": "高利害动作前 deliberate() 自检，命中->正确替代或升国王确认",
-      "loop_driver": "交付质量闭环：候选->对齐检验->未达标修订->再检验->收敛"
-    },
-    "loop_driver": {
-      "enabled": true,
-      "max_rounds": 5,
-      "abort_on": ["520_guard", "kill_switch"],
-      "threshold": {
-        "hard": "可量化指令=100%对齐，差一项即修订，无需确认自动收敛",
-        "soft": "半量化=关键约束零违反+意图对齐>=80%，达标收敛、留痕备抽查",
-        "king_fallback": "模糊指令=不设自动阈值，<=1轮后升国王确认，不擅自定稿"
-      }
-    },
-    "constraint": "deliberate()/Loop 触发 520 护栏/kill-switch 立即中止，不高于国王否决权，不绕过 kaf_gate.py"
   },
   "amendment": {
     "procedure": "king_confirm_required",
