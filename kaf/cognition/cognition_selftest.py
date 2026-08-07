@@ -50,6 +50,45 @@ def main():
     inj = build_injection("归档会话清理 标题改名")
     check("注入块非空", inj != "")
 
+    # --- v5.4.2 闭环三件套（③④ + Loop Driver）---
+    import tempfile as _tf
+    import os as _os
+    _tmp = _os.path.join(_tf.gettempdir(), "_kaf_cog_selftest_exp.jsonl")
+    if _os.path.exists(_tmp):
+        _os.remove(_tmp)
+    try:
+        from experience_distillation import add_experience, get_high_conf
+    except ImportError:
+        from .experience_distillation import add_experience, get_high_conf
+    e1 = add_experience("测试上下文A", "动作", "success", confidence=0.6, source="selftest", path=_tmp)
+    check("③蒸馏写入经验(conf>=0.6)", e1["confidence"] >= 0.6)
+    check("③高置信检索(0.6<0.7应空)", get_high_conf(min_conf=0.7, path=_tmp) == [])
+    add_experience("测试上下文A", "动作", "success", confidence=0.6, source="selftest", path=_tmp)
+    check("③复核后置信度累积>=0.7", any(x["confidence"] >= 0.7 for x in get_high_conf(min_conf=0.7, path=_tmp)))
+
+    try:
+        from calibration_engine import calibrate
+    except ImportError:
+        from .calibration_engine import calibrate
+    r_ok = calibrate("测试上下文A", "动作", "success", path=_tmp)
+    check("④校准无误校准(历史成功)", (not r_ok.miscalibrated) and r_ok.similar_count >= 1)
+    add_experience("测试上下文B", "动作", "fail", confidence=0.8, source="selftest", path=_tmp)
+    r_mis = calibrate("测试上下文B", "动作", "success", path=_tmp)
+    check("④误校准检测(高置信失败但预测成功)", r_mis.miscalibrated)
+
+    try:
+        from loop_driver import run_loop
+    except ImportError:
+        from .loop_driver import run_loop
+    instr_hard = "归档 113 条纯系统备份;均经 conversation_search 零命中"
+    res_h = run_loop(instr_hard, "归档备份", mode="hard", max_rounds=5)
+    check("Loop硬阈值收敛(<=5轮)", res_h["converged"] and res_h["rounds"] <= 5)
+    instr_soft = "归档所有纯系统备份;保留活会话;不得误归档真实工作对话"
+    res_s = run_loop(instr_soft, "归档备份", mode="soft", max_rounds=5)
+    check("Loop软阈值收敛", res_s["converged"])
+    res_k = run_loop(instr_soft, "归档备份", mode="king", max_rounds=5)
+    check("Loop国王兜底needs_king", res_k["needs_king"] and not res_k["converged"])
+
     print("\nRESULT:", "ALL_OK" if ok else "HAS_FAIL")
     sys.exit(0 if ok else 1)
 

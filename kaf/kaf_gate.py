@@ -32,10 +32,11 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from guard520 import Guard520, GuardResult
 from memory_integrity import MemoryIntegrity
 
-# 进智脊柱⑤：元认知门控（高利害动作前软刹车，接 5.3.1 地基）
+# 进智脊柱⑤ + v5.4 Loop Driver（接 5.3.1 地基 + v5.4.2 闭环）
 try:
     from cognition.deliberate import Deliberate
     from cognition.retrieval_inject import build_injection
+    from cognition.loop_driver import run_loop, align, simple_revise
     _COG_OK = True
 except Exception:
     _COG_OK = False
@@ -58,9 +59,21 @@ def audit(op, target, status, confirmed, reason):
         pass
 
 
+def _read_candidate(s):
+    """loop 候选物：若是已存在的文件路径则读内容，否则当作文本。"""
+    s = (s or "").strip()
+    if s and os.path.exists(s) and os.path.isfile(s):
+        try:
+            with open(s, encoding="utf-8") as f:
+                return f.read()
+        except Exception:
+            pass
+    return s
+
+
 def main():
     p = argparse.ArgumentParser(description="KAF 强制门禁")
-    p.add_argument("action", choices=["check", "retrieve"], help="门禁动作(check=强制门禁 / retrieve=输出历史反模式注入块)")
+    p.add_argument("action", choices=["check", "retrieve", "loop"], help="门禁动作(check=强制门禁 / retrieve=输出历史反模式注入块 / loop=交付质量闭环)")
     p.add_argument("--op", required=False, default="",
                    choices=["", "delete", "rm", "move", "mv", "write", "copy", "rmtree"],
                    help="操作类型(check 必填；retrieve 无需)")
@@ -71,6 +84,11 @@ def main():
     p.add_argument("--reason", default="", help="操作理由(铁律12：确认删除/移动/覆盖须可追溯)")
     p.add_argument("--content", default="", help="write 操作的新内容(用于520保护检查)")
     p.add_argument("--task", default="", help="任务描述(供 deliberate 反模式匹配 / retrieve 检索)")
+    p.add_argument("--instruction", default="", help="loop 模式：原始指令(逐条比对候选物)")
+    p.add_argument("--candidate", default="", help="loop 模式：候选交付物(文本或文件路径)")
+    p.add_argument("--mode", default="soft", choices=["hard", "soft", "king"], help="loop 对齐阈值三档")
+    p.add_argument("--max-rounds", type=int, default=5, help="loop 最大迭代轮次(熔断)")
+    p.add_argument("--auto-fix", action="store_true", help="loop 启用最简自动修订(演示)；真实 agent 用 LLM 修订替换")
     p.add_argument("--constitution", default=None, help="constitution.json 路径")
     args = p.parse_args()
 
@@ -81,6 +99,26 @@ def main():
             print(block or "（无命中历史反模式）")
         else:
             print("（cognition 模块不可用，跳过检索注入）")
+        return 0
+
+    # 进智脊柱 v5.4 Loop Driver：交付质量闭环（比对指令→修订→再比对→收敛）
+    if args.action == "loop":
+        instr = args.instruction.strip()
+        cand = _read_candidate(args.candidate)
+        if not instr or not cand:
+            print("BLOCK: loop 须提供 --instruction 与 --candidate(文本或文件路径)")
+            return 1
+        revise = simple_revise if args.auto_fix else (lambda c, g: c)
+        res = run_loop(instr, cand, revise_fn=revise, mode=args.mode, max_rounds=args.max_rounds)
+        print(json.dumps({k: v for k, v in res.items() if k != "final"},
+                         ensure_ascii=False, indent=2))
+        print("FINAL_CANDIDATE:\n" + res["final"])
+        if res["needs_king"]:
+            print("=> 模糊指令：已跑基础对齐，需国王(人类)确认后定稿，不擅自收敛。")
+        elif res["converged"]:
+            print("=> 闭环收敛：候选物已对齐指令，可交付。")
+        else:
+            print("=> 未收敛(达迭代上限/熔断)：请国王(人类)介入或放宽阈值。")
         return 0
 
     # check 动作必须提供 --op

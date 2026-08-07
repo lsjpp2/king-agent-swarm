@@ -231,17 +231,17 @@ CLI 执行：`python kaf.py rotate <agent_name>`
 **五零件**（★ = v5.3.1 地基已实现并接 `kaf_gate.py`，随 v5.4.1 发布）：
 1. **★① 反模式库 Anti-pattern**（`kaf/cognition/anti_patterns.jsonl`，8 条 `8f6d42dc` 真实种子）：记录"绝对不要做" + 触发条件 + 正确替代。种子：`8f6d42dc`（Claw 会话清理事故：一刀切判备份 / 数字未实地核查 / 只改 title 未改 custom_title 致左列不显）。
 2. **★② 检索注入 Retrieval Inject**（`kaf/cognition/retrieval_inject.py`）：任务起点主动拉相关反模式进上下文（解决只写不读）；`kaf_gate.py retrieve` 子命令可输出「⚠️ 历史反模式」注入块。
-3. **③ 经验蒸馏 Distillation（带置信度）**：任务收尾压成 `{context, action, outcome, confidence}`；置信度随复核累积，低置信不注入防噪声。（v5.4 代码范畴，预留接口）
-4. **④ 决策校准引擎 Calibration**：相似决策比对历史 `outcome / confidence`，标注本次是否误校准。（v5.4 代码范畴）
+3. **③ 经验蒸馏 Distillation（带置信度）** ★v5.4.2 已实现：任务收尾压成 `{context, action, outcome, confidence}`；置信度随复核累积，低置信不注入防噪声。（`kaf/cognition/experience_distillation.py`）
+4. **④ 决策校准引擎 Calibration** ★v5.4.2 已实现：相似决策比对历史 `outcome / confidence`，标注本次是否误校准。（`kaf/cognition/calibration_engine.py`）
 5. **★⑤ 元认知门控 deliberate()**（`kaf/cognition/deliberate.py`，接 `kaf_gate.py check`）：高利害动作（删 / 移 / 覆盖 / 归档 / 改名 / 批量写 / 发布）前自问"是否重蹈某条反模式"；命中 high→`DELIBERATE_HOLD` 软刹车（列清单 + 等你确认）；不高于国王否决权，不绕过 `kaf_gate.py`。
 
-**Loop Driver 闭环自修（v5.4 交付质量闭环）**：候选产出 → 后台对齐检验（逐条比对指令）→ 未达标自动修订 → 再检验 → 收敛交付。对齐度阈值三档（国王已确认 2026-08-07）：
+**Loop Driver 闭环自修（v5.4 交付质量闭环）** ★v5.4.2 已实现（`kaf/cognition/loop_driver.py` + `kaf_gate.py loop` 子命令）：候选产出 → 后台对齐检验（逐条比对指令）→ 未达标自动修订 → 再检验 → 收敛交付。对齐度阈值三档（国王已确认 2026-08-07）：
 - **硬阈值**（可量化指令，如"归档 N 条且均经 conversation_search 零命中"）= 100% 对齐，差一项即修订，无需人工确认自动收敛；
 - **软阈值**（半量化，如"标题要一目了然"）= 关键约束零违反 + 主要意图对齐 ≥ 80%，达标即收敛、每轮留痕备国王抽查；
 - **国王兜底**（模糊，如"整理好看点"）= 不设自动阈值，跑 ≤1 轮基础对齐后**升国王确认**，不擅自定稿。
 - 约束：默认 ≤5 轮；触发 520 护栏 / kill-switch 立即中止交还国王；每轮基于上一候选物可逆副本，审计链记录差异。
 
-**落地节奏**：**★ v5.3.1 地基已落地**（①②⑤：反模式库种子 `anti_patterns.jsonl` + 检索注入 `retrieval_inject.py` + 元认知门控 `deliberate.py`，全部接 `kaf_gate.py`，自测 `cognition_selftest.py` 全 PASS），随 **v5.4.1** 发布；v5.4 代码范畴做 ③④ + Loop Driver（需经验沉淀才有意义）。**进智受治理层约束**：deliberate()/Loop 触发护栏即中止，不绕过强制门禁 `kaf_gate.py`。
+**落地节奏**：**★ v5.4.2 全落地**——地基 ①②⑤（v5.4.1）+ 闭环三件套 ③④ + Loop Driver（v5.4.2）；`kaf_gate.py` 新增 `loop` 子命令（--instruction/--candidate/--mode/--auto-fix），`cognition_selftest.py` 全 PASS。**进智受治理层约束**：deliberate()/Loop 触发 520 护栏/kill-switch 立即中止，不绕过强制门禁 `kaf_gate.py`。
 
 ---
 
