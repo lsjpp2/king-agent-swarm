@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>KAF 国王-Agent 框架 v5.4 完整架构说明</title>
+<style>
+:root{
+  --bg:#ffffff; --fg:#1f2328; --muted:#57606a; --line:#e1e4e8;
+  --accent:#6e40c9; --accent2:#b3261e; --amber:#9a6700; --green:#1a7f37;
+  --code-bg:#f6f8fa; --th-bg:#f0f3f6;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Helvetica,Arial,sans-serif;
+  color:var(--fg);background:var(--bg);line-height:1.75;font-size:16px;}
+.cover{max-width:1000px;margin:0 auto;padding:48px 28px 28px;}
+.cover h1{font-size:30px;margin:0 0 6px;letter-spacing:.3px}
+.cover .sub{color:var(--muted);font-size:15px;margin:2px 0}
+.meta{display:flex;flex-wrap:wrap;gap:10px 26px;margin-top:18px;font-size:13.5px;color:var(--muted);
+  border:1px solid var(--line);border-radius:10px;padding:14px 18px;background:#fafbfc}
+.meta b{color:var(--fg);font-weight:600}
+.badge{display:inline-block;background:var(--accent);color:#fff;border-radius:6px;padding:2px 10px;font-size:13px;font-weight:600}
+.toc{max-width:1000px;margin:8px auto;padding:16px 28px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.toc-title{font-weight:700;margin-bottom:8px;color:var(--accent)}
+.toc ol{margin:0;padding-left:20px}.toc ul{padding-left:18px;margin:4px 0}
+.toc a{color:var(--accent);text-decoration:none}.toc a:hover{text-decoration:underline}
+main{max-width:1000px;margin:0 auto;padding:8px 28px 60px}
+section{margin-top:40px}
+h2.ch{font-size:23px;border-left:5px solid var(--accent);padding-left:12px;margin-bottom:6px}
+h3{font-size:18.5px;margin-top:26px;color:#24292f}
+h4{font-size:16px;margin-top:18px;color:#24292f}
+p{margin:10px 0}
+code{background:var(--code-bg);border:1px solid var(--line);border-radius:5px;padding:1px 5px;font-size:13.5px;
+  font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace}
+pre{background:var(--code-bg);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow:auto}
+pre code{border:0;padding:0;background:none}
+blockquote{border-left:4px solid var(--amber);background:#fff8e6;margin:14px 0;padding:10px 16px;color:#5c4a00;border-radius:0 8px 8px 0}
+blockquote p{margin:4px 0}
+table{border-collapse:collapse;width:100%;margin:16px 0;font-size:14px}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--th-bg);font-weight:600}
+tbody tr:nth-child(even){background:#fafbfc}
+.figure{border:1px solid var(--line);border-radius:12px;padding:16px 16px 12px;margin:22px 0;background:#fff;
+  box-shadow:0 1px 3px rgba(27,31,36,.06)}
+.figcap{font-weight:700;font-size:15px;margin-bottom:10px;color:#24292f}
+.fignum{color:var(--accent);margin-right:4px}
+.figdesc{color:var(--muted);font-size:13.5px;margin:12px 0 2px}
+hr{border:0;border-top:1px solid var(--line);margin:24px 0}
+footer{max-width:1000px;margin:0 auto;padding:22px 28px 50px;color:var(--muted);font-size:13px;border-top:1px solid var(--line)}
+.tag-strong{color:var(--green);font-weight:700}
+.tag-new{color:var(--accent);font-weight:700}
+</style>
+</head>
+<body>
+
+<header class="cover" id="cover">
+  <span class="badge">KAF v5.4</span>
+  <h1>国王-Agent 蜂群框架（King Agent Swarm）v5.4 完整架构说明</h1>
+  <p class="sub">Cognition Spine（进智脊柱）· 交付质量闭环（Loop Driver）· 双柱正交治理体系</p>
+  <div class="meta">
+    <span><b>版本</b>：v5.4</span>
+    <span><b>发布日期</b>：2026-08-07</span>
+    <span><b>上一版</b>：v5.3（治理层 + 动态国王）</span>
+    <span><b>真源</b>：github.com/lsjpp2/king-agent-swarm</span>
+    <span><b>状态</b>：架构与规范定稿（代码按 v5.3.1 / v5.4 节奏落地）</span>
+    <span><b>文档类型</b>：自包含单文件（零外部依赖）</span>
+  </div>
+</header>
+
+
+<nav class="toc">
+  <div class="toc-title">目录</div>
+  <ol>
+    <li><a href="#cover">文档信息</a></li>
+    <li><a href="#ch1">第一章 · 整体国王架构说明（v5.4）</a></li>
+    <li><a href="#ch2">第二章 · 图解过程（01–14）</a>
+      <ul>
+        <li><a href="#fig-01">01 权力结构</a> · <a href="#fig-04">04 v5.3 架构</a> · <a href="#fig-08">08 国王解析</a></li>
+        <li><a href="#fig-09">09 进智对照</a> · <a href="#fig-12">12 v5.4 架构</a> · <a href="#fig-14">14 闭环</a></li>
+      </ul>
+    </li>
+    <li><a href="#ch3">第三章 · 版本迭代说明（v5.0 → v5.4）</a></li>
+    <li><a href="#appendix">附录 · 文件清单与引用</a></li>
+  </ol>
+</nav>
+
+<main>
+  <section id="ch1">
+    <h2 class="ch">第一章 · 整体国王架构说明（v5.4）</h2>
+    <p class="sub">本章节由 <code>docs/architecture_v5.4.md</code> 严谨转换，定义七层架构、进智脊柱五零件、交付质量闭环，以及与治理层的关系。</p>
+    <h1>Architecture &amp; Design Philosophy (KAF v5.4)</h1>
+<blockquote>升级自 v5.3。v5.3 把&quot;防错&quot;做成了代码可强制的治理层；v5.4 把&quot;进智&quot;做成可运行、可闭环、可对齐检验的<strong>进智脊柱（Cognition Spine）</strong>。 防错脊柱管&quot;别蠢&quot;，进智脊柱管&quot;变慧&quot;——两者正交，后者受前者约束。</blockquote>
+<hr/>
+<h2>Why King Agent Swarm Exists</h2>
+<p>If you have 2+ AI coding agents installed, you&#x27;ve hit these problems:</p>
+<ol><li><strong>No coordination</strong> — each agent answers independently, often contradicting each other</li><li><strong>Memory contamination</strong> — agent A&#x27;s context leaks into agent B&#x27;s conversation</li><li><strong>No clear leader</strong> — who&#x27;s responsible when a task spans multiple agents?</li><li><strong>Drift</strong> — long-running tasks lose alignment with original intent</li><li><strong>No learning</strong> — the same mistake repeats across sessions (memory persists, wisdom doesn&#x27;t)</li></ol>
+<p>King Agent Swarm solves these with <strong>convention, not code</strong>. It&#x27;s a protocol specification implemented in Markdown + JSON.</p>
+<hr/>
+<h2>Design Principles</h2>
+<h3>1. Sovereignty (King) — whoever deploys, is King</h3>
+<p><strong>v5.3 起 King 就是动态的：<code>Deployer = King</code>。</strong> The framework ships with <strong>no hardcoded owner</strong>. The person (or agent) who deploys it is, by default, in charge, and holds absolute veto over any agent decision.</p>
+<p>Resolution order (<code>kaf/king.py:resolve_king()</code>): <code>KAF_KING env &gt; kaf_config.json[&quot;king&quot;] &gt; local author env &gt; current OS user</code>.</p>
+<p><strong>Why this matters</strong>: KAF is explicitly hierarchical <strong>but owner-agnostic</strong> — copy it, deploy it, you&#x27;re King. No code change required. This is what makes it shareable.</p>
+<hr/>
+<h3>2. Cognition Spine (v5.4 NEW) — 进智脊柱</h3>
+<p><strong>v5.3 的&quot;可进化&quot;是假的</strong>：它把经验封装成 skill，但运行时<strong>只写不读</strong>——经验沉进坟场，同类错误照犯（实证：Claw 会话清理事件 <code>8f6d42dc</code>，数据零丢失，但一刀切 / 数字反复 / 标题 bug 重复 4+ 次）。</p>
+<p>v5.4 补上<strong>进智脊柱</strong>：让框架在&quot;防错&quot;之外真的&quot;变慧&quot;。它由五个零件组成，并由 <strong>v5.4 闭环驱动器（Loop Driver）</strong> 把&quot;检验 → 修订 → 再检验&quot;变成后台自动跑的交付质量闭环：</p>
+<table><thead><tr><th>零件</th><th>作用</th><th>状态(v5.3)</th><th>状态(v5.4)</th></tr></thead><tbody>
+<tr><td>① 反模式库 Anti-pattern</td><td>记录&quot;什么绝对不要做&quot; + 触发条件 + 正确替代</td><td>✗</td><td><strong>✓</strong></td></tr>
+<tr><td>② 检索注入 Retrieval Inject</td><td>任务起点把相关反模式 / 经验拉进上下文</td><td>✗</td><td><strong>✓</strong></td></tr>
+<tr><td>③ 经验蒸馏 Distillation（带置信度）</td><td>任务收尾把成败压成结构化经验</td><td>✗</td><td><strong>✓</strong></td></tr>
+<tr><td>④ 决策校准引擎 Calibration</td><td>相似决策比对历史、标注误校准</td><td>✗</td><td><strong>✓</strong></td></tr>
+<tr><td>⑤ 元认知门控 deliberate()</td><td>高利害动作前自问&quot;我是否重蹈覆辙&quot;</td><td>✗</td><td><strong>✓</strong></td></tr>
+<tr><td><strong>Loop Driver 闭环自修</strong></td><td>后台自动对齐检验 → 修订 → 再检验 → 收敛</td><td>✗</td><td><strong>✓</strong></td></tr>
+</tbody></table>
+<p>进智脊柱<strong>不优于治理层</strong>：触发 520 护栏 / kill-switch 立即中止，deliberate() 不高于国王否决权。</p>
+<hr/>
+<h2>🗺️ Diagrams (v5.4)</h2>
+<p>See <code>../diagrams/</code> for the full SVG set. Three new diagrams join the v5.3 set:</p>
+<p><strong>① v5.4 Layered Architecture</strong> — 在 v5.3 六层之上新增进智脊柱层（Cognition Spine），与治理层正交：</p>
+<p><strong>② Cognition Spine 全景</strong> — 五零件 + 数据流（②注入 → ④校准 → ⑤门控 → ③蒸馏回写）：</p>
+<p><strong>③ v5.4 交付质量闭环（Loop Driver）</strong> — 候选产出 → 后台对齐检验 → 未达标自动修订 → 再检验 → 收敛交付；阈值分三档：</p>
+<p>The v5.3 set (01-08) remains authoritative for power structure / memory isolation / rotation / governance flow / audit chain / shared state / king resolution.</p>
+<hr/>
+<h2>3. Memory Isolation (Red Wall)</h2>
+<p>Each agent has a private memory. No agent reads another&#x27;s private memory. Period.</p>
+<p><strong>Shared layer</strong> (<code>${CLUSTER_ROOT}/</code>): all agents can read/write here. Use it for:</p>
+<ul><li><code>coordinator.json</code> (who&#x27;s PM)</li><li><code>progress/YYYY-MM-DD.md</code> (shared progress log)</li><li><code>agent-identities/</code> (public identity cards)</li><li><code>cognition/</code> (v5.4 NEW: anti_patterns.jsonl + experience db + loop state) — shared so all agents learn from each other&#x27;s mistakes</li></ul>
+<p><strong>Private layer</strong>: each agent&#x27;s own memory directory. Only that agent reads it.</p>
+<hr/>
+<h2>4. Prime Minister Rotation</h2>
+<p>Instead of a fixed coordinator, the &quot;Prime Minister&quot; role rotates:</p>
+<ul><li>King says: &quot;X is PM now.&quot;</li><li>Old PM hands over <code>handover_state</code></li><li>New PM confirms and takes over</li></ul>
+<p><strong>Why rotation, not fixed?</strong> Different agents excel at different tasks. Let the King decide who coordinates based on the task at hand.</p>
+<hr/>
+<h2>5. Conflict Resolution (Weighted Voting)</h2>
+<ul><li>Prime Minister: <strong>3 votes</strong></li><li>Other agents: <strong>1 vote each</strong></li><li>King: <strong>Absolute veto</strong> (overrides everything)</li></ul>
+<p>This balances efficiency (PM can decide fast) with democracy (other agents can override PM with enough votes) and human control (King can stop anything).</p>
+<hr/>
+<h2>6. Anti-Drift Checkpoint + v5.4 闭环自修</h2>
+<p>Long-running tasks (≥3 tool calls): every <strong>5 steps</strong>, the coordinating agent must:</p>
+<ol><li>Restate the original goal</li><li>Check current progress against it</li><li>Correct if drifting</li></ol>
+<p><strong>v5.4 升级</strong>：除周期性&quot;陈述对齐&quot;外，任务产出阶段引入<strong>闭环自修（Loop Driver）</strong>——后台自动把候选交付物与原始指令逐条比对，未对齐则自动修订、再比对，循环到对齐达标（或迭代上限 / 熔断）才交付最终成品。这是把 520 四象限&quot;推理性反馈 = 查证核实&quot;从人工习惯变成框架本能。</p>
+<hr/>
+<h2>7. Cognition Spine 五零件（详述）</h2>
+<h3>① 反模式库（Anti-pattern Library）</h3>
+<p>记录&quot;什么绝对不要做&quot;——每条含 <code>pattern</code>（错误行为）、<code>trigger</code>（触发条件）、<code>correct</code>（正确替代）、<code>source</code>（出处，如某次事故会话 id）。种子来自 Claw 会话清理事件（<code>8f6d42dc</code>）：一刀切判备份、数字未实地核查、只改 title 未改 custom_title 致左列不显。</p>
+<h3>② 检索注入（Retrieval Inject）</h3>
+<p>任务起点，把与当前上下文相关的反模式 + 高置信度经验<strong>主动拉进上下文</strong>。解决&quot;经验只写不读&quot;——这是 v5.4 让经验真正生效的关键链路。</p>
+<h3>③ 经验蒸馏（Distillation, 带置信度）</h3>
+<p>任务收尾，把成败压成结构化经验 <code>{context, action, outcome, confidence}</code>。置信度随被复核次数累积；低置信度经验默认不注入，防噪声污染。</p>
+<h3>④ 决策校准引擎（Calibration Engine）</h3>
+<p>当新决策与历史经验 <code>context</code> 相似度 &gt; 阈值，拉出历史 <code>outcome / confidence</code>，标注本次是否&quot;误校准&quot;（与历史成功路径偏离）。相似决策不再从零推理。</p>
+<h3>⑤ 元认知门控（deliberate()）</h3>
+<p>高利害动作（删 / 移 / 覆盖 / 对外发送）前，自问&quot;我是否正重蹈某条反模式&quot;。命中则强制走正确替代或升国王确认。不优于 520 护栏 / 国王否决。</p>
+<hr/>
+<h2>8. v5.4 交付质量闭环（Loop Driver，详述）</h2>
+<blockquote>用户定义（2026-08-07）：v5.4 要&quot;学会后台自动检验结果有没有对齐指令，并根据检验结果进一步修订、修正交付结果，以此循环，交付最终成品&quot;。</blockquote>
+<ol><li><strong>产出候选</strong>：任务主体执行完毕，先交一版候选交付物（<strong>不直接定稿</strong>）。</li><li><strong>对齐检验（④ 升级为对齐检验器）</strong>：后台把候选物与<strong>原始指令 / 验收标准</strong>逐条比对，输出&quot;对齐度&quot;评分 + 差距清单。</li><li><strong>修订（③ 经验蒸馏供给策略）</strong>：若对齐度未达阈值，按差距清单 + 历史经验自动生成修订，产出下一版候选物。</li><li><strong>再检验</strong>：回到第 2 步重新跑对齐检验。</li><li><strong>收敛交付</strong>：对齐度达标（或触及迭代上限）→ 交付最终成品；全过程留痕、可回滚。</li></ol>
+<p><strong>关键约束</strong>：</p>
+<ul><li><strong>后台自动</strong>：不阻塞用户，到达对齐阈值或迭代上限才停。</li><li><strong>迭代上限 + 熔断</strong>：默认最大 5 轮，防空转；任一轮触发 520 护栏 / kill-switch 立即中止。</li><li><strong>对齐度阈值（国王已确认，2026-08-07）</strong> 分三档：</li></ul>
+<p>  1. <strong>硬阈值（可量化指令）</strong>：含明确可测指标（如&quot;归档 N 条且均经 conversation_search 零命中&quot;）= 100% 对齐，差一项即修订，无需人工确认自动收敛。</p>
+<p>  2. <strong>软阈值（半量化指令）</strong>：有方向缺精确指标（如&quot;标题要一目了然&quot;）= 关键约束零违反 + 主要意图对齐 ≥ 80%，达标即收敛、每轮留痕备国王抽查。</p>
+<p>  3. <strong>国王兜底（模糊指令）</strong>：不可量化（如&quot;整理好看点&quot;）= 不设自动阈值，跑 ≤1 轮基础对齐后<strong>升级国王确认</strong>，不擅自定稿。</p>
+<ul><li><strong>可恢复 + 循环自学习</strong>：每轮基于上一候选物可逆副本；每一轮喂给 ③ 蒸馏，修订策略越跑越准（循环&quot;学会&quot;的来源）。</li></ul>
+<hr/>
+<h2>9. 进智与治理层的关系（关键约束）</h2>
+<table><thead><tr><th>维度</th><th>治理层（防错脊柱）</th><th>进智脊柱（生慧）</th></tr></thead><tbody>
+<tr><td>目标</td><td>别犯不可恢复的错误</td><td>别重复已犯过的错误</td></tr>
+<tr><td>手段</td><td>强制门禁 / 审计链 / kill-switch</td><td>反模式 / 检索 / 蒸馏 / 校准</td></tr>
+<tr><td>优先级</td><td><strong>高</strong>（违反即 DENY）</td><td>低（受治理层约束）</td></tr>
+<tr><td>国王关系</td><td>国王一票否决</td><td>deliberate() 不高于国王否决</td></tr>
+</tbody></table>
+<p><strong>进智必须受治理层约束</strong>：520 可恢复 → 敢试错 → 审计可追溯。没有治理层兜底的&quot;自学习&quot;是灾难（会自我强化错误）。两者正交互补：治理防&quot;蠢&quot;，进智生&quot;慧&quot;。</p>
+<hr/>
+<h2>State Model</h2>
+<pre><code>[Agent Boot] → read coordinator.json → read identity → read progress → [Ready]
+
+[Task Start] → ②检索注入(读①+经验库) → PM assigns → agents execute
+            → [Checkpoint @ 5 steps] → restate/correct
+            → 产出候选 → ④对齐检验 → 未达标? → ③蒸馏修订策略 + 重新执行 → 再检验 → 对齐达标 → 交付
+            → ③经验蒸馏(写经验库,带置信度)
+
+[Rotation Trigger] → King commands → old PM handover → new PM takes over → [Ready]</code></pre>
+<hr/>
+<h2>Message Passing Model</h2>
+<p>Agents <strong>do not</strong> message each other directly. All coordination happens through:</p>
+<ol><li><strong><code>coordinator.json</code></strong> — who&#x27;s PM, who&#x27;s in the cluster</li><li><strong><code>progress/YYYY-MM-DD.md</code></strong> — shared progress log</li><li><strong><code>handover_state</code></strong> — PM handover context</li><li><strong><code>cognition/</code></strong> (v5.4 NEW) — shared anti-patterns + experience db, readable by all agents</li></ol>
+<p>This avoids the &quot;telephone game&quot; problem.</p>
+<hr/>
+<h2>Security Model</h2>
+<ul><li><strong>King&#x27;s commands are absolute</strong> — no agent can override (King = whoever deployed)</li><li><strong><code>coordinator.json</code> can only be modified by PM</strong> (and King directly)</li><li><strong>Private memory is never shared</strong> — agents must go through shared layer</li><li><strong>No agent can self-promote to PM</strong> — only King can appoint</li><li><strong>All write operations pass through the Governance layer</strong> (v5.3) with a tamper-evident audit chain</li><li><strong>v5.4 进智脊柱受治理层约束</strong>：deliberate() / Loop Driver 触发 520 护栏 / kill-switch 立即中止，不绕过强制门禁；经验库写入亦须经治理评估</li></ul>
+<hr/>
+<h2>Comparison with Alternatives</h2>
+<table><thead><tr><th>Framework</th><th>Approach</th><th>King Swarm&#x27;s Difference</th></tr></thead><tbody>
+<tr><td><strong>RuFlo Swarm</strong></td><td>Homogeneous instances, shared memory</td><td>King Swarm: heterogeneous agents, memory isolation, owner-agnostic</td></tr>
+<tr><td><strong>AutoGen</strong></td><td>Code-level orchestration</td><td>King Swarm: protocol-level, platform-agnostic</td></tr>
+<tr><td><strong>CrewAI</strong></td><td>Role-based workflows</td><td>King Swarm: deployer-led, copy-and-own</td></tr>
+<tr><td><strong>LangGraph</strong></td><td>Graph orchestration</td><td>King Swarm: convention-based, no graph DSL</td></tr>
+<tr><td><strong>(v5.4 新增) 其他&quot;可进化&quot;框架</strong></td><td>经验只写不读=坟场</td><td>King Swarm v5.4: 反模式+检索注入+闭环自修，经验真被读、真闭环</td></tr>
+</tbody></table>
+<p>King Swarm is not a replacement — it&#x27;s a <em>coordination + cognition layer</em> that works alongside any of them.</p>
+<hr/>
+<h2>Limitations &amp; Future Work</h2>
+<ul><li><strong>No direct agent-to-agent messaging</strong> (by design)</li><li><strong>Rotation has never been battle-tested in production</strong> (only simulated)</li><li><strong>v5.4 闭环自修的&quot;对齐检验器&quot;依赖指令可结构化</strong>——模糊指令仍需国王兜底（见 §8 阈值三档）</li><li><strong>经验库冷启动</strong>：①反模式种子需先有人工事故沉淀，前几轮闭环质量有限（这正是 Claw 事件 <code>8f6d42dc</code> 作为首条种子的价值）</li><li><strong>No web UI</strong> for cluster management (CLI / file editing only)</li></ul>
+<p>Contributions welcome: see <code>CONTRIBUTING.md</code>.</p>
+  </section>
+
+  <section id="ch2">
+    <h2 class="ch">第二章 · 图解过程（01–14）</h2>
+    <p>本框架的图解分为两组：<strong>01–08 为 v5.3 治理层全套（权力结构 / 记忆隔离 / 宰相轮值 / 六层架构 / 治理流 / 审计链 / 共享状态 / 国王解析）</strong>；
+    <strong>09–14 为进智脊柱与 v5.4 闭环新增图解</strong>。以下按编号顺序排列，每张图附规范说明。</p>
+    
+<figure class="figure" id="fig-01">
+  <figcaption class="figcap"><span class="fignum">图 01</span> · 权力结构</figcaption>
+  <svg viewBox="0 0 680 420" xmlns="http://www.w3.org/2000/svg" style="font-family: system-ui, sans-serif;">
+  <defs>
+    <filter id="sh" x="-4%" y="-4%" width="108%" height="116%"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.18"/></filter>
+    <linearGradient id="gK" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f0c040"/><stop offset="1" stop-color="#d4a030"/></linearGradient>
+    <linearGradient id="gP" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7be0a0"/><stop offset="1" stop-color="#4dc970"/></linearGradient>
+    <linearGradient id="gA" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#58a6ff"/><stop offset="1" stop-color="#2d6cdf"/></linearGradient>
+    <linearGradient id="gR" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f78166"/><stop offset="1" stop-color="#d45a3e"/></linearGradient>
+  </defs>
+
+  <rect width="680" height="420" rx="14" fill="#0d1117"/>
+
+  <!-- Title -->
+  <text x="340" y="38" text-anchor="middle" font-size="18" font-weight="800" fill="#f0f0f0" letter-spacing="0.5">👑  King Agent Swarm · Power Structure</text>
+  <text x="340" y="60" text-anchor="middle" font-size="11" fill="#8b949e" font-style="italic">King → Prime Minister → Agents (constitutional hierarchy)</text>
+
+  <!-- King box -->
+  <rect x="240" y="78" width="200" height="56" rx="12" fill="url(#gK)" filter="url(#sh)"/>
+  <text x="340" y="106" text-anchor="middle" font-size="16" font-weight="800" fill="#1a1a2e">👑  KING</text>
+  <text x="340" y="126" text-anchor="middle" font-size="11" fill="rgba(26,26,46,0.85)" font-weight="600">Sovereign · Absolute Veto</text>
+
+  <!-- PM box -->
+  <rect x="240" y="162" width="200" height="56" rx="12" fill="url(#gP)" filter="url(#sh)"/>
+  <text x="340" y="190" text-anchor="middle" font-size="15" font-weight="800" fill="#1a1a2e">🔶  PRIME MINISTER</text>
+  <text x="340" y="210" text-anchor="middle" font-size="10" fill="rgba(26,26,46,0.8)">Rotates on King's command · 3 votes in conflict</text>
+
+  <!-- Arrow: King → PM -->
+  <path d="M 340 134 L 340 156" stroke="#f0c040" stroke-width="2.5" fill="none" marker-end="url(#aK)"/>
+  <text x="358" y="148" font-size="10" fill="#f0c040" font-weight="600">appoints / commands</text>
+
+  <!-- Agents row -->
+  <!-- Agent 1 -->
+  <rect x="38" y="254" width="145" height="52" rx="10" fill="url(#gA)" filter="url(#sh)"/>
+  <text x="110" y="280" text-anchor="middle" font-size="13" font-weight="700" fill="white">🤖  Agent A</text>
+  <text x="110" y="298" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.8)">can be PM · 1 vote</text>
+
+  <!-- Agent 2 -->
+  <rect x="205" y="254" width="145" height="52" rx="10" fill="url(#gA)" filter="url(#sh)"/>
+  <text x="278" y="280" text-anchor="middle" font-size="13" font-weight="700" fill="white">🤖  Agent B</text>
+  <text x="278" y="298" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.8)">can be PM · 1 vote</text>
+
+  <!-- Agent 3 -->
+  < rect x="372" y="254" width="145" height="52" rx="10" fill="url(#gR)" filter="url(#sh)"/>
+  <text x="445" y="280" text-anchor="middle" font-size="13" font-weight="700" fill="white">🤖  Agent C</text>
+  <text x="445" y="298" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.8)">can be PM · 1 vote</text>
+
+  <!-- Agent N -->
+  <rect x="539" y="254" width="105" height="52" rx="10" fill="#30363d" filter="url(#sh)" stroke="#58a6ff" stroke-width="1" stroke-dasharray="4 3"/>
+  <text x="592" y="280" text-anchor="middle" font-size="13" font-weight="700" fill="#58a6ff">🤖  ...</text>
+  <text x="592" y="298" text-anchor="middle" font-size="9" fill="#8b949e">more agents</text>
+
+  <!-- Arrows: PM → Agents -->
+  <path d="M 262 218 L 110 250" stroke="#58a6ff" stroke-width="2" fill="none" marker-end="url(#aP)" opacity="0.8"/>
+  <path d="M 340 218 L 278 250" stroke="#58a6ff" stroke-width="2" fill="none" marker-end="url(#aP)" opacity="0.8"/>
+  <path d="M 418 218 L 445 250" stroke="#58a6ff" stroke-width="2" fill="none" marker-end="url(#aP)" opacity="0.8"/>
+  <path d="M 460 218 L 592 250" stroke="#58a6ff" stroke-width="1.5" fill="none" stroke-dasharray="4 3" marker-end="url(#aP)" opacity="0.6"/>
+
+  <!-- Coordination arrow (bidirectional) -->
+  <path d="M 178 280 L 196 280" stroke="#7be0a0" stroke-width="1.5" fill="none" marker-end="url(#aG)" opacity="0.5"/>
+  <path d="M 320 280 L 338 280" stroke="#7be0a0" stroke-width="1.5" fill="none" marker-end="url(#aG)" opacity="0.5"/>
+  <text x="340" y="274" text-anchor="middle" font-size="9" fill="#7be0a0" opacity="0.7">coordinate via shared layer</text>
+
+  <!-- Legend -->
+  <rect x="20" y="326" width="640" height="78" rx="8" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+  <text x="36" y="350" font-size="12" font-weight="700" fill="#f0c040">⚡  How it works</text>
+  <text x="36" y="370" font-size="10" fill="#8b949e">• King gives command → King says "X is PM now" → immediate rotation</text>
+  <text x="36" y="386" font-size="10" fill="#8b949e">• PM coordinates → PM dispatches tasks, resolves conflicts (3 votes vs 1)</text>
+  <text x="36" y="402" font-size="10" fill="#8b949e">• King's veto → King can override any decision at any time</text>
+
+  <!-- marker definitions -->
+  <defs>
+    <marker id="aK" markerWidth="8" markerHeight="8" refX="4" refY="4"><circle cx="4" cy="4" r="3" fill="#f0c040"/></marker>
+    <marker id="aP" markerWidth="8" markerHeight="8" refX="4" refY="4"><circle cx="4" cy="4" r="3" fill="#58a6ff"/></marker>
+    <marker id="aG" markerWidth="8" markerHeight="8" refX="4" refY="4"><circle cx="4" cy="4" r="2.5" fill="#7be0a0"/></marker>
+  </defs>
+</svg>
+
+  <p class="figdesc">国王（部署者即国王）拥有绝对否决权；宰相 PM 持 3 票、普通 Agent 各 1 票，表决权重化以平衡效率与民主、并保留人类最终控制权。</p>
+</figure>
+<figure class="figure" id="fig-02">
+  <figcaption class="figcap"><span class="fignum">图 02</span> · 记忆隔离（红墙）</figcaption>
+  <svg viewBox="0 0 680 520" xmlns="http://www.w3.org/2000/svg" style="font-family: system-ui, sans-serif;">
+  <defs>
+    <filter id="sh" x="-4%" y="-4%" width="108%" height="116%"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.18"/></filter>
+    <linearGradient id="gS" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1a3a2e"/><stop offset="1" stop-color="#0d1a16"/></linearGradient>
+    <linearGradient id="gP" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1a2a1a"/><stop offset="1" stop-color="#0d1a0d"/></linearGradient>
+  </defs>
+
+  <rect width="680" height="520" rx="14" fill="#0d1117"/>
+
+  <!-- Title -->
+  <text x="340" y="38" text-anchor="middle" font-size="18" font-weight="800" fill="#f0f0f0">🧱  Memory Isolation Wall</text>
+  <text x="340" y="60" text-anchor="middle" font-size="11" fill="#8b949e" font-style="italic">Each agent has its own private memory. Red wall = cannot cross.</text>
+
+  <!-- Shared Layer - top -->
+  <rect x="60" y="78" width="560" height="54" rx="6" fill="#1a3a2e" stroke="#7be0a0" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="340" y="100" text-anchor="middle" font-size="13" font-weight="700" fill="#7be0a0">🌐  SHARED LAYER  (all agents R/W)</text>
+  <text x="340" y="120" text-anchor="middle" font-size="10" fill="#8b949e">coordinator.json  ·  constitution.md  ·  progress/  ·  agent-identities/</text>
+
+  <!-- Red wall -->
+  <line x1="60" y1="142" x2="620" y2="142" stroke="#f78166" stroke-width="3" stroke-dasharray=""/>
+  <text x="340" y="136" text-anchor="middle" font-size="10" font-weight="700" fill="#f78166">🚫  MEMORY ISOLATION WALL  🚫</text>
+
+  <!-- Agent private zones -->
+  <!-- Agent A -->
+  <rect x="60" y="156" width="160" height="140" rx="10" fill="#1a1a2e" stroke="#58a6ff" stroke-width="1.2" filter="url(#sh)"/>
+  <rect x="60" y="156" width="160" height="30" rx="10" fill="#58a6ff" opacity="0.85"/>
+  <text x="140" y="176" text-anchor="middle" font-size="12" font-weight="700" fill="white">🤖  Agent A</text>
+  <rect x="74" y="196" width="132" height="28" rx="5" fill="#0d1117"/>
+  <text x="140" y="213" text-anchor="middle" font-size="10" fill="#8b949e">private memory</text>
+  <rect x="74" y="230" width="132" height="28" rx="5" fill="#0d1117"/>
+  <text x="140" y="247" text-anchor="middle" font-size="10" fill="#8b949e">session logs</text>
+  <rect x="74" y="264" width="132" height="28" rx="5" fill="#0d1117"/>
+  <text x="140" y="281" text-anchor="middle" font-size="10" fill="#8b949e">preferences</text>
+
+  <!-- X (cannot cross) -->
+  <text x="105" y="360" font-size="22" fill="#f78166" font-weight="900" opacity="0.6">✗</text>
+  <text x="155" y="360" font-size="10" fill="#f78166" opacity="0.7">NO ACCESS</text>
+
+  <!-- Agent B -->
+  <rect x="260" y="156" width="160" height="140" rx="10" fill="#1a1a2e" stroke="#f0c040" stroke-width="1.2" filter="url(#sh)"/>
+  <rect x="260" y="156" width="160" height="30" rx="10" fill="#f0c040" opacity="0.85"/>
+  <text x="340" y="176" text-anchor="middle" font-size="12" font-weight="700" fill="#1a1a2e">🤖  Agent B</text>
+  <rect x="274" y="196" width="132" height="28" rx="5" fill="#0d1117"/>
+  <text x="340" y="213" text-anchor="middle" font-size="10" fill="#8b949e">private memory</text>
+  <rect x="274" y="230" width="132" height="28" rx="5" fill="#0d1117"/>
+  <text x="340" y="247" text-anchor="middle" font-size="10" fill="#8b949e">session logs</text>
+  <rect x="274" y="264" width="132" height="28" rx="5" fill="#0d1117"/>
+  <text x="340" y="281" text-anchor="middle" font-size="10" fill="#8b949e">preferences</text>
+
+  <text x="305" y="360" font-size="22" fill="#f78166" font-weight="900" opacity="0.6">✗</text>
+  <text x="355" y="360" font-size="10" fill="#f78166" opacity="0.7">NO ACCESS</text>
+
+  <!-- Agent C -->
+  <rect x="460" y="156" width="160" height="140" rx="10" fill="#1a1a2e" stroke="#7be0a0" stroke-width="1.2" filter="url(#sh)"/>
+  <rect x="460" y="156" width="160" height="30" rx="10" fill="#7be0a0" opacity="0.85"/>
+  <text x="540" y="176" text-anchor="middle" font-size="12" font-weight="700" fill="#1a1a2e">🤖  Agent C</text>
+  <rect x="474" y="196" width="132" height="28" rx="5" fill="#0d1117"/>
+  <text x="540" y="213" text-anchor="middle" font-size="10" fill="#8b949e">private memory</text>
+  <rect x="474" y="230" width="132" height="28" rx="5" fill="#0d1117"/>
+  <text x="540" y="247" text-anchor="middle" font-size="10" fill="#8b949e">session logs</text>
+  <rect x="474" y="264" width="132" height="28" rx="5" fill="#0d1117"/>
+  <text x="540" y="281" text-anchor="middle" font-size="10" fill="#8b949e">preferences</text>
+
+  <text x="505" y="360" font-size="22" fill="#f78166" font-weight="900" opacity="0.6">✗</text>
+  <text x="555" y="360" font-size="10" fill="#f78166" opacity="0.7">NO ACCESS</text>
+
+  <!-- Arrows to shared layer -->
+  <path d="M 140 156 L 140 132" stroke="#58a6ff" stroke-width="1.5" fill="none" marker-end="url(#arrowS)" opacity="0.7"/>
+  <path d="M 340 156 L 340 132" stroke="#f0c040" stroke-width="1.5" fill="none" marker-end="url(#arrowS)" opacity="0.7"/>
+  <path d="M 540 156 L 540 132" stroke="#7be0a0" stroke-width="1.5" fill="none" marker-end="url(#arrowS)" opacity="0.7"/>
+  <text x="340" y="126" text-anchor="middle" font-size="9" fill="#7be0a0" opacity="0.8">↕ read/write shared layer</text>
+
+  <!-- Bottom note -->
+  <rect x="60" y="378" width="560" height="120" rx="8" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+  <text x="76" y="402" font-size="12" font-weight="700" fill="#f78166">🚫  Why isolation matters</text>
+  <text x="76" y="422" font-size="10" fill="#8b949e">• Without isolation: Agent A's wrong context leaks into Agent B's response → "my agents seem confused"</text>
+  <text x="76" y="438" font-size="10" fill="#8b949e">• With isolation: each agent brings its own perspective → better collective decisions</text>
+  <text x="76" y="454" font-size="10" fill="#8b949e">• Shared layer is ONLY for coordination: who's PM, what's the progress, handover state</text>
+  <text x="76" y="470" font-size="10" fill="#8b949e">• Rule: NO agent may read another agent's private memory. This is enforced by convention (identity card).</text>
+  <text x="76" y="486" font-size="10" fill="#8b949e" font-style="italic">  Enforcement is not technical (yet) — agents must voluntarily obey the protocol.</text>
+
+  <defs>
+    <marker id="arrowS" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5"><circle cx="3.5" cy="3.5" r="2.5" fill="#7be0a0"/></marker>
+  </defs>
+</svg>
+
+  <p class="figdesc">每个 Agent 拥有私有记忆层、互不跨读；共享层 ${CLUSTER_ROOT}/ 存放 coordinator.json、progress、cognition，供集群协同与跨 Agent 学习。</p>
+</figure>
+<figure class="figure" id="fig-03">
+  <figcaption class="figcap"><span class="fignum">图 03</span> · 宰相轮值流</figcaption>
+  <svg viewBox="0 0 680 500" xmlns="http://www.w3.org/2000/svg" style="font-family: system-ui, sans-serif;">
+  <defs>
+    <filter id="sh" x="-4%" y="-4%" width="108%" height="116%"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.18"/></filter>
+    <linearGradient id="gK" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f0c040"/><stop offset="1" stop-color="#d4a030"/></linearGradient>
+    <linearGradient id="gO" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f78166"/><stop offset="1" stop-color="#d45a3e"/></linearGradient>
+    <linearGradient id="gN" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#58a6ff"/><stop offset="1" stop-color="#2d6cdf"/></linearGradient>
+  </defs>
+
+  <rect width="680" height="500" rx="14" fill="#0d1117"/>
+
+  <!-- Title -->
+  <text x="340" y="38" text-anchor="middle" font-size="18" font-weight="800" fill="#f0f0f0">🔄  PM Rotation Flow</text>
+  <text x="340" y="60" text-anchor="middle" font-size="11" fill="#8b949e" font-style="italic">King's command → Old PM hands over → New PM takes over</text>
+
+  <!-- Step 1: King's Command -->
+  <rect x="20" y="78" width="640" height="80" rx="10" fill="#1c2128" stroke="#f0c040" stroke-width="1.5" filter="url(#sh)"/>
+  <circle cx="52" cy="108" r="18" fill="url(#gK)"/>
+  <text x="52" y="114" text-anchor="middle" font-size="14" font-weight="800" fill="#1a1a2e">1</text>
+  <text x="80" y="100" font-size="14" font-weight="700" fill="#f0c040">👑  Step 1: King's Command</text>
+  <text x="80" y="122" font-size="11" fill="#8b949e">King says (verbally or in text):</text>
+  <rect x="80" y="130" width="460" height="22" rx="4" fill="#161b22"/>
+  <text x="90" y="145" font-size="11" fill="#7be0a0" font-family="monospace">"From now on, [Agent Name] is Prime Minister."</text>
+  <text x="560" y="145" font-size="10" fill="#f0c040" font-weight="600">⚡ IMMEDIATE</text>
+
+  <!-- Arrow down -->
+  <path d="M 340 164 L 340 184" stroke="#f0c040" stroke-width="2" fill="none" marker-end="url(#aK)"/>
+  <text x="350" y="178" font-size="9" fill="#f0c040">trigger</text>
+
+  <!-- Step 2: Old PM Hands Over -->
+  <rect x="20" y="196" width="640" height="108" rx="10" fill="#1c2128" stroke="#f78166" stroke-width="1.5" filter="url(#sh)"/>
+  <circle cx="52" cy="226" r="18" fill="url(#gO)"/>
+  <text x="52" y="232" text-anchor="middle" font-size="14" font-weight="800" fill="white">2</text>
+  <text x="80" y="218" font-size="14" font-weight="700" fill="#f78166">📦  Step 2: Old PM Hands Over</text>
+  <text x="80" y="240" font-size="11" fill="#8b949e">Old PM (current coordinator) executes:</text>
+  <rect x="80" y="248" width="560" height="20" rx="4" fill="#0d1117"/>
+  <text x="92" y="262" font-size="10" fill="#c9d1d9"> ① Write current status to progress/YYYY-MM-DD.md</text>
+  <rect x="80" y="270" width="560" height="20" rx="4" fill="#0d1117"/>
+  <text x="92" y="284" font-size="10" fill="#c9d1d9"> ② Package handover_state → write to coordinator.json</text>
+  <rect x="80" y="298" width="560" height="20" rx="4" fill="#0d1117"/>
+  <text x="92" y="312" font-size="10" fill="#c9d1d9"> ③ Update coordinator.json: current_coordinator = New PM, since = now</text>
+
+  <!-- Arrow down -->
+  <path d="M 340 312 L 340 332" stroke="#f78166" stroke-width="2" fill="none" marker-end="url(#aO)"/>
+  <text x="350" y="326" font-size="9" fill="#f78166">handover complete</text>
+
+  <!-- Step 3: New PM Takes Over -->
+  <rect x="20" y="338" width="640" height="108" rx="10" fill="#1c2128" stroke="#58a6ff" stroke-width="1.5" filter="url(#sh)"/>
+  <circle cx="52" cy="368" r="18" fill="url(#gN)"/>
+  <text x="52" y="374" text-anchor="middle" font-size="14" font-weight="800" fill="white">3</text>
+  <text x="80" y="360" font-size="14" font-weight="700" fill="#58a6ff">👑  Step 3: New PM Takes Over</text>
+  <text x="80" y="382" font-size="11" fill="#8b949e">New PM (incoming coordinator) executes:</text>
+  <rect x="80" y="390" width="560" height="20" rx="4" fill="#0d1117"/>
+  <text x="92" y="404" font-size="10" fill="#c9d1d9"> ① Read coordinator.json → confirm current_coordinator = self</text>
+  <rect x="80" y="418" width="560" height="20" rx="4" fill="#0d1117"/>
+  <text x="92" y="432" font-size="10" fill="#c9d1d9"> ② Read handover_state → get context</text>
+  <rect x="80" y="446" width="560" height="20" rx="4" fill="#0d1117"/>
+  <text x="92" y="460" font-size="10" fill="#c9d1d9"> ③ Confirm to King: "I have taken over as Prime Minister."</text>
+
+  <!-- Completion badge -->
+  <rect x="460" y="460" width="160" height="24" rx="12" fill="#7be0a0" opacity="0.9"/>
+  <text x="540" y="476" text-anchor="middle" font-size="11" font-weight="700" fill="#1a1a2e">✅  ROTATION COMPLETE</text>
+
+  <!-- Bottom: state diagram -->
+  <rect x="20" y="462" width="640" height="28" rx="6" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+  <text x="36" y="480" font-size="10" fill="#8b949e">State:  [Idle] → "King commands" → [Handover] → "Old PM writes state" → [Inauguration] → "New PM confirms" → [Active]  </text>
+
+  <defs>
+    <marker id="aK" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5"><circle cx="3.5" cy="3.5" r="2.5" fill="#f0c040"/></marker>
+    <marker id="aO" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5"><circle cx="3.5" cy="3.5" r="2.5" fill="#f78166"/></marker>
+    <marker id="aN" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5"><circle cx="3.5" cy="3.5" r="2.5" fill="#58a6ff"/></marker>
+  </defs>
+</svg>
+
+  <p class="figdesc">King 任命 PM → 旧 PM 交接 handover_state → 新 PM 确认接管；按任务特质动态选协调者，而非固定中枢。</p>
+</figure>
+<figure class="figure" id="fig-04">
+  <figcaption class="figcap"><span class="fignum">图 04</span> · v5.3 六层架构</figcaption>
+  <svg viewBox="0 0 680 580" xmlns="http://www.w3.org/2000/svg" style="font-family: system-ui, sans-serif;">
+  <defs>
+    <filter id="sh" x="-4%" y="-4%" width="108%" height="116%"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.18"/></filter>
+    <linearGradient id="gA" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#58a6ff"/><stop offset="1" stop-color="#2d6cdf"/></linearGradient>
+    <linearGradient id="gC" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7be0a0"/><stop offset="1" stop-color="#4dc970"/></linearGradient>
+    <linearGradient id="gG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a78bfa"/><stop offset="1" stop-color="#7c3aed"/></linearGradient>
+    <linearGradient id="gR" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f78166"/><stop offset="1" stop-color="#d45a3e"/></linearGradient>
+    <linearGradient id="gK" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f0c040"/><stop offset="1" stop-color="#d4a030"/></linearGradient>
+    <linearGradient id="gM" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#79c0ff"/><stop offset="1" stop-color="#388bfd"/></linearGradient>
+  </defs>
+
+  <rect width="680" height="580" rx="14" fill="#0d1117"/>
+
+  <text x="340" y="36" text-anchor="middle" font-size="18" font-weight="800" fill="#f0f0f0">🏛️  KAF v5.3 · Layered Architecture</text>
+  <text x="340" y="58" text-anchor="middle" font-size="11" fill="#8b949e" font-style="italic">Governance layer (NEW) cross-cuts every action · King identity is dynamic (resolve_king)</text>
+
+  <!-- Layer 1: Platform Adapters -->
+  <rect x="40" y="78" width="600" height="58" rx="10" fill="url(#gA)" filter="url(#sh)"/>
+  <text x="60" y="104" font-size="13" font-weight="800" fill="white">🧩  Platform Adapters</text>
+  <text x="60" y="124" font-size="10" fill="rgba(255,255,255,0.85)">WorkBuddy / Claude / OpenCode / Cursor / Kimi — 5 行代码接入任意平台；dispatch 派发到共享队列</text>
+
+  <!-- Layer 2: Coordinator Protocol -->
+  <rect x="40" y="144" width="600" height="58" rx="10" fill="url(#gC)" filter="url(#sh)"/>
+  <text x="60" y="170" font-size="13" font-weight="800" fill="#1a1a2e">🔄  Coordinator Protocol</text>
+  <text x="60" y="190" font-size="10" fill="rgba(26,26,46,0.85)">宰相轮值 · 3票 vs 1票 · 国王一票否决 · handover_state 交接</text>
+
+  <!-- Layer 3: Governance (NEW) -->
+  <rect x="40" y="210" width="600" height="62" rx="10" fill="url(#gG)" filter="url(#sh)" stroke="#c4b5fd" stroke-width="1.5"/>
+  <text x="60" y="236" font-size="13" font-weight="800" fill="white">🛡️  Governance Layer  ★ v5.3 NEW</text>
+  <text x="60" y="256" font-size="10" fill="rgba(255,255,255,0.9)">策略即代码(policy.json) · 急停(kill-switch) · 防篡改审计链 · Agent 身份归因(HMAC)</text>
+  <text x="560" y="232" font-size="9" fill="#ede9fe" font-weight="700">evaluate(): kill→attest→guard520→policy</text>
+  <text x="560" y="248" font-size="9" fill="#ede9fe" font-weight="700">全程写审计链</text>
+
+  <!-- Layer 4: 520 Runtime Guard -->
+  <rect x="40" y="280" width="600" height="58" rx="10" fill="url(#gR)" filter="url(#sh)"/>
+  <text x="60" y="306" font-size="13" font-weight="800" fill="white">⚡  520 Runtime Guard</text>
+  <text x="60" y="326" font-size="10" fill="rgba(255,255,255,0.85)">4 检查点(pre:delete/pre:destructive_op/post:write_memory/startup) · 铁律8/9/10 · agent侧门禁 kaf_gate.py</text>
+
+  <!-- Layer 5: Constitution-as-Code -->
+  <rect x="40" y="346" width="600" height="58" rx="10" fill="url(#gK)" filter="url(#sh)"/>
+  <text x="60" y="372" font-size="13" font-weight="800" fill="#1a1a2e">📜  Constitution-as-Code</text>
+  <text x="60" y="392" font-size="10" fill="rgba(26,26,46,0.85)">声明式宪法 JSON · economics_routing/dispatch/review_loop/shared_ledger/governance · sovereign.king_resolver 动态国王</text>
+
+  <!-- Layer 6: Memory Integrity -->
+  <rect x="40" y="412" width="600" height="58" rx="10" fill="url(#gM)" filter="url(#sh)"/>
+  <text x="60" y="438" font-size="13" font-weight="800" fill="white">🔐  Memory Integrity</text>
+  <text x="60" y="458" font-size="10" fill="rgba(255,255,255,0.85)">SHA-256 指纹 + drift 检测 + protect_write · 隔离墙 strict · 共享账本 .memory_ledger.db</text>
+
+  <!-- Action flow arrow (left side, descending) -->
+  <rect x="14" y="78" width="20" height="392" rx="6" fill="#21262d" stroke="#30363d"/>
+  <text x="24" y="270" text-anchor="middle" font-size="9" fill="#8b949e" transform="rotate(-90 24 270)">AGENT ACTION ↓</text>
+
+  <!-- King resolution callout -->
+  <rect x="40" y="486" width="600" height="78" rx="10" fill="#161b22" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="60" y="510" font-size="12" font-weight="800" fill="#c4b5fd">👑  King = resolve_king()  (v5.3 修正：不再硬编码山禾)</text>
+  <text x="60" y="530" font-size="10" fill="#8b949e">本地作者环境 → 山禾    ｜    远程新手复制 → 当前 OS 用户 / operator</text>
+  <text x="60" y="548" font-size="10" fill="#8b949e">显式覆盖：环境变量 KAF_KING 或 kaf_config.json 的 {"king":"你的名字"}</text>
+</svg>
+
+  <p class="figdesc">自上而下：治理层（策略即代码 / 急停 / 审计链 / 身份归因）→ 平台适配器 → 宰相轮值协议 → 520 运行时护栏 → 声明式宪法 → 记忆完整性。</p>
+</figure>
+<figure class="figure" id="fig-05">
+  <figcaption class="figcap"><span class="fignum">图 05</span> · 治理流</figcaption>
+  <svg viewBox="0 0 680 560" xmlns="http://www.w3.org/2000/svg" style="font-family: system-ui, sans-serif;">
+  <defs>
+    <filter id="sh" x="-4%" y="-4%" width="108%" height="116%"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.18"/></filter>
+    <marker id="ar" markerWidth="9" markerHeight="9" refX="4" refY="4.5"><path d="M0,0 L9,4.5 L0,9 Z" fill="#8b949e"/></marker>
+    <marker id="arD" markerWidth="9" markerHeight="9" refX="4" refY="4.5"><path d="M0,0 L9,4.5 L0,9 Z" fill="#f78166"/></marker>
+    <marker id="arG" markerWidth="9" markerHeight="9" refX="4" refY="4.5"><path d="M0,0 L9,4.5 L0,9 Z" fill="#7be0a0"/></marker>
+  </defs>
+
+  <rect width="680" height="560" rx="14" fill="#0d1117"/>
+
+  <text x="340" y="36" text-anchor="middle" font-size="18" font-weight="800" fill="#f0f0f0">🛡️  Governance.evaluate() 评估流程</text>
+  <text x="340" y="58" text-anchor="middle" font-size="11" fill="#8b949e" font-style="italic">每一步拒绝都写入防篡改审计链；DENY 优先于 ALLOW</text>
+
+  <!-- Start -->
+  <rect x="270" y="74" width="140" height="40" rx="20" fill="#21262d" stroke="#58a6ff" stroke-width="1.5"/>
+  <text x="340" y="99" text-anchor="middle" font-size="12" font-weight="700" fill="#58a6ff">Agent 动作 (action)</text>
+
+  <!-- 1 kill-switch -->
+  <path d="M340 114 L340 134" stroke="#8b949e" stroke-width="2" fill="none" marker-end="url(#ar)"/>
+  <polygon points="340,138 286,178 394,178" fill="#1c2128" stroke="#f78166" stroke-width="1.5"/>
+  <text x="340" y="166" text-anchor="middle" font-size="11" font-weight="700" fill="#f78166">kill-switch 激活?</text>
+  <path d="M394 158 L470 158 L470 300 L520 300" stroke="#f78166" stroke-width="2" fill="none" marker-end="url(#arD)"/>
+  <text x="478" y="230" font-size="10" fill="#f78166" font-weight="600">YES</text>
+
+  <!-- 2 attestation -->
+  <path d="M340 178 L340 210" stroke="#8b949e" stroke-width="2" fill="none" marker-end="url(#ar)"/>
+  <polygon points="340,214 284,254 396,254" fill="#1c2128" stroke="#f0c040" stroke-width="1.5"/>
+  <text x="340" y="242" text-anchor="middle" font-size="11" font-weight="700" fill="#f0c040">agent 已 attest?</text>
+  <path d="M396 234 L470 234 L470 300 L520 300" stroke="#f78166" stroke-width="2" fill="none" marker-end="url(#arD)"/>
+  <text x="478" y="214" font-size="10" fill="#f78166" font-weight="600">NO</text>
+
+  <!-- 3 guard520 -->
+  <path d="M340 254 L340 286" stroke="#8b949e" stroke-width="2" fill="none" marker-end="url(#ar)"/>
+  <polygon points="340,290 284,330 396,330" fill="#1c2128" stroke="#f78166" stroke-width="1.5"/>
+  <text x="340" y="313" text-anchor="middle" font-size="11" font-weight="700" fill="#f78166" >520 护栏拦截?</text>
+  <path d="M396 310 L470 310 L470 300 L520 300" stroke="#f78166" stroke-width="2" fill="none" marker-end="url(#arD)"/>
+  <text x="478" y="290" font-size="10" fill="#f78166" font-weight="600">YES</text>
+
+  <!-- 4 policy engine -->
+  <path d="M340 330 L340 362" stroke="#8b949e" stroke-width="2" fill="none" marker-end="url(#ar)"/>
+  <rect x="230" y="366" width="220" height="46" rx="10" fill="#7c3aed" filter="url(#sh)"/>
+  <text x="340" y="388" text-anchor="middle" font-size="12" font-weight="800" fill="white">PolicyEngine.evaluate()</text>
+  <text x="340" y="404" text-anchor="middle" font-size="9.5" fill="rgba(255,255,255,0.9)">DENY优先 · require 为豁免条件</text>
+
+  <!-- policy -> DENY / ALLOW -->
+  <path d="M340 412 L340 444" stroke="#8b949e" stroke-width="2" fill="none" marker-end="url(#ar)"/>
+  <polygon points="340,448 286,488 394,488" fill="#1c2128" stroke="#a78bfa" stroke-width="1.5"/>
+  <text x="340" y="471" text-anchor="middle" font-size="11" font-weight="700" fill="#c4b5fd">命中 deny 规则</text>
+  <text x="340" y="476" text-anchor="middle" font-size="9" fill="#8b949e">(无豁免)</text>
+  <path d="M340 488 L340 510" stroke="#8b949e" stroke-width="2" fill="none" marker-end="url(#ar)"/>
+
+  <!-- Outcomes -->
+  <rect x="500" y="280" width="160" height="40" rx="10" fill="#f78166" filter="url(#sh)"/>
+  <text x="580" y="305" text-anchor="middle" font-size="12" font-weight="800" fill="white">⛔ DENY</text>
+
+  <rect x="500" y="498" width="160" height="40" rx="10" fill="#7be0a0" filter="url(#sh)"/>
+  <text x="580" y="523" text-anchor="middle" font-size="12" font-weight="800" fill="#1a1a2e">✅ ALLOW</text>
+
+  <!-- DENY edge from policy diamond -->
+  <path d="M394 468 L500 468 L500 300 L500 300" stroke="#f78166" stroke-width="2" fill="none" marker-end="url(#arD)"/>
+  <path d="M394 468 L500 468" stroke="#f78166" stroke-width="2" fill="none" marker-end="url(#arD)"/>
+  <path d="M500 468 L500 320" stroke="#f78166" stroke-width="2" fill="none" marker-end="url(#arD)"/>
+
+  <!-- ALLOW edge from bottom -->
+  <path d="M340 510 L340 540 L500 540 L500 538" stroke="#7be0a0" stroke-width="2" fill="none" marker-end="url(#arG)"/>
+
+  <!-- audit note -->
+  <text x="60" y="540" font-size="10" fill="#8b949e" font-style="italic">每条结果（含 DENY/ALLOW）均 hash 上链 → audit_chain.log (verify() 可检测篡改)</text>
+</svg>
+
+  <p class="figdesc">所有写操作必经 Governance.evaluate()：急停判定 → 身份归因(HMAC) → 520 护栏 → 策略校验 → 写入防篡改审计链。</p>
+</figure>
+<figure class="figure" id="fig-06">
+  <figcaption class="figcap"><span class="fignum">图 06</span> · 防篡改审计链</figcaption>
+  <svg viewBox="0 0 680 360" xmlns="http://www.w3.org/2000/svg" style="font-family: system-ui, sans-serif;">
+  <defs>
+    <filter id="sh" x="-4%" y="-4%" width="108%" height="116%"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.18"/></filter>
+    <marker id="ah" markerWidth="9" markerHeight="9" refX="4" refY="4.5"><path d="M0,0 L9,4.5 L0,9 Z" fill="#7be0a0"/></marker>
+  </defs>
+
+  <rect width="680" height="360" rx="14" fill="#0d1117"/>
+
+  <text x="340" y="36" text-anchor="middle" font-size="18" font-weight="800" fill="#f0f0f0">🔗  Tamper-evident Audit Chain</text>
+  <text x="340" y="58" text-anchor="middle" font-size="11" fill="#8b949e" font-style="italic">每条记录 hash(prev_hash + payload) ；改任意一行 → verify() 判定断裂</text>
+
+  <!-- GENESIS -->
+  <rect x="30" y="90" width="150" height="150" rx="10" fill="#161b22" stroke="#30363d" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="105" y="116" text-anchor="middle" font-size="11" font-weight="800" fill="#8b949e">GENESIS</text>
+  <text x="105" y="140" text-anchor="middle" font-size="9" fill="#8b949e">prev =</text>
+  <text x="105" y="156" text-anchor="middle" font-size="9" fill="#58a6ff" font-family="monospace">"0"*64</text>
+  <text x="105" y="180" text-anchor="middle" font-size="9" fill="#8b949e">entry =</text>
+  <text x="105" y="196" text-anchor="middle" font-size="9" fill="#c9d1d9" font-family="monospace">{...}</text>
+  <text x="105" y="222" text-anchor="middle" font-size="9" fill="#8b949e">hash =</text>
+  <text x="105" y="238" text-anchor="middle" font-size="8" fill="#7be0a0" font-family="monospace">sha256(...)</text>
+
+  <!-- Block i -->
+  <rect x="265" y="90" width="150" height="150" rx="10" fill="#161b22" stroke="#7c3aed" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="340" y="116" text-anchor="middle" font-size="11" font-weight="800" fill="#c4b5fd">RECORD[i]</text>
+  <text x="340" y="140" text-anchor="middle" font-size="9" fill="#8b949e">prev =</text>
+  <text x="340" y="156" text-anchor="middle" font-size="8" fill="#58a6ff" font-family="monospace">hash[i-1]</text>
+  <text x="340" y="180" text-anchor="middle" font-size="9" fill="#8b949e">entry =</text>
+  <text x="340" y="196" text-anchor="middle" font-size="8" fill="#c9d1d9" font-family="monospace">{action,agent}</text>
+  <text x="340" y="214" text-anchor="middle" font-size="8" fill="#c9d1d9" font-family="monospace">{resource,...}</text>
+  <text x="340" y="238" text-anchor="middle" font-size="9" fill="#8b949e">hash =</text>
+  <text x="340" y="254" text-anchor="middle" font-size="8" fill="#7be0a0" font-family="monospace">sha256(prev|entry)</text>
+
+  <!-- Block i+1 -->
+  <rect x="500" y="90" width="150" height="150" rx="10" fill="#161b22" stroke="#7c3aed" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="575" y="116" text-anchor="middle" font-size="11" font-weight="800" fill="#c4b5fd">RECORD[i+1]</text>
+  <text x="575" y="140" text-anchor="middle" font-size="9" fill="#8b949e">prev =</text>
+  <text x="575" y="156" text-anchor="middle" font-size="8" fill="#58a6ff" font-family="monospace">hash[i]</text>
+  <text x="575" y="180" text-anchor="middle" font-size="9" fill="#8b949e">entry =</text>
+  <text x="575" y="196" text-anchor="middle" font-size="8" fill="#c9d1d9" font-family="monospace">{action,agent}</text>
+  <text x="575" y="214" text-anchor="middle" font-size="8" fill="#c9d1d9" font-family="monospace">{resource,...}</text>
+  <text x="575" y="238" text-anchor="middle" font-size="9" fill="#8b949e">hash =</text>
+  <text x="575" y="254" text-anchor="middle" font-size="8" fill="#7be0a0" font-family="monospace">sha256(prev|entry)</text>
+
+  <!-- arrows -->
+  <path d="M180 165 L263 165" stroke="#7be0a0" stroke-width="2.5" fill="none" marker-end="url(#ah)"/>
+  <path d="M415 165 L498 165" stroke="#7be0a0" stroke-width="2.5" fill="none" marker-end="url(#ah)"/>
+
+  <!-- verify box -->
+  <rect x="30" y="270" width="620" height="64" rx="10" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+  <text x="46" y="294" font-size="12" font-weight="700" fill="#7be0a0">🔍  verify()：从 GENESIS 重算每条 hash 并与存储值比对</text>
+  <text x="46" y="314" font-size="10" fill="#8b949e">• 全部一致 → (True, None)   ✅ 审计链完整</text>
+  <text x="46" y="328" font-size="10" fill="#f78166">• 任一行被篡改 → (False, broken_index)   ⛔ 防篡改生效（自测已证明：篡改中行后 verify=False）</text>
+</svg>
+
+  <p class="figdesc">每条写操作以 HMAC 链式背书，前序哈希纳入后序，任何篡改即可被侦测。</p>
+</figure>
+<figure class="figure" id="fig-07">
+  <figcaption class="figcap"><span class="fignum">图 07</span> · 共享状态</figcaption>
+  <svg viewBox="0 0 680 440" xmlns="http://www.w3.org/2000/svg" style="font-family: system-ui, sans-serif;">
+  <defs>
+    <filter id="sh" x="-4%" y="-4%" width="108%" height="116%"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.18"/></filter>
+    <marker id="as" markerWidth="8" markerHeight="8" refX="4" refY="4.5"><path d="M0,0 L8,4.5 L0,9 Z" fill="#7be0a0"/></marker>
+  </defs>
+
+  <rect width="680" height="440" rx="14" fill="#0d1117"/>
+
+  <text x="340" y="36" text-anchor="middle" font-size="18" font-weight="800" fill="#f0f0f0">🌐  Shared State Topology</text>
+  <text x="340" y="58" text-anchor="middle" font-size="11" fill="#8b949e" font-style="italic">D:/Agent集群共享/ — 所有 agent 读写同一本账；v5.3 治理状态在此落盘</text>
+
+  <!-- Agents -->
+  <rect x="30" y="86" width="120" height="44" rx="10" fill="#1c2128" stroke="#58a6ff" stroke-width="1.2" filter="url(#sh)"/>
+  <text x="90" y="113" text-anchor="middle" font-size="11" font-weight="700" fill="#58a6ff">🤖 workbuddy</text>
+  <rect x="30" y="140" width="120" height="44" rx="10" fill="#1c2128" stroke="#7be0a0" stroke-width="1.2" filter="url(#sh)"/>
+  <text x="90" y="167" text-anchor="middle" font-size="11" font-weight="700" fill="#7be0a0">🤖 claude</text>
+  <rect x="30" y="194" width="120" height="44" rx="10" fill="#1c2128" stroke="#f0c040" stroke-width="1.2" filter="url(#sh)"/>
+  <text x="90" y="221" text-anchor="middle" font-size="11" font-weight="700" fill="#f0c040">🤖 cursor</text>
+
+  <!-- arrows to shared -->
+  <path d="M150 108 L300 200" stroke="#7be0a0" stroke-width="1.5" fill="none" marker-end="url(#as)" opacity="0.7"/>
+  <path d="M150 162 L300 210" stroke="#7be0a0" stroke-width="1.5" fill="none" marker-end="url(#as)" opacity="0.7"/>
+  <path d="M150 216 L300 220" stroke="#7be0a0" stroke-width="1.5" fill="none" marker-end="url(#as)" opacity="0.7"/>
+
+  <!-- Shared root -->
+  <rect x="300" y="80" width="350" height="300" rx="12" fill="#0d1a16" stroke="#7be0a0" stroke-width="2" filter="url(#sh)"/>
+  <text x="320" y="104" font-size="13" font-weight="800" fill="#7be0a0">📁  D:/Agent集群共享/</text>
+
+  <!-- governance (highlight) -->
+  <rect x="320" y="116" width="310" height="78" rx="8" fill="#1a1030" stroke="#a78bfa" stroke-width="1.5"/>
+  <text x="336" y="138" font-size="12" font-weight="800" fill="#c4b5fd">🛡️  governance/  ★ v5.3</text>
+  <text x="336" y="158" font-size="10" fill="#c9d1d9">• kill_switch.json  (🛑 全局急停)</text>
+  <text x="336" y="176" font-size="10" fill="#c9d1d9">• audit_chain.log  (🔗 防篡改审计链)</text>
+  <text x="336" y="192" font-size="9" fill="#8b949e" font-style="italic">governance.py 状态目录（共享优先）</text>
+
+  <rect x="320" y="204" width="310" height="26" rx="6" fill="#161b22"/>
+  <text x="336" y="221" font-size="10" fill="#c9d1d9">📨  dispatch_queue.json  (路由落执行)</text>
+
+  <rect x="320" y="236" width="310" height="26" rx="6" fill="#161b22"/>
+  <text x="336" y="253" font-size="10" fill="#c9d1d9">🗄️  .memory_ledger.db  (共享账本)</text>
+
+  <rect x="320" y="268" width="310" height="26" rx="6" fill="#161b22"/>
+  <text x="336" y="285" font-size="10" fill="#c9d1d9">📜  铁律/review_findings.md  (BLOCK 写回)</text>
+
+  <rect x="320" y="300" width="310" height="26" rx="6" fill="#161b22"/>
+  <text x="336" y="317" font-size="10" fill="#c9d1d9">🔄  handover_state.json  (宰相交接)</text>
+
+  <rect x="320" y="332" width="310" height="26" rx="6" fill="#161b22"/>
+  <text x="336" y="349" font-size="10" fill="#c9d1d9">🪪  Agent身份/  (身份卡)</text>
+
+  <text x="340" y="408" text-anchor="middle" font-size="10" fill="#8b949e" font-style="italic">本地回退：共享目录不存在时退到 ./.kaf_governance（仍可离线运行）</text>
+</svg>
+
+  <p class="figdesc">集群共享层承载协调状态：coordinator.json（PM 与成员）、progress/YYYY-MM-DD.md（进度日志）、cognition/（v5.4 反模式与经验库）。</p>
+</figure>
+<figure class="figure" id="fig-08">
+  <figcaption class="figcap"><span class="fignum">图 08</span> · 国王解析</figcaption>
+  <svg viewBox="0 0 680 480" xmlns="http://www.w3.org/2000/svg" style="font-family: system-ui, sans-serif;">
+  <defs>
+    <filter id="sh" x="-4%" y="-4%" width="108%" height="116%"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.18"/></filter>
+    <marker id="rk" markerWidth="9" markerHeight="9" refX="4" refY="4.5"><path d="M0,0 L9,4.5 L0,9 Z" fill="#8b949e"/></marker>
+    <marker id="rY" markerWidth="9" markerHeight="9" refX="4" refY="4.5"><path d="M0,0 L9,4.5 L0,9 Z" fill="#7be0a0"/></marker>
+  </defs>
+
+  <rect width="680" height="480" rx="14" fill="#0d1117"/>
+
+  <text x="340" y="36" text-anchor="middle" font-size="18" font-weight="800" fill="#f0f0f0">👑  King Resolution  (v5.3 · Deployer = King)</text>
+  <text x="340" y="58" text-anchor="middle" font-size="11" fill="#8b949e" font-style="italic">kaf/king.py:resolve_king() — 国王不再硬编码，而是当前部署者/使用者</text>
+
+  <!-- start -->
+  <rect x="290" y="74" width="160" height="38" rx="19" fill="#21262d" stroke="#f0c040" stroke-width="1.5"/>
+  <text x="370" y="98" text-anchor="middle" font-size="12" font-weight="700" fill="#f0c040">resolve_king()</text>
+
+  <!-- D1 env -->
+  <path d="M370 112 L370 132" stroke="#8b949e" stroke-width="2" fill="none" marker-end="url(#rk)"/>
+  <polygon points="370,136 308,176 432,176" fill="#1c2128" stroke="#f0c040" stroke-width="1.5"/>
+  <text x="370" y="159" text-anchor="middle" font-size="11" font-weight="700" fill="#f0c040">KAF_KING 已设?</text>
+  <text x="370" y="173" text-anchor="middle" font-size="9" fill="#8b949e">环境变量</text>
+  <path d="M432 156 L520 156 L520 250 L560 250" stroke="#7be0a0" stroke-width="2" fill="none" marker-end="url(#rY)"/>
+  <text x="470" y="148" font-size="10" fill="#7be0a0" font-weight="600">YES</text>
+
+  <!-- D2 config -->
+  <path d="M370 176 L370 206" stroke="#8b949e" stroke-width="2" fill="none" marker-end="url(#rk)"/>
+  <polygon points="370,210 308,250 432,250" fill="#1c2128" stroke="#58a6ff" stroke-width="1.5"/>
+  <text x="370" y="233" text-anchor="middle" font-size="11" font-weight="700" fill="#58a6ff">kaf_config.json</text>
+  <text x="370" y="247" text-anchor="middle" font-size="9" fill="#8b949e">含 king 字段?</text>
+  <path d="M432 230 L520 230 L520 250 L560 250" stroke="#7be0a0" stroke-width="2" fill="none" marker-end="url(#rY)"/>
+  <text x="470" y="222" font-size="10" fill="#7be0a0" font-weight="600">YES</text>
+
+  <!-- D3 author -->
+  <path d="M370 250 L370 280" stroke="#8b949e" stroke-width="2" fill="none" marker-end="url(#rk)"/>
+  <polygon points="370,284 308,324 432,324" fill="#1c2128" stroke="#a78bfa" stroke-width="1.5"/>
+  <text x="370" y="307" text-anchor="middle" font-size="11" font-weight="700" fill="#a78bfa">本地作者环境?</text>
+  <text x="370" y="321" text-anchor="middle" font-size="9" fill="#8b949e">USERPROFILE含山禾/USER=山禾</text>
+  <path d="M432 304 L520 304 L520 358 L560 358" stroke="#7be0a0" stroke-width="2" fill="none" marker-end="url(#rY)"/>
+  <text x="470" y="296" font-size="10" fill="#7be0a0" font-weight="600">YES</text>
+
+  <!-- D4 os user -->
+  <path d="M370 324 L370 354" stroke="#8b949e" stroke-width="2" fill="none" marker-end="url(#rk)"/>
+  <rect x="280" y="358" width="180" height="40" rx="10" fill="#1c2128" stroke="#f78166" stroke-width="1.5"/>
+  <text x="370" y="383" text-anchor="middle" font-size="11" font-weight="700" fill="#f78166">当前 OS 用户</text>
+  <text x="370" y="396" text-anchor="middle" font-size="9" fill="#8b949e">USERNAME / USER / operator</text>
+  <path d="M280 378 L200 378 L200 358 L160 358" stroke="#7be0a0" stroke-width="2" fill="none" marker-end="url(#rY)"/>
+
+  <!-- Outcomes -->
+  <rect x="540" y="226" width="120" height="48" rx="10" fill="#7be0a0" filter="url(#sh)"/>
+  <text x="600" y="246" text-anchor="middle" font-size="12" font-weight="800" fill="#1a1a2e">= KAF_KING</text>
+  <text x="600" y="264" text-anchor="middle" font-size="9" fill="#1a1a2e">显式覆盖</text>
+
+  <rect x="540" y="234" width="0" height="0"/>
+  <rect x="540" y="226" width="120" height="48" rx="10" fill="#7be0a0" filter="url(#sh)"/>
+  <text x="600" y="246" text-anchor="middle" font-size="12" font-weight="800" fill="#1a1a2e">= config.king</text>
+  <text x="600" y="264" text-anchor="middle" font-size="9" fill="#1a1a2e">部署者指定</text>
+
+  <rect x="120" y="334" width="120" height="48" rx="10" fill="#a78bfa" filter="url(#sh)"/>
+  <text x="180" y="354" text-anchor="middle" font-size="12" font-weight="800" fill="white">= 山禾</text>
+  <text x="180" y="372" text-anchor="middle" font-size="9" fill="#ede9fe">本地作者默认</text>
+
+  <rect x="120" y="342" width="0" height="0"/>
+  <rect x="120" y="334" width="120" height="48" rx="10" fill="#a78bfa" filter="url(#sh)"/>
+  <text x="180" y="354" text-anchor="middle" font-size="12" font-weight="800" fill="white">= OS user</text>
+  <text x="180" y="372" text-anchor="middle" font-size="9" fill="#ede9fe">远程新手默认</text>
+
+  <!-- bottom summary -->
+  <rect x="30" y="416" width="620" height="50" rx="10" fill="#161b22" stroke="#f0c040" stroke-width="1"/>
+  <text x="46" y="438" font-size="11" font-weight="700" fill="#f0c040">📌 原则：国王 = 使用者。本地山禾当然是国王；远程复制后"你"就是国王。</text>
+  <text x="46" y="456" font-size="10" fill="#8b949e">自检：python king.py  →  本机打印"山禾"，未配置环境回退当前 OS 用户。</text>
+</svg>
+
+  <p class="figdesc">King = Deployer：解析顺序 KAF_KING 环境变量 > kaf_config.json 的 king > 本地作者环境变量 > 当前 OS 用户；框架不硬编码任何所有者。</p>
+</figure>
+<figure class="figure" id="fig-09">
+  <figcaption class="figcap"><span class="fignum">图 09</span> · 进智脊柱对照（问题诊断）</figcaption>
+  <svg style="max-width:100%;height:auto;display:block;" viewBox="0 0 680 444" role="img" xmlns="http://www.w3.org/2000/svg">
+  <title>脊柱对照：防错已强，进智为空</title>
+  <desc>KAF 5.3 治理/防错层齐备；"可进化"实为只写不读的坟场；进智脊柱五零件全缺</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <style>
+      .th{font-family:var(--font-sans,sans-serif);font-size:16px;font-weight:600;fill:#2C2C2A}
+      .ts{font-family:var(--font-sans,sans-serif);font-size:12px;font-weight:400;fill:#5F5E5A}
+      .cap{font-family:var(--font-sans,sans-serif);font-size:12.5px;font-weight:500;fill:#2C2C2A}
+    </style>
+  </defs>
+
+  <text class="th" x="40" y="34">脊柱对照 · 防错已强，进智为空</text>
+  <text class="ts" x="40" y="56">KAF 5.3 治理层齐备；"可进化"=skill 自动封装=只写不读=坟场</text>
+
+  <rect x="40" y="86" width="290" height="42" rx="8" fill="#EAF3DE" stroke="#3B6D11" stroke-width="0.8"/>
+  <text class="th" x="185" y="112" text-anchor="middle">防错脊柱 · 已强</text>
+
+  <rect x="350" y="86" width="290" height="42" rx="8" fill="#FCEBEB" stroke="#A32D2D" stroke-width="0.8"/>
+  <text class="th" x="495" y="112" text-anchor="middle">进智脊柱 · 空</text>
+
+  <text x="340" y="112" text-anchor="middle" font-size="13" font-weight="700" fill="#5F5E5A">VS</text>
+
+  <!-- 左：防错已强 -->
+  <g>
+    <rect x="40" y="146" width="290" height="38" rx="7" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+    <text class="cap" x="56" y="170">520 护栏 / 可恢复</text>
+    <text x="314" y="170" text-anchor="end" font-size="15" font-weight="700" fill="#3B6D11">✓</text>
+  </g>
+  <g>
+    <rect x="40" y="190" width="290" height="38" rx="7" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+    <text class="cap" x="56" y="214">kill-switch 熔断</text>
+    <text x="314" y="214" text-anchor="end" font-size="15" font-weight="700" fill="#3B6D11">✓</text>
+  </g>
+  <g>
+    <rect x="40" y="234" width="290" height="38" rx="7" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+    <text class="cap" x="56" y="258">防篡改审计链</text>
+    <text x="314" y="258" text-anchor="end" font-size="15" font-weight="700" fill="#3B6D11">✓</text>
+  </g>
+  <g>
+    <rect x="40" y="278" width="290" height="38" rx="7" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+    <text class="cap" x="56" y="302">agent HMAC 背书</text>
+    <text x="314" y="302" text-anchor="end" font-size="15" font-weight="700" fill="#3B6D11">✓</text>
+  </g>
+  <g>
+    <rect x="40" y="322" width="290" height="38" rx="7" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+    <text class="cap" x="56" y="346">记忆隔离（红墙）</text>
+    <text x="314" y="346" text-anchor="end" font-size="15" font-weight="700" fill="#3B6D11">✓</text>
+  </g>
+
+  <!-- 右：进智为空 -->
+  <g>
+    <rect x="350" y="146" width="290" height="38" rx="7" fill="#FCEBEB" stroke="#A32D2D" stroke-width="0.5"/>
+    <text class="cap" x="366" y="170" fill="#7A2222">① 反模式库 Anti-pattern</text>
+    <text x="624" y="170" text-anchor="end" font-size="15" font-weight="700" fill="#A32D2D">✗</text>
+  </g>
+  <g>
+    <rect x="350" y="190" width="290" height="38" rx="7" fill="#FCEBEB" stroke="#A32D2D" stroke-width="0.5"/>
+    <text class="cap" x="366" y="214" fill="#7A2222">② 检索注入 Retrieval</text>
+    <text x="624" y="214" text-anchor="end" font-size="15" font-weight="700" fill="#A32D2D">✗</text>
+  </g>
+  <g>
+    <rect x="350" y="234" width="290" height="38" rx="7" fill="#FCEBEB" stroke="#A32D2D" stroke-width="0.5"/>
+    <text class="cap" x="366" y="258" fill="#7A2222">③ 经验蒸馏（置信度）</text>
+    <text x="624" y="258" text-anchor="end" font-size="15" font-weight="700" fill="#A32D2D">✗</text>
+  </g>
+  <g>
+    <rect x="350" y="278" width="290" height="38" rx="7" fill="#FCEBEB" stroke="#A32D2D" stroke-width="0.5"/>
+    <text class="cap" x="366" y="302" fill="#7A2222">④ 决策校准引擎</text>
+    <text x="624" y="302" text-anchor="end" font-size="15" font-weight="700" fill="#A32D2D">✗</text>
+  </g>
+  <g>
+    <rect x="350" y="322" width="290" height="38" rx="7" fill="#FCEBEB" stroke="#A32D2D" stroke-width="0.5"/>
+    <text class="cap" x="366" y="346" fill="#7A2222">⑤ 元认知门控 deliberate()</text>
+    <text x="624" y="346" text-anchor="end" font-size="15" font-weight="700" fill="#A32D2D">✗</text>
+  </g>
+
+  <rect x="40" y="378" width="600" height="46" rx="8" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.8"/>
+  <text class="cap" x="340" y="400" text-anchor="middle" fill="#854F0B">记忆不断档，但同类错误（一刀切/数字反复/标题 bug）重复 4+ 次 → 缺"智慧"层</text>
+
+  <line x1="340" y1="128" x2="340" y2="144" stroke="#5F5E5A" stroke-width="1.2" marker-end="url(#arrow)"/>
+</svg>
+
+  <p class="figdesc">v5.3 治理层（防错）全 ✓，但"可进化"实为只写不读的坟场——进智五零件全 ✗；同一类错误仍重复发生（实证：Claw 会话清理事件 8f6d42dc）。</p>
+</figure>
+<figure class="figure" id="fig-10">
+  <figcaption class="figcap"><span class="fignum">图 10</span> · 进智数据流</figcaption>
+  <svg style="max-width:100%;height:auto;display:block;" viewBox="0 0 680 500" role="img" xmlns="http://www.w3.org/2000/svg">
+  <title>进智脊柱五零件数据流</title>
+  <desc>任务开始→检索注入(读反模式库+经验库)→决策(校准引擎比对)→deliberate()门控→执行→经验蒸馏(写经验库)→回环</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <style>
+      .th{font-family:var(--font-sans,sans-serif);font-size:16px;font-weight:600;fill:#2C2C2A}
+      .ts{font-family:var(--font-sans,sans-serif);font-size:12px;font-weight:400;fill:#5F5E5A}
+      .cap{font-family:var(--font-sans,sans-serif);font-size:12.5px;font-weight:500;fill:#2C2C2A}
+      .lbl{font-family:var(--font-sans,sans-serif);font-size:11px;font-weight:600}
+    </style>
+  </defs>
+
+  <text class="th" x="40" y="34">进智脊柱 · 五零件数据流</text>
+  <text class="ts" x="40" y="56">检索注入把历史经验拉进上下文；蒸馏把新经验写回；deliberate() 在高利害动作前刹车</text>
+
+  <!-- 侧存：反模式库 -->
+  <rect x="30" y="120" width="175" height="64" rx="8" fill="#FCEBEB" stroke="#A32D2D" stroke-width="0.6"/>
+  <text class="cap" x="117" y="146" text-anchor="middle" fill="#7A2222">① 反模式库</text>
+  <text class="ts" x="117" y="166" text-anchor="middle">共享层 · 只读</text>
+
+  <!-- 侧存：经验库 -->
+  <rect x="475" y="300" width="175" height="64" rx="8" fill="#EAF3DE" stroke="#3B6D11" stroke-width="0.6"/>
+  <text class="cap" x="562" y="326" text-anchor="middle" fill="#2E5A0D">经验库</text>
+  <text class="ts" x="562" y="346" text-anchor="middle">蒸馏产物 · 带置信度</text>
+
+  <!-- 侧：决策校准引擎 -->
+  <rect x="475" y="150" width="175" height="64" rx="8" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.6"/>
+  <text class="cap" x="562" y="176" text-anchor="middle" fill="#854F0B">④ 决策校准引擎</text>
+  <text class="ts" x="562" y="196" text-anchor="middle">比对历史经验</text>
+
+  <!-- 主管道 x=240 w=170 h=46 -->
+  <g>
+    <rect x="240" y="24" width="170" height="46" rx="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+    <text class="cap" x="325" y="52" text-anchor="middle">任务开始</text>
+  </g>
+  <g>
+    <rect x="240" y="96" width="170" height="46" rx="8" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.6"/>
+    <text class="cap" x="325" y="124" text-anchor="middle">② 检索注入</text>
+  </g>
+  <g>
+    <rect x="240" y="168" width="170" height="46" rx="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+    <text class="cap" x="325" y="196" text-anchor="middle">决策</text>
+  </g>
+  <g>
+    <rect x="240" y="240" width="170" height="46" rx="8" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.6"/>
+    <text class="cap" x="325" y="268" text-anchor="middle">⑤ deliberate() 门控</text>
+  </g>
+  <g>
+    <rect x="240" y="312" width="170" height="46" rx="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+    <text class="cap" x="325" y="340" text-anchor="middle">执行</text>
+  </g>
+  <g>
+    <rect x="240" y="384" width="170" height="46" rx="8" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.6"/>
+    <text class="cap" x="325" y="412" text-anchor="middle">③ 经验蒸馏（置信度）</text>
+  </g>
+  <g>
+    <rect x="240" y="448" width="170" height="38" rx="8" fill="#EAF3DE" stroke="#3B6D11" stroke-width="0.6"/>
+    <text class="cap" x="325" y="471" text-anchor="middle">回写经验库</text>
+  </g>
+
+  <!-- 竖向管道箭头 -->
+  <line x1="325" y1="70" x2="325" y2="94" stroke="#5F5E5A" stroke-width="1.4" marker-end="url(#arrow)"/>
+  <line x1="325" y1="142" x2="325" y2="166" stroke="#5F5E5A" stroke-width="1.4" marker-end="url(#arrow)"/>
+  <line x1="325" y1="214" x2="325" y2="238" stroke="#5F5E5A" stroke-width="1.4" marker-end="url(#arrow)"/>
+  <line x1="325" y1="286" x2="325" y2="310" stroke="#5F5E5A" stroke-width="1.4" marker-end="url(#arrow)"/>
+  <line x1="325" y1="358" x2="325" y2="382" stroke="#5F5E5A" stroke-width="1.4" marker-end="url(#arrow)"/>
+  <line x1="325" y1="430" x2="325" y2="446" stroke="#5F5E5A" stroke-width="1.4" marker-end="url(#arrow)"/>
+
+  <!-- ① -> ② 读 -->
+  <line x1="205" y1="152" x2="238" y2="119" stroke="#A32D2D" stroke-width="1.4" marker-end="url(#arrow)"/>
+  <text class="lbl" x="205" y="138" fill="#A32D2D">读</text>
+
+  <!-- 决策 -> ④ 比对 -->
+  <line x1="410" y1="191" x2="473" y2="182" stroke="#854F0B" stroke-width="1.4" marker-end="url(#arrow)"/>
+  <text class="lbl" x="412" y="178" fill="#854F0B">比对</text>
+  <line x1="473" y1="200" x2="410" y2="206" stroke="#854F0B" stroke-width="0.8" stroke-dasharray="3 3" marker-end="url(#arrow)"/>
+
+  <!-- ③ -> 经验库 写 -->
+  <line x1="410" y1="407" x2="473" y2="332" stroke="#3B6D11" stroke-width="1.4" marker-end="url(#arrow)"/>
+  <text class="lbl" x="430" y="384" fill="#3B6D11">写</text>
+
+  <text class="ts" x="340" y="492" text-anchor="middle">回环：经验库 → 下次检索注入，误差逐轮收敛</text>
+</svg>
+
+  <p class="figdesc">任务起点②检索注入读取①反模式库；决策经④校准引擎；高利害动作过⑤deliberate() 门控；收尾③经验蒸馏回写经验库，形成回环。</p>
+</figure>
+<figure class="figure" id="fig-11">
+  <figcaption class="figcap"><span class="fignum">图 11</span> · 落地路线图</figcaption>
+  <svg style="max-width:100%;height:auto;display:block;" viewBox="0 0 680 340" role="img" xmlns="http://www.w3.org/2000/svg">
+  <title>进智脊柱落地节奏 v5.3.1 / v5.4</title>
+  <desc>地基 v5.3.1 做①②⑤（低成本高杠杆）；闭环 v5.4 做③④（需数据沉淀）；宪法加 cognition 节</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <style>
+      .th{font-family:var(--font-sans,sans-serif);font-size:16px;font-weight:600;fill:#2C2C2A}
+      .ts{font-family:var(--font-sans,sans-serif);font-size:12px;font-weight:400;fill:#5F5E5A}
+      .cap{font-family:var(--font-sans,sans-serif);font-size:12.5px;font-weight:500;fill:#2C2C2A}
+      .big{font-family:var(--font-sans,sans-serif);font-size:22px;font-weight:700}
+    </style>
+  </defs>
+
+  <text class="th" x="40" y="34">落地节奏 · 地基先行，闭环靠数据</text>
+  <text class="ts" x="40" y="56">宪法新增 cognition 节（v5.3.1 起生效）</text>
+
+  <!-- v5.3 现状 -->
+  <rect x="30" y="90" width="180" height="150" rx="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.6"/>
+  <text class="cap" x="120" y="116" text-anchor="middle">v5.3 现状</text>
+  <text class="big" x="120" y="150" text-anchor="middle" fill="#5F5E5A">✓ / ✗</text>
+  <text class="ts" x="120" y="176" text-anchor="middle">防错强</text>
+  <text class="ts" x="120" y="196" text-anchor="middle">进智空</text>
+  <text class="ts" x="120" y="218" text-anchor="middle">治理层齐备</text>
+
+  <line x1="212" y1="165" x2="246" y2="165" stroke="#5F5E5A" stroke-width="1.6" marker-end="url(#arrow)"/>
+
+  <!-- v5.3.1 地基 -->
+  <rect x="250" y="64" width="185" height="200" rx="8" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.7"/>
+  <text class="cap" x="342" y="90" text-anchor="middle" fill="#534AB7">v5.3.1 地基</text>
+  <text class="big" x="342" y="124" text-anchor="middle" fill="#534AB7">①②⑤</text>
+  <text class="cap" x="342" y="156" text-anchor="middle">反模式库</text>
+  <text class="cap" x="342" y="180" text-anchor="middle">检索注入</text>
+  <text class="cap" x="342" y="204" text-anchor="middle">deliberate() 门控</text>
+  <text class="ts" x="342" y="238" text-anchor="middle" fill="#854F0B">低成本 · 高杠杆</text>
+
+  <line x1="437" y1="164" x2="466" y2="164" stroke="#5F5E5A" stroke-width="1.6" marker-end="url(#arrow)"/>
+
+  <!-- v5.4 闭环 -->
+  <rect x="470" y="64" width="185" height="200" rx="8" fill="#EAF3DE" stroke="#3B6D11" stroke-width="0.7"/>
+  <text class="cap" x="562" y="88" text-anchor="middle" fill="#3B6D11">v5.4 闭环自修</text>
+  <text class="big" x="562" y="120" text-anchor="middle" fill="#3B6D11">③④+循环</text>
+  <text class="cap" x="562" y="150" text-anchor="middle">对齐检验</text>
+  <text class="cap" x="562" y="174" text-anchor="middle">后台修订循环</text>
+  <text class="ts" x="562" y="210" text-anchor="middle" fill="#3B6D11">对齐达标才交付</text>
+  <text class="ts" x="562" y="234" text-anchor="middle" fill="#3B6D11">阈值分档·模糊国王兜底</text>
+
+  <!-- 底部时间轴 -->
+  <line x1="40" y1="300" x2="640" y2="300" stroke="#5F5E5A" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text class="ts" x="340" y="292" text-anchor="middle">迭代顺序：先建反模式地基，再靠真实经验跑通闭环</text>
+</svg>
+
+  <p class="figdesc">v5.3.1 打地基（①②⑤：反模式种子 / 检索注入 / deliberate 钩子）；v5.4 做闭环（③④ + Loop Driver：蒸馏 / 校准 / 后台对齐修订循环）。</p>
+</figure>
+<figure class="figure" id="fig-12">
+  <figcaption class="figcap"><span class="fignum">图 12</span> · v5.4 七层架构</figcaption>
+  <svg viewBox="0 0 680 620" xmlns="http://www.w3.org/2000/svg" style="font-family: system-ui, sans-serif;">
+  <defs>
+    <filter id="sh" x="-4%" y="-4%" width="108%" height="116%"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.18"/></filter>
+    <linearGradient id="gA" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#58a6ff"/><stop offset="1" stop-color="#2d6cdf"/></linearGradient>
+    <linearGradient id="gC" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7be0a0"/><stop offset="1" stop-color="#4dc970"/></linearGradient>
+    <linearGradient id="gT" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2dd4bf"/><stop offset="1" stop-color="#0d9488"/></linearGradient>
+    <linearGradient id="gG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a78bfa"/><stop offset="1" stop-color="#7c3aed"/></linearGradient>
+    <linearGradient id="gR" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f78166"/><stop offset="1" stop-color="#d45a3e"/></linearGradient>
+    <linearGradient id="gK" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f0c040"/><stop offset="1" stop-color="#d4a030"/></linearGradient>
+    <linearGradient id="gM" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#79c0ff"/><stop offset="1" stop-color="#388bfd"/></linearGradient>
+  </defs>
+
+  <rect width="680" height="620" rx="14" fill="#0d1117"/>
+
+  <text x="340" y="36" text-anchor="middle" font-size="18" font-weight="800" fill="#f0f0f0">🧠  KAF v5.4 · Layered Architecture</text>
+  <text x="340" y="58" text-anchor="middle" font-size="11" fill="#8b949e" font-style="italic">Cognition Spine (NEW, teal) joins v5.3 governance · King identity dynamic (resolve_king)</text>
+
+  <!-- L1 Platform Adapters -->
+  <rect x="40" y="74" width="600" height="54" rx="10" fill="url(#gA)" filter="url(#sh)"/>
+  <text x="60" y="98" font-size="13" font-weight="800" fill="white">🧩  Platform Adapters</text>
+  <text x="60" y="118" font-size="10" fill="rgba(255,255,255,0.85)">WorkBuddy / Claude / OpenCode / Cursor / Kimi — 5 行代码接入任意平台；dispatch 派发到共享队列</text>
+
+  <!-- L2 Coordinator Protocol -->
+  <rect x="40" y="136" width="600" height="54" rx="10" fill="url(#gC)" filter="url(#sh)"/>
+  <text x="60" y="160" font-size="13" font-weight="800" fill="#1a1a2e">🔄  Coordinator Protocol</text>
+  <text x="60" y="180" font-size="10" fill="rgba(26,26,46,0.85)">宰相轮值 · 3票 vs 1票 · 国王一票否决 · handover_state 交接</text>
+
+  <!-- L3 Cognition Spine (NEW) -->
+  <rect x="40" y="198" width="600" height="54" rx="10" fill="url(#gT)" filter="url(#sh)" stroke="#5eead4" stroke-width="1.5"/>
+  <text x="60" y="222" font-size="13" font-weight="800" fill="#042f2e">🧠  Cognition Spine  ★ v5.4 NEW</text>
+  <text x="60" y="242" font-size="10" fill="rgba(4,47,46,0.9)">反模式库 · 检索注入 · 经验蒸馏(置信度) · 决策校准 · deliberate() 门控 · 闭环自修(Loop Driver)</text>
+  <text x="560" y="220" font-size="9" fill="#042f2e" font-weight="700">与治理层正交</text>
+  <text x="560" y="236" font-size="9" fill="#042f2e" font-weight="700">受 520/kill-switch 约束</text>
+
+  <!-- L4 Governance -->
+  <rect x="40" y="260" width="600" height="54" rx="10" fill="url(#gG)" filter="url(#sh)" stroke="#c4b5fd" stroke-width="1.5"/>
+  <text x="60" y="284" font-size="13" font-weight="800" fill="white">🛡️  Governance Layer  ★ v5.3</text>
+  <text x="60" y="304" font-size="10" fill="rgba(255,255,255,0.9)">策略即代码(policy.json) · 急停(kill-switch) · 防篡改审计链 · Agent 身份归因(HMAC)</text>
+  <text x="560" y="282" font-size="9" fill="#ede9fe" font-weight="700">evaluate(): kill→attest→guard520→policy</text>
+  <text x="560" y="298" font-size="9" fill="#ede9fe" font-weight="700">全程写审计链</text>
+
+  <!-- L5 520 Runtime Guard -->
+  <rect x="40" y="322" width="600" height="54" rx="10" fill="url(#gR)" filter="url(#sh)"/>
+  <text x="60" y="346" font-size="13" font-weight="800" fill="white">⚡  520 Runtime Guard</text>
+  <text x="60" y="366" font-size="10" fill="rgba(255,255,255,0.85)">4 检查点 · 铁律8/9/10 · agent侧门禁 kaf_gate.py</text>
+
+  <!-- L6 Constitution-as-Code -->
+  <rect x="40" y="384" width="600" height="54" rx="10" fill="url(#gK)" filter="url(#sh)"/>
+  <text x="60" y="408" font-size="13" font-weight="800" fill="#1a1a2e">📜  Constitution-as-Code</text>
+  <text x="60" y="428" font-size="10" fill="rgba(26,26,46,0.85)">声明式宪法 JSON · economics_routing/dispatch/review_loop/shared_ledger/governance/cognition · sovereign.king_resolver 动态国王</text>
+
+  <!-- L7 Memory Integrity -->
+  <rect x="40" y="446" width="600" height="54" rx="10" fill="url(#gM)" filter="url(#sh)"/>
+  <text x="60" y="470" font-size="13" font-weight="800" fill="white">🔐  Memory Integrity</text>
+  <text x="60" y="490" font-size="10" fill="rgba(255,255,255,0.85)">SHA-256 指纹 + drift 检测 + protect_write · 隔离墙 strict · 共享账本 .memory_ledger.db · cognition/ 共享经验</text>
+
+  <!-- Action flow arrow -->
+  <rect x="14" y="74" width="20" height="426" rx="6" fill="#21262d" stroke="#30363d"/>
+  <text x="24" y="287" text-anchor="middle" font-size="9" fill="#8b949e" transform="rotate(-90 24 287)">AGENT ACTION ↓</text>
+
+  <!-- King resolution callout -->
+  <rect x="40" y="514" width="600" height="78" rx="10" fill="#161b22" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="60" y="538" font-size="12" font-weight="800" fill="#c4b5fd">👑  King = resolve_king()  (v5.3 动态 · v5.4 维持)</text>
+  <text x="60" y="558" font-size="10" fill="#8b949e">本地作者环境 → 山禾    ｜    远程新手复制 → 当前 OS 用户 / operator</text>
+  <text x="60" y="576" font-size="10" fill="#8b949e">显式覆盖：环境变量 KAF_KING 或 kaf_config.json 的 {"king":"你的名字"}</text>
+</svg>
+
+  <p class="figdesc">在 v5.3 六层之上新增进智脊柱层（Cognition Spine），与治理层正交；进智层受治理层约束（触发 520 护栏 / kill-switch 即中止）。</p>
+</figure>
+<figure class="figure" id="fig-13">
+  <figcaption class="figcap"><span class="fignum">图 13</span> · 进智脊柱全景</figcaption>
+  <svg viewBox="0 0 680 520" xmlns="http://www.w3.org/2000/svg" style="font-family: system-ui, sans-serif;">
+  <defs>
+    <filter id="sh" x="-4%" y="-4%" width="108%" height="116%"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.18"/></filter>
+    <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#8b949e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+    <linearGradient id="gT" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2dd4bf"/><stop offset="1" stop-color="#0d9488"/></linearGradient>
+    <linearGradient id="gG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a78bfa"/><stop offset="1" stop-color="#7c3aed"/></linearGradient>
+  </defs>
+
+  <rect width="680" height="520" rx="14" fill="#0d1117"/>
+
+  <text x="340" y="36" text-anchor="middle" font-size="18" font-weight="800" fill="#f0f0f0">🧠  KAF v5.4 · Cognition Spine 全景</text>
+  <text x="340" y="58" text-anchor="middle" font-size="11" fill="#8b949e" font-style="italic">经验从"只写不读(坟场)"变为"注入→校准→门控→蒸馏→回环"的可运行脊柱</text>
+
+  <!-- 顶部数据流 -->
+  <rect x="34" y="92" width="108" height="50" rx="9" fill="url(#gT)" filter="url(#sh)"/>
+  <text x="88" y="114" text-anchor="middle" font-size="12" font-weight="800" fill="#042f2e">任务开始</text>
+  <text x="88" y="132" text-anchor="middle" font-size="9" fill="#042f2e">②注入</text>
+
+  <rect x="166" y="92" width="108" height="50" rx="9" fill="url(#gT)" filter="url(#sh)"/>
+  <text x="220" y="114" text-anchor="middle" font-size="12" font-weight="800" fill="#042f2e">④ 校准引擎</text>
+  <text x="220" y="132" text-anchor="middle" font-size="9" fill="#042f2e">比对历史</text>
+
+  <rect x="298" y="92" width="108" height="50" rx="9" fill="url(#gT)" filter="url(#sh)"/>
+  <text x="352" y="114" text-anchor="middle" font-size="12" font-weight="800" fill="#042f2e">⑤ deliberate()</text>
+  <text x="352" y="132" text-anchor="middle" font-size="9" fill="#042f2e">门控高利害</text>
+
+  <rect x="430" y="92" width="108" height="50" rx="9" fill="#21262d" stroke="#30363d" filter="url(#sh)"/>
+  <text x="484" y="114" text-anchor="middle" font-size="12" font-weight="800" fill="#e6edf3">执行</text>
+  <text x="484" y="132" text-anchor="middle" font-size="9" fill="#8b949e">落地产出</text>
+
+  <rect x="562" y="92" width="108" height="50" rx="9" fill="url(#gT)" filter="url(#sh)"/>
+  <text x="616" y="114" text-anchor="middle" font-size="12" font-weight="800" fill="#042f2e">③ 蒸馏</text>
+  <text x="616" y="132" text-anchor="middle" font-size="9" fill="#042f2e">带置信度回写</text>
+
+  <!-- 数据流箭头 -->
+  <line x1="142" y1="117" x2="164" y2="117" stroke="#8b949e" stroke-width="1.6" marker-end="url(#ar)"/>
+  <line x1="274" y1="117" x2="296" y2="117" stroke="#8b949e" stroke-width="1.6" marker-end="url(#ar)"/>
+  <line x1="406" y1="117" x2="428" y2="117" stroke="#8b949e" stroke-width="1.6" marker-end="url(#ar)"/>
+  <line x1="538" y1="117" x2="560" y2="117" stroke="#8b949e" stroke-width="1.6" marker-end="url(#ar)"/>
+  <!-- 回环 -->
+  <path d="M616 142 C 616 196, 88 196, 88 142" fill="none" stroke="#2dd4bf" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#ar)"/>
+  <text x="352" y="190" text-anchor="middle" font-size="10" fill="#5eead4" font-style="italic">回环：每轮修订策略喂回经验库，越跑越准</text>
+
+  <!-- 五零件说明卡 -->
+  <g>
+    <rect x="34" y="216" width="125" height="118" rx="9" fill="#161b22" stroke="#0d9488" stroke-width="0.8"/>
+    <text x="96" y="240" text-anchor="middle" font-size="12" font-weight="800" fill="#5eead4">① 反模式库</text>
+    <text x="44" y="262" font-size="9.5" fill="#8b949e">记录"绝对不要做"</text>
+    <text x="44" y="278" font-size="9.5" fill="#8b949e">+ 触发条件</text>
+    <text x="44" y="294" font-size="9.5" fill="#8b949e">+ 正确替代</text>
+    <text x="44" y="310" font-size="9.5" fill="#8b949e">种子: 8f6d42dc</text>
+    <text x="44" y="326" font-size="9.5" fill="#8b949e">(Claw清理事故)</text>
+  </g>
+  <g>
+    <rect x="171" y="216" width="125" height="118" rx="9" fill="#161b22" stroke="#0d9488" stroke-width="0.8"/>
+    <text x="233" y="240" text-anchor="middle" font-size="12" font-weight="800" fill="#5eead4">② 检索注入</text>
+    <text x="181" y="262" font-size="9.5" fill="#8b949e">任务起点主动</text>
+    <text x="181" y="278" font-size="9.5" fill="#8b949e">拉相关反模式</text>
+    <text x="181" y="294" font-size="9.5" fill="#8b949e">+ 高置信经验</text>
+    <text x="181" y="310" font-size="9.5" fill="#8b949e">进上下文</text>
+    <text x="181" y="326" font-size="9.5" fill="#8b949e">(解决只写不读)</text>
+  </g>
+  <g>
+    <rect x="308" y="216" width="125" height="118" rx="9" fill="#161b22" stroke="#0d9488" stroke-width="0.8"/>
+    <text x="370" y="240" text-anchor="middle" font-size="12" font-weight="800" fill="#5eead4">③ 经验蒸馏</text>
+    <text x="318" y="262" font-size="9.5" fill="#8b949e">{context, action,</text>
+    <text x="318" y="278" font-size="9.5" fill="#8b949e"> outcome, conf}</text>
+    <text x="318" y="294" font-size="9.5" fill="#8b949e">置信度累积</text>
+    <text x="318" y="310" font-size="9.5" fill="#8b949e">低置信不注入</text>
+    <text x="318" y="326" font-size="9.5" fill="#8b949e">防噪声污染</text>
+  </g>
+  <g>
+    <rect x="445" y="216" width="125" height="118" rx="9" fill="#161b22" stroke="#0d9488" stroke-width="0.8"/>
+    <text x="507" y="240" text-anchor="middle" font-size="12" font-weight="800" fill="#5eead4">④ 校准引擎</text>
+    <text x="455" y="262" font-size="9.5" fill="#8b949e">相似决策比对</text>
+    <text x="455" y="278" font-size="9.5" fill="#8b949e">历史 outcome/conf</text>
+    <text x="455" y="294" font-size="9.5" fill="#8b949e">标注误校准</text>
+    <text x="455" y="310" font-size="9.5" fill="#8b949e">不再从零推理</text>
+    <text x="455" y="326" font-size="9.5" fill="#8b949e">受治理约束</text>
+  </g>
+  <g>
+    <rect x="582" y="216" width="125" height="118" rx="9" fill="#161b22" stroke="#0d9488" stroke-width="0.8"/>
+    <text x="644" y="240" text-anchor="middle" font-size="12" font-weight="800" fill="#5eead4">⑤ deliberate()</text>
+    <text x="592" y="262" font-size="9.5" fill="#8b949e">高利害前自问</text>
+    <text x="592" y="278" font-size="9.5" fill="#8b949e">"是否重蹈覆辙"</text>
+    <text x="592" y="294" font-size="9.5" fill="#8b949e">命中→正确替代</text>
+    <text x="592" y="310" font-size="9.5" fill="#8b949e">或升国王确认</text>
+    <text x="592" y="326" font-size="9.5" fill="#8b949e">不高于否决权</text>
+  </g>
+
+  <!-- Loop Driver 条 -->
+  <rect x="34" y="356" width="673" height="60" rx="10" fill="#0d9488" filter="url(#sh)"/>
+  <text x="60" y="382" font-size="13" font-weight="800" fill="#042f2e">🔁  Loop Driver 闭环自修（v5.4 核心）</text>
+  <text x="60" y="402" font-size="10" fill="#042f2e">候选产出 → 后台对齐检验 → 未达标自动修订 → 再检验 → 收敛交付；阈值分三档（硬/软/国王兜底）</text>
+
+  <!-- 与 governance 关系 -->
+  <rect x="34" y="432" width="673" height="60" rx="10" fill="#161b22" stroke="#7c3aed" stroke-width="1"/>
+  <text x="60" y="458" font-size="12" font-weight="800" fill="#c4b5fd">🛡️ 进智受治理层约束（正交互补）</text>
+  <text x="60" y="478" font-size="10" fill="#8b949e">触发 520 护栏 / kill-switch → 循环立即中止交还国王；deliberate() 不优于国王否决；无兜底的自学习=灾难</text>
+</svg>
+
+  <p class="figdesc">五零件全貌与数据流：②注入 → ④校准 → ⑤门控 → ③蒸馏回写 → 经验库反哺①与②，形成可运行、可闭环的智慧层。</p>
+</figure>
+<figure class="figure" id="fig-14">
+  <figcaption class="figcap"><span class="fignum">图 14</span> · 交付质量闭环（Loop Driver）</figcaption>
+  <svg viewBox="0 0 680 560" xmlns="http://www.w3.org/2000/svg" style="font-family: system-ui, sans-serif;">
+  <defs>
+    <filter id="sh" x="-4%" y="-4%" width="108%" height="116%"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.18"/></filter>
+    <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#8b949e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+    <marker id="arg" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#3fb950" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+    <linearGradient id="gT" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2dd4bf"/><stop offset="1" stop-color="#0d9488"/></linearGradient>
+    <linearGradient id="gG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a78bfa"/><stop offset="1" stop-color="#7c3aed"/></linearGradient>
+  </defs>
+
+  <rect width="680" height="560" rx="14" fill="#0d1117"/>
+
+  <text x="340" y="36" text-anchor="middle" font-size="18" font-weight="800" fill="#f0f0f0">🔁  KAF v5.4 · 交付质量闭环（Loop Driver）</text>
+  <text x="340" y="58" text-anchor="middle" font-size="11" fill="#8b949e" font-style="italic">后台自动对齐检验 → 修订 → 再检验 → 收敛；把"查证核实"变成框架本能</text>
+
+  <!-- 候选产出 -->
+  <rect x="60" y="80" width="200" height="50" rx="9" fill="#21262d" stroke="#30363d" filter="url(#sh)"/>
+  <text x="160" y="102" text-anchor="middle" font-size="12" font-weight="800" fill="#e6edf3">① 候选产出</text>
+  <text x="160" y="120" text-anchor="middle" font-size="9" fill="#8b949e">不直接定稿</text>
+
+  <!-- 对齐检验 -->
+  <rect x="60" y="156" width="200" height="56" rx="9" fill="url(#gG)" filter="url(#sh)"/>
+  <text x="160" y="180" text-anchor="middle" font-size="12" font-weight="800" fill="white">④ 对齐检验</text>
+  <text x="160" y="198" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.9)">逐条比对指令</text>
+
+  <!-- 交付 -->
+  <rect x="60" y="430" width="200" height="50" rx="9" fill="#238636" filter="url(#sh)"/>
+  <text x="160" y="452" text-anchor="middle" font-size="12" font-weight="800" fill="white">✅ 交付最终成品</text>
+  <text x="160" y="470" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.9)">对齐达标/迭代上限</text>
+
+  <!-- 修订 -->
+  <rect x="400" y="156" width="200" height="56" rx="9" fill="url(#gT)" filter="url(#sh)"/>
+  <text x="500" y="180" text-anchor="middle" font-size="12" font-weight="800" fill="#042f2e">③ 修订策略</text>
+  <text x="500" y="198" text-anchor="middle" font-size="9" fill="rgba(4,47,46,0.9)">按差距清单+经验</text>
+
+  <!-- 下一版候选 -->
+  <rect x="400" y="240" width="200" height="50" rx="9" fill="#21262d" stroke="#30363d" filter="url(#sh)"/>
+  <text x="500" y="262" text-anchor="middle" font-size="12" font-weight="800" fill="#e6edf3">下一版候选</text>
+  <text x="500" y="280" text-anchor="middle" font-size="9" fill="#8b949e">喂回③蒸馏</text>
+
+  <!-- 主箭头 -->
+  <line x1="160" y1="130" x2="160" y2="154" stroke="#8b949e" stroke-width="1.6" marker-end="url(#ar)"/>
+  <!-- 检验 -> 修订 (未达标) -->
+  <line x1="262" y1="184" x2="398" y2="184" stroke="#8b949e" stroke-width="1.6" marker-end="url(#ar)"/>
+  <text x="330" y="176" text-anchor="middle" font-size="9" fill="#f0883e" font-weight="700">未达标</text>
+  <!-- 修订 -> 下一版 -->
+  <line x1="500" y1="212" x2="500" y2="238" stroke="#8b949e" stroke-width="1.6" marker-end="url(#ar)"/>
+  <!-- 下一版 -> 回检验 (绕过候选，直接再检验) -->
+  <path d="M400 266 C 320 290, 200 300, 160 212" fill="none" stroke="#2dd4bf" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#ar)"/>
+  <text x="250" y="300" text-anchor="middle" font-size="9" fill="#5eead4" font-style="italic">再检验</text>
+  <!-- 检验 -> 交付 (达标) -->
+  <line x1="160" y1="212" x2="160" y2="428" stroke="#3fb950" stroke-width="1.8" marker-end="url(#arg)"/>
+  <text x="178" y="330" font-size="9" fill="#3fb950" font-weight="700">对齐达标</text>
+
+  <!-- 阈值三档卡 -->
+  <g>
+    <rect x="40" y="356" width="190" height="150" rx="9" fill="#161b22" stroke="#3fb950" stroke-width="0.8"/>
+    <text x="135" y="380" text-anchor="middle" font-size="11" font-weight="800" fill="#3fb950">硬阈值</text>
+    <text x="50" y="400" font-size="9" fill="#8b949e">可量化指令</text>
+    <text x="50" y="416" font-size="9" fill="#8b949e">= 100% 对齐</text>
+    <text x="50" y="432" font-size="9" fill="#8b949e">差一项即修订</text>
+    <text x="50" y="448" font-size="9" fill="#8b949e">无需确认自动收敛</text>
+    <text x="50" y="470" font-size="8.5" fill="#5eead4">e.g. 归档N条+</text>
+    <text x="50" y="484" font-size="8.5" fill="#5eead4">search零命中</text>
+  </g>
+  <g>
+    <rect x="245" y="356" width="190" height="150" rx="9" fill="#161b22" stroke="#d4a030" stroke-width="0.8"/>
+    <text x="340" y="380" text-anchor="middle" font-size="11" font-weight="800" fill="#d4a030">软阈值</text>
+    <text x="255" y="400" font-size="9" fill="#8b949e">半量化指令</text>
+    <text x="255" y="416" font-size="9" fill="#8b949e">关键约束零违反</text>
+    <text x="255" y="432" font-size="9" fill="#8b949e">+ 意图对齐≥80%</text>
+    <text x="255" y="448" font-size="9" fill="#8b949e">达标即收敛</text>
+    <text x="255" y="470" font-size="8.5" fill="#d4a030">每轮留痕备抽查</text>
+    <text x="255" y="484" font-size="8.5" fill="#d4a030">e.g. 标题一目了然</text>
+  </g>
+  <g>
+    <rect x="450" y="356" width="190" height="150" rx="9" fill="#161b22" stroke="#f85149" stroke-width="0.8"/>
+    <text x="545" y="380" text-anchor="middle" font-size="11" font-weight="800" fill="#f85149">国王兜底</text>
+    <text x="460" y="400" font-size="9" fill="#8b949e">模糊指令</text>
+    <text x="460" y="416" font-size="9" fill="#8b949e">不设自动阈值</text>
+    <text x="460" y="432" font-size="9" fill="#8b949e">跑≤1轮基础对齐</text>
+    <text x="460" y="448" font-size="9" fill="#8b949e">升级国王确认</text>
+    <text x="460" y="470" font-size="8.5" fill="#f0883e">不擅自定稿</text>
+    <text x="460" y="484" font-size="8.5" fill="#f0883e">e.g. 整理好看点</text>
+  </g>
+
+  <!-- 熔断条 -->
+  <rect x="40" y="516" width="600" height="34" rx="8" fill="#161b22" stroke="#f85149" stroke-width="0.8"/>
+  <text x="340" y="538" text-anchor="middle" font-size="10" fill="#8b949e">🛑 默认最大 5 轮 · 触发 520 护栏 / kill-switch 立即中止交还国王 · 每轮可逆副本+审计链</text>
+</svg>
+
+  <p class="figdesc">候选产出 → 后台对齐检验（逐条比指令）→ 未达标自动修订 → 再检验 → 收敛交付；阈值分硬 / 软 / 国王兜底三档，含迭代上限与熔断。</p>
+</figure>
+  </section>
+
+  <section id="ch3">
+    <h2 class="ch">第三章 · 版本迭代说明（v5.0 → v5.4）</h2>
+    <p class="sub">本章节由 <code>RELEASE_v5.4.md</code> 严谨转换，含能力对照表、落地节奏、校验与兼容性声明。</p>
+    <h1>KAF 国王-Agent 框架 v5.4 发布说明</h1>
+<blockquote>发布时间：2026-08-07 真源：https://github.com/lsjpp2/king-agent-swarm 上一版标签：v5.3</blockquote>
+<h2>一句话</h2>
+<p>v5.4 在 v5.3（治理层 + 动态国王）之上，补上<strong>进智脊柱（Cognition Spine）</strong>——把&quot;可进化&quot;从只写不读的坟场，变成可运行、可闭环、可对齐检验的<strong>智慧层</strong>。防错脊柱管&quot;别蠢&quot;，进智脊柱管&quot;变慧&quot;，两者正交、后者受前者约束。</p>
+<h2>核心补充（v5.4 进智脊柱）</h2>
+<ul><li><strong>五零件</strong>：</li></ul>
+<p>  1. ① 反模式库 Anti-pattern —— 记录&quot;绝对不要做&quot; + 触发条件 + 正确替代；种子来自 Claw 会话清理事故 <code>8f6d42dc</code>。</p>
+<p>  2. ② 检索注入 Retrieval Inject —— 任务起点主动拉相关反模式 + 高置信经验进上下文（解决只写不读）。</p>
+<p>  3. ③ 经验蒸馏 Distillation（带置信度）—— 任务收尾压成 <code>{context,action,outcome,confidence}</code>；低置信不注入防噪声。</p>
+<p>  4. ④ 决策校准引擎 Calibration —— 相似决策比对历史 <code>outcome/confidence</code>，标注误校准。</p>
+<p>  5. ⑤ 元认知门控 deliberate() —— 高利害动作前自问&quot;是否重蹈覆辙&quot;，命中→正确替代或升国王确认；不高于国王否决权。</p>
+<ul><li><strong>Loop Driver 闭环自修（v5.4 交付质量闭环）</strong>：候选产出 → 后台对齐检验（逐条比对指令）→ 未达标自动修订 → 再检验 → 收敛交付；循环本身喂回蒸馏，修订策略越跑越准。</li><li><strong>对齐度阈值三档（国王已确认 2026-08-07）</strong>：</li></ul>
+<p>  - 硬阈值（可量化指令，如&quot;归档 N 条且均经 conversation_search 零命中&quot;）= 100% 对齐，差一项即修订，无需确认自动收敛；</p>
+<p>  - 软阈值（半量化，如&quot;标题要一目了然&quot;）= 关键约束零违反 + 主要意图对齐 ≥ 80%，达标即收敛、每轮留痕备国王抽查；</p>
+<p>  - 国王兜底（模糊，如&quot;整理好看点&quot;）= 不设自动阈值，跑 ≤1 轮基础对齐后<strong>升国王确认</strong>，不擅自定稿。</p>
+<ul><li><strong>实证锚点</strong>：Claw 会话清理事件 <code>8f6d42dc</code>——数据零丢失但一刀切 / 数字反复 / 标题 bug 重复 4+ 次，证明&quot;防错强 ≠ 有智慧&quot;；首条反模式种子即来自此。</li></ul>
+<h2>能力对照（v5.0 → v5.4）</h2>
+<table><thead><tr><th>能力</th><th>v5.0</th><th>v5.1</th><th>v5.2</th><th>v5.3</th><th>v5.4</th></tr></thead><tbody>
+<tr><td>宪法 / 520 护栏</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td></tr>
+<tr><td>模型经济学路由</td><td>–</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td></tr>
+<tr><td>多视角审查闭环</td><td>–</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td></tr>
+<tr><td>共享账本持久化</td><td>–</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td></tr>
+<tr><td>治理层 + kill-switch</td><td>–</td><td>–</td><td>–</td><td><strong>✓</strong></td><td><strong>✓</strong></td></tr>
+<tr><td>防篡改审计链</td><td>–</td><td>–</td><td>–</td><td><strong>✓</strong></td><td><strong>✓</strong></td></tr>
+<tr><td>agent HMAC 背书</td><td>–</td><td>–</td><td>–</td><td><strong>✓</strong></td><td><strong>✓</strong></td></tr>
+<tr><td>动态国王</td><td>硬编码</td><td>硬编码</td><td>硬编码</td><td><strong>✓</strong></td><td><strong>✓</strong></td></tr>
+<tr><td>图解 01-08 + 离线页</td><td>部分</td><td>部分</td><td>01-03</td><td><strong>✓</strong></td><td><strong>✓</strong></td></tr>
+<tr><td><strong>反模式库</strong></td><td>–</td><td>–</td><td>–</td><td>–</td><td><strong>✓</strong></td></tr>
+<tr><td><strong>检索注入</strong></td><td>–</td><td>–</td><td>–</td><td>–</td><td><strong>✓</strong></td></tr>
+<tr><td><strong>经验蒸馏（置信度）</strong></td><td>–</td><td>–</td><td>–</td><td>–</td><td><strong>✓</strong></td></tr>
+<tr><td><strong>决策校准引擎</strong></td><td>–</td><td>–</td><td>–</td><td>–</td><td><strong>✓</strong></td></tr>
+<tr><td><strong>deliberate() 门控</strong></td><td>–</td><td>–</td><td>–</td><td>–</td><td><strong>✓</strong></td></tr>
+<tr><td><strong>闭环自修 Loop Driver</strong></td><td>–</td><td>–</td><td>–</td><td>–</td><td><strong>✓</strong></td></tr>
+<tr><td><strong>图解 12-14（进智/闭环）</strong></td><td>–</td><td>–</td><td>–</td><td>–</td><td><strong>✓</strong></td></tr>
+</tbody></table>
+<h2>架构文档与图解</h2>
+<ul><li><code>docs/architecture_v5.4.md</code>：完整 5.4 架构（七层含进智层 + 进智五零件 + 闭环自修 + 阈值分级 + 与治理层关系 + State/Message/Security 模型更新）。</li><li><code>diagrams/12-architecture-v5.4.svg</code>（七层架构，含进智层，深色风格对齐 04）、<code>13-cognition-full.svg</code>（进智全景 + 数据流）、<code>14-loop-closure.svg</code>（闭环 + 阈值三档）。</li><li>进智脊柱设计提案（背景推导与国王确认记录）：<code>docs/cognition_spine_proposal.md</code>。</li></ul>
+<h2>落地节奏（代码分阶段，宣称=实现）</h2>
+<ul><li><strong>v5.3.1（地基）</strong>：①②⑤ —— 反模式种子 <code>anti_patterns.jsonl</code> + 检索注入 <code>retrieval_inject</code> + <code>deliberate()</code> 钩子。</li><li><strong>v5.4（闭环）</strong>：③④ + Loop Driver —— 经验蒸馏（置信度）/ 决策校准引擎 / 后台对齐检验与修订循环（需经验沉淀才有意义）。</li><li>本发布为<strong>架构与规范定稿</strong>；代码模块按上述节奏落地，不提前宣称已实现。</li></ul>
+<h2>远程复制者指引</h2>
+<pre><code>git clone https://github.com/lsjpp2/king-agent-swarm.git
+cd king-agent-swarm
+# 默认你就是国王（当前 OS 用户），无需改代码
+export KAF_KING=你的名字        # 或 kaf_config.json 写 {&quot;king&quot;:&quot;你的名字&quot;}
+python kaf/kaf.py check</code></pre>
+<h2>校验</h2>
+<ul><li>共享归档：<code>D:/Agent集群共享/国王技能KAF/v5.4/</code>（git archive 真快照）。</li><li>集群生效仓：<code>C:/Users/山禾/.workbuddy/skills/国王-Agent蜂群/</code> 已同步（SKILL.md / constitution.json / diagrams / docs）。</li><li>git tag <code>v5.4</code> 指向本发布提交；远程 <code>master</code> 已推送（SHA 回验一致）。</li><li><code>constitution.json</code> <code>version=5.4</code> 且含 <code>cognition</code> 节；<code>SKILL.md</code> 标题/理念/七层架构/图解引用/进智节 均已升级。</li></ul>
+<h2>与 v5.3 兼容</h2>
+<ul><li>治理层、动态国王、520 护栏、记忆隔离<strong>全部向后兼容</strong>；进智脊柱为新增正交层，不改动既有强制逻辑。</li><li>升级方式：复制本快照覆盖即可。<code>constitution.json</code> 仅新增 <code>cognition</code> 节，旧客户端忽略未知节，无破坏。</li></ul>
+  </section>
+
+  <section id="appendix">
+    <h2 class="ch">附录 · 文件清单与引用</h2>
+    <h3>本 HTML 内联来源</h3>
+    <table>
+      <thead><tr><th>类型</th><th>文件</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td>架构文档</td><td><code>docs/architecture_v5.4.md</code></td><td>v5.4 七层架构 / 进智五零件 / 闭环自修 / 与治理层关系 / State·Message·Security 模型</td></tr>
+        <tr><td>发布说明</td><td><code>RELEASE_v5.4.md</code></td><td>能力对照表（v5.0→v5.4）/ 落地节奏 / 校验 / 兼容性</td></tr>
+        <tr><td>设计提案</td><td><code>docs/cognition_spine_proposal.md</code></td><td>进智脊柱背景推导与国王确认记录</td></tr>
+        <tr><td>图解 01–08</td><td><code>diagrams/0*.svg</code></td><td>v5.3 治理层全套（深色风格）</td></tr>
+        <tr><td>图解 09–11</td><td><code>diagrams/09-11*.svg</code></td><td>进智脊柱对照 / 数据流 / 路线图（提案草稿）</td></tr>
+        <tr><td>图解 12–14</td><td><code>diagrams/12-14*.svg</code></td><td>v5.4 七层架构 / 进智全景 / 交付闭环（深色风格，对齐 04）</td></tr>
+        <tr><td>宪法</td><td><code>kaf/constitution.json</code></td><td>v5.4，含新增 <code>cognition</code> 节</td></tr>
+        <tr><td>技能</td><td><code>SKILL.md</code></td><td>v5.4 标题 / 理念 / 七层架构 / 图解引用 / 进智节</td></tr>
+      </tbody>
+    </table>
+    <h3>同步三仓（已备份 · 可逆）</h3>
+    <table>
+      <thead><tr><th>目标</th><th>状态</th></tr></thead>
+      <tbody>
+        <tr><td>本地生效仓 <code>C:/Users/山禾/.workbuddy/skills/国王-Agent蜂群/</code></td><td class="tag-strong">已同步</td></tr>
+        <tr><td>集群共享仓 <code>D:/Agent集群共享/国王技能KAF/v5.4/</code></td><td class="tag-strong">完整快照</td></tr>
+        <tr><td>GitHub 开源仓 <code>master</code></td><td class="tag-strong">已推送</td></tr>
+      </tbody>
+    </table>
+    <p class="sub">说明：本 HTML 为只读说明文档，不替代上述源文件；如需落地运行，请以源仓与真源为准。代码中进智五零件按 v5.3.1（①②⑤）/ v5.4（③④ + Loop）节奏实现，本版为架构与规范定稿。</p>
+  </section>
+</main>
+
+<footer>
+  国王-Agent 蜂群框架（KAF）v5.4 完整架构说明 · 生成于 2026-08-07 · 自包含单文件 · 真源 github.com/lsjpp2/king-agent-swarm
+</footer>
+</body>
+</html>
