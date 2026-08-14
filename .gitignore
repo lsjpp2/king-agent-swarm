@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+*.log
+kaf_gate_audit.log
+kaf_operations.log
+coordinator.json
+kaf/coordinator.json
+github_skill_analysis/
+_release_body.md
+*.bak
