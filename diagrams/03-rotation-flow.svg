@@ -1,0 +1,72 @@
+<svg viewBox="0 0 680 500" xmlns="http://www.w3.org/2000/svg" style="font-family: system-ui, sans-serif;">
+  <defs>
+    <filter id="sh" x="-4%" y="-4%" width="108%" height="116%"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.18"/></filter>
+    <linearGradient id="gK" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f0c040"/><stop offset="1" stop-color="#d4a030"/></linearGradient>
+    <linearGradient id="gO" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f78166"/><stop offset="1" stop-color="#d45a3e"/></linearGradient>
+    <linearGradient id="gN" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#58a6ff"/><stop offset="1" stop-color="#2d6cdf"/></linearGradient>
+  </defs>
+
+  <rect width="680" height="500" rx="14" fill="#0d1117"/>
+
+  <!-- Title -->
+  <text x="340" y="38" text-anchor="middle" font-size="18" font-weight="800" fill="#f0f0f0">🔄  PM Rotation Flow</text>
+  <text x="340" y="60" text-anchor="middle" font-size="11" fill="#8b949e" font-style="italic">King's command → Old PM hands over → New PM takes over</text>
+
+  <!-- Step 1: King's Command -->
+  <rect x="20" y="78" width="640" height="80" rx="10" fill="#1c2128" stroke="#f0c040" stroke-width="1.5" filter="url(#sh)"/>
+  <circle cx="52" cy="108" r="18" fill="url(#gK)"/>
+  <text x="52" y="114" text-anchor="middle" font-size="14" font-weight="800" fill="#1a1a2e">1</text>
+  <text x="80" y="100" font-size="14" font-weight="700" fill="#f0c040">👑  Step 1: King's Command</text>
+  <text x="80" y="122" font-size="11" fill="#8b949e">King says (verbally or in text):</text>
+  <rect x="80" y="130" width="460" height="22" rx="4" fill="#161b22"/>
+  <text x="90" y="145" font-size="11" fill="#7be0a0" font-family="monospace">"From now on, [Agent Name] is Prime Minister."</text>
+  <text x="560" y="145" font-size="10" fill="#f0c040" font-weight="600">⚡ IMMEDIATE</text>
+
+  <!-- Arrow down -->
+  <path d="M 340 164 L 340 184" stroke="#f0c040" stroke-width="2" fill="none" marker-end="url(#aK)"/>
+  <text x="350" y="178" font-size="9" fill="#f0c040">trigger</text>
+
+  <!-- Step 2: Old PM Hands Over -->
+  <rect x="20" y="196" width="640" height="108" rx="10" fill="#1c2128" stroke="#f78166" stroke-width="1.5" filter="url(#sh)"/>
+  <circle cx="52" cy="226" r="18" fill="url(#gO)"/>
+  <text x="52" y="232" text-anchor="middle" font-size="14" font-weight="800" fill="white">2</text>
+  <text x="80" y="218" font-size="14" font-weight="700" fill="#f78166">📦  Step 2: Old PM Hands Over</text>
+  <text x="80" y="240" font-size="11" fill="#8b949e">Old PM (current coordinator) executes:</text>
+  <rect x="80" y="248" width="560" height="20" rx="4" fill="#0d1117"/>
+  <text x="92" y="262" font-size="10" fill="#c9d1d9"> ① Write current status to progress/YYYY-MM-DD.md</text>
+  <rect x="80" y="270" width="560" height="20" rx="4" fill="#0d1117"/>
+  <text x="92" y="284" font-size="10" fill="#c9d1d9"> ② Package handover_state → write to coordinator.json</text>
+  <rect x="80" y="298" width="560" height="20" rx="4" fill="#0d1117"/>
+  <text x="92" y="312" font-size="10" fill="#c9d1d9"> ③ Update coordinator.json: current_coordinator = New PM, since = now</text>
+
+  <!-- Arrow down -->
+  <path d="M 340 312 L 340 332" stroke="#f78166" stroke-width="2" fill="none" marker-end="url(#aO)"/>
+  <text x="350" y="326" font-size="9" fill="#f78166">handover complete</text>
+
+  <!-- Step 3: New PM Takes Over -->
+  <rect x="20" y="338" width="640" height="108" rx="10" fill="#1c2128" stroke="#58a6ff" stroke-width="1.5" filter="url(#sh)"/>
+  <circle cx="52" cy="368" r="18" fill="url(#gN)"/>
+  <text x="52" y="374" text-anchor="middle" font-size="14" font-weight="800" fill="white">3</text>
+  <text x="80" y="360" font-size="14" font-weight="700" fill="#58a6ff">👑  Step 3: New PM Takes Over</text>
+  <text x="80" y="382" font-size="11" fill="#8b949e">New PM (incoming coordinator) executes:</text>
+  <rect x="80" y="390" width="560" height="20" rx="4" fill="#0d1117"/>
+  <text x="92" y="404" font-size="10" fill="#c9d1d9"> ① Read coordinator.json → confirm current_coordinator = self</text>
+  <rect x="80" y="418" width="560" height="20" rx="4" fill="#0d1117"/>
+  <text x="92" y="432" font-size="10" fill="#c9d1d9"> ② Read handover_state → get context</text>
+  <rect x="80" y="446" width="560" height="20" rx="4" fill="#0d1117"/>
+  <text x="92" y="460" font-size="10" fill="#c9d1d9"> ③ Confirm to King: "I have taken over as Prime Minister."</text>
+
+  <!-- Completion badge -->
+  <rect x="460" y="460" width="160" height="24" rx="12" fill="#7be0a0" opacity="0.9"/>
+  <text x="540" y="476" text-anchor="middle" font-size="11" font-weight="700" fill="#1a1a2e">✅  ROTATION COMPLETE</text>
+
+  <!-- Bottom: state diagram -->
+  <rect x="20" y="462" width="640" height="28" rx="6" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+  <text x="36" y="480" font-size="10" fill="#8b949e">State:  [Idle] → "King commands" → [Handover] → "Old PM writes state" → [Inauguration] → "New PM confirms" → [Active]  </text>
+
+  <defs>
+    <marker id="aK" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5"><circle cx="3.5" cy="3.5" r="2.5" fill="#f0c040"/></marker>
+    <marker id="aO" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5"><circle cx="3.5" cy="3.5" r="2.5" fill="#f78166"/></marker>
+    <marker id="aN" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5"><circle cx="3.5" cy="3.5" r="2.5" fill="#58a6ff"/></marker>
+  </defs>
+</svg>
