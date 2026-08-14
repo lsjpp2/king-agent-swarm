@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KAF v5.3 · 详细图解与交叉验证</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:#0d1117; color:#c9d1d9; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; line-height:1.6; }
+  header { padding:28px 24px 18px; border-bottom:1px solid #21262d; }
+  h1 { margin:0 0 6px; font-size:22px; color:#f0f0f0; }
+  .sub { color:#8b949e; font-size:13px; }
+  main { max-width:960px; margin:0 auto; padding:24px; }
+  section { margin:32px 0; }
+  h2 { font-size:17px; color:#f0c040; border-left:4px solid #f0c040; padding-left:10px; margin:0 0 10px; }
+  h3 { font-size:14px; color:#7be0a0; margin:18px 0 6px; }
+  .card { background:#161b22; border:1px solid #30363d; border-radius:12px; padding:14px; overflow:auto; }
+  .card svg { width:100%; height:auto; display:block; }
+  img.diag { width:100%; height:auto; border-radius:12px; border:1px solid #30363d; }
+  pre { background:#0d1117; border:1px solid #30363d; border-radius:8px; padding:12px 14px; overflow:auto; font-size:12px; color:#c9d1d9; }
+  .ok { color:#7be0a0; } .bad { color:#f78166; } .warn { color:#f0c040; }
+  .meta { font-size:12px; color:#8b949e; }
+  .tag { display:inline-block; background:#1c2128; border:1px solid #30363d; border-radius:999px; padding:2px 10px; font-size:11px; color:#8b949e; margin-right:6px; }
+  footer { text-align:center; color:#8b949e; font-size:12px; padding:30px; border-top:1px solid #21262d; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🛡️ KAF v5.3 · 详细图解与交叉验证</h1>
+  <div class="sub">国王-Agent蜂群 · Constitution-as-Code + Governance Layer · 宣称 = 实现（实地跑通证据见文末）</div>
+  <div style="margin-top:10px">
+    <span class="tag">策略即代码</span><span class="tag">kill-switch 急停</span><span class="tag">防篡改审计链</span>
+    <span class="tag">Agent 身份归因</span><span class="tag">Deployer = King（动态国王）</span>
+  </div>
+</header>
+<main>
+
+<section>
+  <h2>① 六层架构（含 v5.3 治理层）</h2>
+  <div class="card">
+    <svg viewBox="0 0 680 580" xmlns="http://www.w3.org/2000/svg" style="font-family: system-ui, sans-serif;">
+      <defs>
+        <filter id="sh" x="-4%" y="-4%" width="108%" height="116%"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.18"/></filter>
+        <linearGradient id="gA" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#58a6ff"/><stop offset="1" stop-color="#2d6cdf"/></linearGradient>
+        <linearGradient id="gC" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7be0a0"/><stop offset="1" stop-color="#4dc970"/></linearGradient>
+        <linearGradient id="gG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a78bfa"/><stop offset="1" stop-color="#7c3aed"/></linearGradient>
+        <linearGradient id="gR" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f78166"/><stop offset="1" stop-color="#d45a3e"/></linearGradient>
+        <linearGradient id="gK" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f0c040"/><stop offset="1" stop-color="#d4a030"/></linearGradient>
+        <linearGradient id="gM" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#79c0ff"/><stop offset="1" stop-color="#388bfd"/></linearGradient>
+      </defs>
+      <rect width="680" height="580" rx="14" fill="#0d1117"/>
+      <text x="340" y="36" text-anchor="middle" font-size="18" font-weight="800" fill="#f0f0f0">🏛️  KAF v5.3 · Layered Architecture</text>
+      <text x="340" y="58" text-anchor="middle" font-size="11" fill="#8b949e" font-style="italic">Governance layer (NEW) cross-cuts every action · King identity is dynamic (resolve_king)</text>
+      <rect x="40" y="78" width="600" height="58" rx="10" fill="url(#gA)" filter="url(#sh)"/>
+      <text x="60" y="104" font-size="13" font-weight="800" fill="white">🧩  Platform Adapters</text>
+      <text x="60" y="124" font-size="10" fill="rgba(255,255,255,0.85)">WorkBuddy / Claude / OpenCode / Cursor / Kimi — 5 行代码接入任意平台；dispatch 派发到共享队列</text>
+      <rect x="40" y="144" width="600" height="58" rx="10" fill="url(#gC)" filter="url(#sh)"/>
+      <text x="60" y="170" font-size="13" font-weight="800" fill="#1a1a2e">🔄  Coordinator Protocol</text>
+      <text x="60" y="190" font-size="10" fill="rgba(26,26,46,0.85)">宰相轮值 · 3票 vs 1票 · 国王一票否决 · handover_state 交接</text>
+      <rect x="40" y="210" width="600" height="62" rx="10" fill="url(#gG)" filter="url(#sh)" stroke="#c4b5fd" stroke-width="1.5"/>
+      <text x="60" y="236" font-size="13" font-weight="800" fill="white">🛡️  Governance Layer  ★ v5.3 NEW</text>
+      <text x="60" y="256" font-size="10" fill="rgba(255,255,255,0.9)">策略即代码(policy.json) · 急停(kill-switch) · 防篡改审计链 · Agent 身份归因(HMAC)</text>
+      <text x="560" y="232" font-size="9" fill="#ede9fe" font-weight="700">evaluate(): kill→attest→guard520→policy</text>
+      <text x="560" y="248" font-size="9" fill="#ede9fe" font-weight="700">全程写审计链</text>
+      <rect x="40" y="280" width="600" height="58" rx="10" fill="url(#gR)" filter="url(#sh)"/>
+      <text x="60" y="306" font-size="13" font-weight="800" fill="white">⚡  520 Runtime Guard</text>
+      <text x="60" y="326" font-size="10" fill="rgba(255,255,255,0.85)">4 检查点(pre:delete/pre:destructive_op/post:write_memory/startup) · 铁律8/9/10 · agent侧门禁 kaf_gate.py</text>
+      <rect x="40" y="346" width="600" height="58" rx="10" fill="url(#gK)" filter="url(#sh)"/>
+      <text x="60" y="372" font-size="13" font-weight="800" fill="#1a1a2e">📜  Constitution-as-Code</text>
+      <text x="60" y="392" font-size="10" fill="rgba(26,26,46,0.85)">声明式宪法 JSON · economics_routing/dispatch/review_loop/shared_ledger/governance · sovereign.king_resolver 动态国王</text>
+      <rect x="40" y="412" width="600" height="58" rx="10" fill="url(#gM)" filter="url(#sh)"/>
+      <text x="60" y="438" font-size="13" font-weight="800" fill="white">🔐  Memory Integrity</text>
+      <text x="60" y="458" font-size="10" fill="rgba(255,255,255,0.85)">SHA-256 指纹 + drift 检测 + protect_write · 隔离墙 strict · 共享账本 .memory_ledger.db</text>
+      <rect x="14" y="78" width="20" height="392" rx="6" fill="#21262d" stroke="#30363d"/>
+      <text x="24" y="270" text-anchor="middle" font-size="9" fill="#8b949e" transform="rotate(-90 24 270)">AGENT ACTION ↓</text>
+      <rect x="40" y="486" width="600" height="78" rx="10" fill="#161b22" stroke="#7c3aed" stroke-width="1.5"/>
+      <text x="60" y="510" font-size="12" font-weight="800" fill="#c4b5fd">👑  King = resolve_king()  (v5.3 修正：不再硬编码${KING_NAME})</text>
+      <text x="60" y="530" font-size="10" fill="#8b949e">本地作者环境 → ${KING_NAME}    ｜    远程新手复制 → 当前 OS 用户 / operator</text>
+      <text x="60" y="548" font-size="10" fill="#8b949e">显式覆盖：环境变量 KAF_KING 或 kaf_config.json 的 {"king":"你的名字"}</text>
+    </svg>
+  </div>
+</section>
+
+<section>
+  <h2>② 治理评估流程 Governance.evaluate()</h2>
+  <div class="card">
+    <svg viewBox="0 0 680 560" xmlns="http://www.w3.org/2000/svg" style="font-family: system-ui, sans-serif;">
+      <defs>
+        <filter id="sh" x="-4%" y="-4%" width="108%" height="116%"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.18"/></filter>
+        <marker id="ar" markerWidth="9" markerHeight="9" refX="4" refY="4.5"><path d="M0,0 L9,4.5 L0,9 Z" fill="#8b949e"/></marker>
+        <marker id="arD" markerWidth="9" markerHeight="9" refX="4" refY="4.5"><path d="M0,0 L9,4.5 L0,9 Z" fill="#f78166"/></marker>
+        <marker id="arG" markerWidth="9" markerHeight="9" refX="4" refY="4.5"><path d="M0,0 L9,4.5 L0,9 Z" fill="#7be0a0"/></marker>
+      </defs>
+      <rect width="680" height="560" rx="14" fill="#0d1117"/>
+      <text x="340" y="36" text-anchor="middle" font-size="18" font-weight="800" fill="#f0f0f0">🛡️  Governance.evaluate() 评估流程</text>
+      <text x="340" y="58" text-anchor="middle" font-size="11" fill="#8b949e" font-style="italic">每一步拒绝都写入防篡改审计链；DENY 优先于 ALLOW</text>
+      <rect x="270" y="74" width="140" height="40" rx="20" fill="#21262d" stroke="#58a6ff" stroke-width="1.5"/>
+      <text x="340" y="99" text-anchor="middle" font-size="12" font-weight="700" fill="#58a6ff">Agent 动作 (action)</text>
+      <path d="M340 114 L340 134" stroke="#8b949e" stroke-width="2" fill="none" marker-end="url(#ar)"/>
+      <polygon points="340,138 286,178 394,178" fill="#1c2128" stroke="#f78166" stroke-width="1.5"/>
+      <text x="340" y="166" text-anchor="middle" font-size="11" font-weight="700" fill="#f78166">kill-switch 激活?</text>
+      <path d="M394 158 L470 158 L470 300 L520 300" stroke="#f78166" stroke-width="2" fill="none" marker-end="url(#arD)"/>
+      <text x="478" y="230" font-size="10" fill="#f78166" font-weight="600">YES</text>
+      <path d="M340 178 L340 210" stroke="#8b949e" stroke-width="2" fill="none" marker-end="url(#ar)"/>
+      <polygon points="340,214 284,254 396,254" fill="#1c2128" stroke="#f0c040" stroke-width="1.5"/>
+      <text x="340" y="242" text-anchor="middle" font-size="11" font-weight="700" fill="#f0c040">agent 已 attest?</text>
+      <path d="M396 234 L470 234 L470 300 L520 300" stroke="#f78166" stroke-width="2" fill="none" marker-end="url(#arD)"/>
+      <text x="478" y="214" font-size="10" fill="#f78166" font-weight="600">NO</text>
+      <path d="M340 254 L340 286" stroke="#8b949e" stroke-width="2" fill="none" marker-end="url(#ar)"/>
+      <polygon points="340,290 284,330 396,330" fill="#1c2128" stroke="#f78166" stroke-width="1.5"/>
+      <text x="340" y="313" text-anchor="middle" font-size="11" font-weight="700" fill="#f78166">520 护栏拦截?</text>
+      <path d="M396 310 L470 310 L470 300 L520 300" stroke="#f78166" stroke-width="2" fill="none" marker-end="url(#arD)"/>
+      <text x="478" y="290" font-size="10" fill="#f78166" font-weight="600">YES</text>
+      <path d="M340 330 L340 362" stroke="#8b949e" stroke-width="2" fill="none" marker-end="url(#ar)"/>
+      <rect x="230" y="366" width="220" height="46" rx="10" fill="#7c3aed" filter="url(#sh)"/>
+      <text x="340" y="388" text-anchor="middle" font-size="12" font-weight="800" fill="white">PolicyEngine.evaluate()</text>
+      <text x="340" y="404" text-anchor="middle" font-size="9.5" fill="rgba(255,255,255,0.9)">DENY优先 · require 为豁免条件</text>
+      <path d="M340 412 L340 444" stroke="#8b949e" stroke-width="2" fill="none" marker-end="url(#ar)"/>
+      <polygon points="340,448 286,488 394,488" fill="#1c2128" stroke="#a78bfa" stroke-width="1.5"/>
+      <text x="340" y="471" text-anchor="middle" font-size="11" font-weight="700" fill="#c4b5fd">命中 deny 规则</text>
+      <text x="340" y="476" text-anchor="middle" font-size="9" fill="#8b949e">(无豁免)</text>
+      <path d="M340 488 L340 510" stroke="#8b949e" stroke-width="2" fill="none" marker-end="url(#ar)"/>
+      <rect x="500" y="280" width="160" height="40" rx="10" fill="#f78166" filter="url(#sh)"/>
+      <text x="580" y="305" text-anchor="middle" font-size="12" font-weight="800" fill="white">⛔ DENY</text>
+      <rect x="500" y="498" width="160" height="40" rx="10" fill="#7be0a0" filter="url(#sh)"/>
+      <text x="580" y="523" text-anchor="middle" font-size="12" font-weight="800" fill="#1a1a2e">✅ ALLOW</text>
+      <path d="M394 468 L500 468" stroke="#f78166" stroke-width="2" fill="none" marker-end="url(#arD)"/>
+      <path d="M500 468 L500 320" stroke="#f78166" stroke-width="2" fill="none" marker-end="url(#arD)"/>
+      <path d="M340 510 L340 540 L500 540 L500 538" stroke="#7be0a0" stroke-width="2" fill="none" marker-end="url(#arG)"/>
+      <text x="60" y="540" font-size="10" fill="#8b949e" font-style="italic">每条结果（含 DENY/ALLOW）均 hash 上链 → audit_chain.log (verify() 可检测篡改)</text>
+    </svg>
+  </div>
+</section>
+
+<section>
+  <h2>③ 防篡改审计链 Audit Chain</h2>
+  <div class="card">
+    <svg viewBox="0 0 680 360" xmlns="http://www.w3.org/2000/svg" style="font-family: system-ui, sans-serif;">
+      <defs>
+        <filter id="sh" x="-4%" y="-4%" width="108%" height="116%"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.18"/></filter>
+        <marker id="ah" markerWidth="9" markerHeight="9" refX="4" refY="4.5"><path d="M0,0 L9,4.5 L0,9 Z" fill="#7be0a0"/></marker>
+      </defs>
+      <rect width="680" height="360" rx="14" fill="#0d1117"/>
+      <text x="340" y="36" text-anchor="middle" font-size="18" font-weight="800" fill="#f0f0f0">🔗  Tamper-evident Audit Chain</text>
+      <text x="340" y="58" text-anchor="middle" font-size="11" fill="#8b949e" font-style="italic">每条记录 hash(prev_hash + payload) ；改任意一行 → verify() 判定断裂</text>
+      <rect x="30" y="90" width="150" height="150" rx="10" fill="#161b22" stroke="#30363d" stroke-width="1.5" filter="url(#sh)"/>
+      <text x="105" y="116" text-anchor="middle" font-size="11" font-weight="800" fill="#8b949e">GENESIS</text>
+      <text x="105" y="140" text-anchor="middle" font-size="9" fill="#8b949e">prev =</text>
+      <text x="105" y="156" text-anchor="middle" font-size="9" fill="#58a6ff" font-family="monospace">"0"*64</text>
+      <text x="105" y="180" text-anchor="middle" font-size="9" fill="#8b949e">entry =</text>
+      <text x="105" y="196" text-anchor="middle" font-size="9" fill="#c9d1d9" font-family="monospace">{...}</text>
+      <text x="105" y="222" text-anchor="middle" font-size="9" fill="#8b949e">hash =</text>
+      <text x="105" y="238" text-anchor="middle" font-size="8" fill="#7be0a0" font-family="monospace">sha256(...)</text>
+      <rect x="265" y="90" width="150" height="150" rx="10" fill="#161b22" stroke="#7c3aed" stroke-width="1.5" filter="url(#sh)"/>
+      <text x="340" y="116" text-anchor="middle" font-size="11" font-weight="800" fill="#c4b5fd">RECORD[i]</text>
+      <text x="340" y="140" text-anchor="middle" font-size="9" fill="#8b949e">prev =</text>
+      <text x="340" y="156" text-anchor="middle" font-size="8" fill="#58a6ff" font-family="monospace">hash[i-1]</text>
+      <text x="340" y="180" text-anchor="middle" font-size="9" fill="#8b949e">entry =</text>
+      <text x="340" y="196" text-anchor="middle" font-size="8" fill="#c9d1d9" font-family="monospace">{action,agent}</text>
+      <text x="340" y="214" text-anchor="middle" font-size="8" fill="#c9d1d9" font-family="monospace">{resource,...}</text>
+      <text x="340" y="238" text-anchor="middle" font-size="9" fill="#8b949e">hash =</text>
+      <text x="340" y="254" text-anchor="middle" font-size="8" fill="#7be0a0" font-family="monospace">sha256(prev|entry)</text>
+      <rect x="500" y="90" width="150" height="150" rx="10" fill="#161b22" stroke="#7c3aed" stroke-width="1.5" filter="url(#sh)"/>
+      <text x="575" y="116" text-anchor="middle" font-size="11" font-weight="800" fill="#c4b5fd">RECORD[i+1]</text>
+      <text x="575" y="140" text-anchor="middle" font-size="9" fill="#8b949e">prev =</text>
+      <text x="575" y="156" text-anchor="middle" font-size="8" fill="#58a6ff" font-family="monospace">hash[i]</text>
+      <text x="575" y="180" text-anchor="middle" font-size="9" fill="#8b949e">entry =</text>
+      <text x="575" y="196" text-anchor="middle" font-size="8" fill="#c9d1d9" font-family="monospace">{action,agent}</text>
+      <text x="575" y="214" text-anchor="middle" font-size="8" fill="#c9d1d9" font-family="monospace">{resource,...}</text>
+      <text x="575" y="238" text-anchor="middle" font-size="9" fill="#8b949e">hash =</text>
+      <text x="575" y="254" text-anchor="middle" font-size="8" fill="#7be0a0" font-family="monospace">sha256(prev|entry)</text>
+      <path d="M180 165 L263 165" stroke="#7be0a0" stroke-width="2.5" fill="none" marker-end="url(#ah)"/>
+      <path d="M415 165 L498 165" stroke="#7be0a0" stroke-width="2.5" fill="none" marker-end="url(#ah)"/>
+      <rect x="30" y="270" width="620" height="64" rx="10" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+      <text x="46" y="294" font-size="12" font-weight="700" fill="#7be0a0">🔍  verify()：从 GENESIS 重算每条 hash 并与存储值比对</text>
+      <text x="46" y="314" font-size="10" fill="#8b949e">• 全部一致 → (True, None)   ✅ 审计链完整</text>
+      <text x="46" y="328" font-size="10" fill="#f78166">• 任一行被篡改 → (False, broken_index)   ⛔ 防篡改生效（自测已证明：篡改中行后 verify=False）</text>
+    </svg>
+  </div>
+</section>
+
+<section>
+  <h2>④ 共享状态拓扑 Shared State</h2>
+  <img class="diag" src="07-shared-state.svg" alt="Shared State Topology">
+</section>
+
+<section>
+  <h2>⑤ 国王身份动态解析 (Deployer = King)</h2>
+  <img class="diag" src="08-king-resolution.svg" alt="King Resolution">
+</section>
+
+<section>
+  <h2>附：v5.2 基础图解（权力结构 / 记忆隔离 / 宰相轮值）</h2>
+  <h3>权力结构 Power Structure</h3>
+  <img class="diag" src="01-power-structure.svg" alt="Power Structure">
+  <h3>记忆隔离墙 Memory Isolation</h3>
+  <img class="diag" src="02-memory-isolation.svg" alt="Memory Isolation">
+  <h3>宰相轮值流程 PM Rotation</h3>
+  <img class="diag" src="03-rotation-flow.svg" alt="PM Rotation">
+</section>
+
+<section>
+  <h2>🔬 交叉验证证据（宣称 = 实现，已实地跑通）</h2>
+  <p class="meta">以下为本地（${KING_NAME}环境）真实执行输出，复现命令见每行注释。</p>
+
+  <h3>[1] 国王解析 <span class="meta"># python kaf/king.py</span></h3>
+  <pre><span class="ok">=== KAF v5.3 King Resolution ===
+  当前国王(King): ${KING_NAME}
+  解析来源(source): author_env(本地作者)
+  优先级: env:KAF_KING &gt; kaf_config.json &gt; 本地作者(${KING_NAME}) &gt; 当前OS用户/operator</span></pre>
+
+  <h3>[2] 治理层自测 <span class="meta"># python kaf/governance_selftest.py</span></h3>
+  <pre><span class="ok">  ✅ 受保护资产(MEMORY.md)删除无 king_confirmed → DENY
+  ✅ 受保护资产删除 + king_confirmed+user_confirmed+has_script → ALLOW
+  ✅ kill-switch ON → 任何动作 DENY
+  ✅ kill-switch OFF → 恢复 ALLOW
+  ✅ 未归因 agent → DENY(attestation)
+  ✅ attest 后 → 通过(非 attestation 拒绝)
+  ✅ 审计链追加后 verify()=True
+  ✅ 篡改审计链中行后 verify()=False（防篡改生效）
+
+[self-test] PASS=8 FAIL=0</span></pre>
+
+  <h3>[3] 治理评估 DENY <span class="meta"># python kaf/kaf.py govern "delete" --resource "D:/x/MEMORY.md" --user_confirmed --has_script</span></h3>
+  <pre><span class="bad">  ⛔ 决策: DENY
+  动作: delete  资源: D:/x/MEMORY.md
+  触发规则: gov-520-write-protect
+  原因: 宪法/520/铁律/记忆为受保护资产，须国王显式确认(king_confirmed)方可写/删/移</span></pre>
+
+  <h3>[4] 治理评估 ALLOW <span class="meta"># ... --king_confirmed (全确认)</span></h3>
+  <pre><span class="ok">  ✅ 决策: ALLOW
+  动作: delete  资源: D:/x/MEMORY.md
+  触发规则: default</span></pre>
+
+  <h3>[5] 审计链完整性 <span class="meta"># python kaf/kaf.py audit-tail 6</span></h3>
+  <pre><span class="ok">  完整性: ✅ 有效
+  [2026-08-04T13:45:17] deny  | delete | ? | D:/x/MEMORY.md | gov-520-write-protect | ...
+  [2026-08-04T14:07:09] deny  | delete | ? | D:/x/MEMORY.md | gov-520-write-protect | ...
+  [2026-08-04T14:07:09] allow | delete | ? | D:/x/MEMORY.md | default              | ...</span></pre>
+
+  <h3 class="warn">[6] 520 自检 traceable 项（已知前置状态，非 v5.3 回归）</h3>
+  <pre><span class="bad">  ❌ traceable: 尚无操作日志：护栏从未实际拦截/记录过任何操作 (不可追溯)</span>
+  <span class="ok">  ✅ recoverable / fixable / evolvable / enforced 均 PASS</span>
+  <span class="meta">说明：traceable 依赖 kaf_operations.log 有真实拦截记录，当前环境从未写入该日志 —— 属 520 自检前置状态，
+  v5.3 未改动 guard520；治理审计链 audit_chain.log 现已提供互补的防篡改操作记录。</span></pre>
+</section>
+
+</main>
+<footer>
+  KAF v5.3 · 离线自包含页面（零外部依赖）· 国王-Agent蜂群 Skill · MIT License
+</footer>
+</body>
+</html>
