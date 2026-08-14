@@ -1,0 +1,52 @@
+<svg viewBox="0 0 680 340" role="img" xmlns="http://www.w3.org/2000/svg">
+  <title>进智脊柱落地节奏 v5.3.1 / v5.4</title>
+  <desc>地基 v5.3.1 做①②⑤（低成本高杠杆）；闭环 v5.4 做③④（需数据沉淀）；宪法加 cognition 节</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <style>
+      .th{font-family:var(--font-sans,sans-serif);font-size:16px;font-weight:600;fill:#2C2C2A}
+      .ts{font-family:var(--font-sans,sans-serif);font-size:12px;font-weight:400;fill:#5F5E5A}
+      .cap{font-family:var(--font-sans,sans-serif);font-size:12.5px;font-weight:500;fill:#2C2C2A}
+      .big{font-family:var(--font-sans,sans-serif);font-size:22px;font-weight:700}
+    </style>
+  </defs>
+
+  <text class="th" x="40" y="34">落地节奏 · 地基先行，闭环靠数据</text>
+  <text class="ts" x="40" y="56">宪法新增 cognition 节（v5.3.1 起生效）</text>
+
+  <!-- v5.3 现状 -->
+  <rect x="30" y="90" width="180" height="150" rx="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.6"/>
+  <text class="cap" x="120" y="116" text-anchor="middle">v5.3 现状</text>
+  <text class="big" x="120" y="150" text-anchor="middle" fill="#5F5E5A">✓ / ✗</text>
+  <text class="ts" x="120" y="176" text-anchor="middle">防错强</text>
+  <text class="ts" x="120" y="196" text-anchor="middle">进智空</text>
+  <text class="ts" x="120" y="218" text-anchor="middle">治理层齐备</text>
+
+  <line x1="212" y1="165" x2="246" y2="165" stroke="#5F5E5A" stroke-width="1.6" marker-end="url(#arrow)"/>
+
+  <!-- v5.3.1 地基 -->
+  <rect x="250" y="64" width="185" height="200" rx="8" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.7"/>
+  <text class="cap" x="342" y="90" text-anchor="middle" fill="#534AB7">v5.3.1 地基</text>
+  <text class="big" x="342" y="124" text-anchor="middle" fill="#534AB7">①②⑤</text>
+  <text class="cap" x="342" y="156" text-anchor="middle">反模式库</text>
+  <text class="cap" x="342" y="180" text-anchor="middle">检索注入</text>
+  <text class="cap" x="342" y="204" text-anchor="middle">deliberate() 门控</text>
+  <text class="ts" x="342" y="238" text-anchor="middle" fill="#854F0B">低成本 · 高杠杆</text>
+
+  <line x1="437" y1="164" x2="466" y2="164" stroke="#5F5E5A" stroke-width="1.6" marker-end="url(#arrow)"/>
+
+  <!-- v5.4 闭环 -->
+  <rect x="470" y="64" width="185" height="200" rx="8" fill="#EAF3DE" stroke="#3B6D11" stroke-width="0.7"/>
+  <text class="cap" x="562" y="88" text-anchor="middle" fill="#3B6D11">v5.4 闭环自修</text>
+  <text class="big" x="562" y="120" text-anchor="middle" fill="#3B6D11">③④+循环</text>
+  <text class="cap" x="562" y="150" text-anchor="middle">对齐检验</text>
+  <text class="cap" x="562" y="174" text-anchor="middle">后台修订循环</text>
+  <text class="ts" x="562" y="210" text-anchor="middle" fill="#3B6D11">对齐达标才交付</text>
+  <text class="ts" x="562" y="234" text-anchor="middle" fill="#3B6D11">阈值分档·模糊国王兜底</text>
+
+  <!-- 底部时间轴 -->
+  <line x1="40" y1="300" x2="640" y2="300" stroke="#5F5E5A" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text class="ts" x="340" y="292" text-anchor="middle">迭代顺序：先建反模式地基，再靠真实经验跑通闭环</text>
+</svg>
