@@ -1,0 +1,58 @@
+<svg viewBox="0 0 680 580" xmlns="http://www.w3.org/2000/svg" style="font-family: system-ui, sans-serif;">
+  <defs>
+    <filter id="sh" x="-4%" y="-4%" width="108%" height="116%"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.18"/></filter>
+    <linearGradient id="gA" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#58a6ff"/><stop offset="1" stop-color="#2d6cdf"/></linearGradient>
+    <linearGradient id="gC" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7be0a0"/><stop offset="1" stop-color="#4dc970"/></linearGradient>
+    <linearGradient id="gG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a78bfa"/><stop offset="1" stop-color="#7c3aed"/></linearGradient>
+    <linearGradient id="gR" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f78166"/><stop offset="1" stop-color="#d45a3e"/></linearGradient>
+    <linearGradient id="gK" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f0c040"/><stop offset="1" stop-color="#d4a030"/></linearGradient>
+    <linearGradient id="gM" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#79c0ff"/><stop offset="1" stop-color="#388bfd"/></linearGradient>
+  </defs>
+
+  <rect width="680" height="580" rx="14" fill="#0d1117"/>
+
+  <text x="340" y="36" text-anchor="middle" font-size="18" font-weight="800" fill="#f0f0f0">🏛️  KAF v5.3 · Layered Architecture</text>
+  <text x="340" y="58" text-anchor="middle" font-size="11" fill="#8b949e" font-style="italic">Governance layer (NEW) cross-cuts every action · King identity is dynamic (resolve_king)</text>
+
+  <!-- Layer 1: Platform Adapters -->
+  <rect x="40" y="78" width="600" height="58" rx="10" fill="url(#gA)" filter="url(#sh)"/>
+  <text x="60" y="104" font-size="13" font-weight="800" fill="white">🧩  Platform Adapters</text>
+  <text x="60" y="124" font-size="10" fill="rgba(255,255,255,0.85)">WorkBuddy / Claude / OpenCode / Cursor / Kimi — 5 行代码接入任意平台；dispatch 派发到共享队列</text>
+
+  <!-- Layer 2: Coordinator Protocol -->
+  <rect x="40" y="144" width="600" height="58" rx="10" fill="url(#gC)" filter="url(#sh)"/>
+  <text x="60" y="170" font-size="13" font-weight="800" fill="#1a1a2e">🔄  Coordinator Protocol</text>
+  <text x="60" y="190" font-size="10" fill="rgba(26,26,46,0.85)">宰相轮值 · 3票 vs 1票 · 国王一票否决 · handover_state 交接</text>
+
+  <!-- Layer 3: Governance (NEW) -->
+  <rect x="40" y="210" width="600" height="62" rx="10" fill="url(#gG)" filter="url(#sh)" stroke="#c4b5fd" stroke-width="1.5"/>
+  <text x="60" y="236" font-size="13" font-weight="800" fill="white">🛡️  Governance Layer  ★ v5.3 NEW</text>
+  <text x="60" y="256" font-size="10" fill="rgba(255,255,255,0.9)">策略即代码(policy.json) · 急停(kill-switch) · 防篡改审计链 · Agent 身份归因(HMAC)</text>
+  <text x="560" y="232" font-size="9" fill="#ede9fe" font-weight="700">evaluate(): kill→attest→guard520→policy</text>
+  <text x="560" y="248" font-size="9" fill="#ede9fe" font-weight="700">全程写审计链</text>
+
+  <!-- Layer 4: 520 Runtime Guard -->
+  <rect x="40" y="280" width="600" height="58" rx="10" fill="url(#gR)" filter="url(#sh)"/>
+  <text x="60" y="306" font-size="13" font-weight="800" fill="white">⚡  520 Runtime Guard</text>
+  <text x="60" y="326" font-size="10" fill="rgba(255,255,255,0.85)">4 检查点(pre:delete/pre:destructive_op/post:write_memory/startup) · 铁律8/9/10 · agent侧门禁 kaf_gate.py</text>
+
+  <!-- Layer 5: Constitution-as-Code -->
+  <rect x="40" y="346" width="600" height="58" rx="10" fill="url(#gK)" filter="url(#sh)"/>
+  <text x="60" y="372" font-size="13" font-weight="800" fill="#1a1a2e">📜  Constitution-as-Code</text>
+  <text x="60" y="392" font-size="10" fill="rgba(26,26,46,0.85)">声明式宪法 JSON · economics_routing/dispatch/review_loop/shared_ledger/governance · sovereign.king_resolver 动态国王</text>
+
+  <!-- Layer 6: Memory Integrity -->
+  <rect x="40" y="412" width="600" height="58" rx="10" fill="url(#gM)" filter="url(#sh)"/>
+  <text x="60" y="438" font-size="13" font-weight="800" fill="white">🔐  Memory Integrity</text>
+  <text x="60" y="458" font-size="10" fill="rgba(255,255,255,0.85)">SHA-256 指纹 + drift 检测 + protect_write · 隔离墙 strict · 共享账本 .memory_ledger.db</text>
+
+  <!-- Action flow arrow (left side, descending) -->
+  <rect x="14" y="78" width="20" height="392" rx="6" fill="#21262d" stroke="#30363d"/>
+  <text x="24" y="270" text-anchor="middle" font-size="9" fill="#8b949e" transform="rotate(-90 24 270)">AGENT ACTION ↓</text>
+
+  <!-- King resolution callout -->
+  <rect x="40" y="486" width="600" height="78" rx="10" fill="#161b22" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="60" y="510" font-size="12" font-weight="800" fill="#c4b5fd">👑  King = resolve_king()  (v5.3 修正：不再硬编码${KING_NAME})</text>
+  <text x="60" y="530" font-size="10" fill="#8b949e">本地作者环境 → ${KING_NAME}    ｜    远程新手复制 → 当前 OS 用户 / operator</text>
+  <text x="60" y="548" font-size="10" fill="#8b949e">显式覆盖：环境变量 KAF_KING 或 kaf_config.json 的 {"king":"你的名字"}</text>
+</svg>
