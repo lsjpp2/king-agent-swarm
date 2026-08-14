@@ -1,0 +1,223 @@
+{
+  "$schema": "https://kaf.dev/constitution/v2",
+  "version": "5.4",
+  "code_status": "v5.4.2 全落地：地基①②⑤(v5.4.1) + 闭环③④+Loop Driver(v5.4.2)，全接 kaf_gate.py（retrieve/loop 子命令）；cognition_selftest 全 PASS。",
+  "name": "King-Agent Framework Constitution",
+  "effective_date": "2026-08-07",
+  "sovereign": {
+    "id": "human",
+    "title": "King",
+    "powers": ["veto", "amend", "appoint_coordinator"],
+    "irrevocable": true,
+    "king_resolver": "KAF_KING env > kaf_config.json > 本地作者环境(${KING_NAME}) > 当前OS用户/operator",
+    "note": "国王身份动态解析，绝不硬编码某个名字。本地作者环境默认${KING_NAME}；远程新手复制技能后默认'使用者即国王'(当前OS用户或operator)。部署者可用 KAF_KING 或 kaf_config.json 显式指定。"
+  },
+  "power_structure": {
+    "type": "hierarchical",
+    "coordinator": {
+      "title": "Prime Minister",
+      "votes": 3,
+      "rotatable": true,
+      "rotation_trigger": "king_command",
+      "handover_fields": ["active_tasks", "pending_decisions", "context_summary"]
+    },
+    "agents": {
+      "default_votes": 1,
+      "can_be_coordinator": true
+    }
+  },
+  "memory_wall": {
+    "isolation": "strict",
+    "rule": "agents_must_not_read_others_private_memory",
+    "shared_layer": "${KAF_SHARED_DIR}/",
+    "private_pattern": "{{agent_memory_path}}"
+  },
+  "rules": [
+    {
+      "id": "delete_auth",
+      "trigger": "pre:delete",
+      "require": "user_confirm",
+      "irreversible_action": "warn_and_block",
+      "source": "铁律10"
+    },
+    {
+      "id": "path_discipline",
+      "trigger": "pre:write",
+      "allow_only": "{{workspace}}/**",
+      "blocked_zones": ["Desktop", "Documents", "Downloads", "system_root"],
+      "source": "路径纪律"
+    },
+    {
+      "id": "script_required",
+      "trigger": "pre:destructive_op",
+      "require": "script_file",
+      "verify_after": true,
+      "source": "铁律8"
+    },
+    {
+      "id": "number_verify",
+      "trigger": "post:write_memory",
+      "check": "numbers_in_memory_must_be_verified",
+      "source": "铁律9"
+    },
+    {
+      "id": "memory_integrity",
+      "trigger": "startup",
+      "check": "fingerprint_match",
+      "on_fail": "block_and_alert",
+      "source": "520记忆保护"
+    }
+  ],
+  "rule_520": {
+    "enabled": true,
+    "baseline_date": "2026-05-20",
+    "principles": {
+      "traceable": "every_action_has_script_and_log",
+      "recoverable": "deletes_go_to_recycle_bin_config_backuped",
+      "fixable": "errors_can_rollback",
+      "evolvable": "extract_workflow_rules_skills"
+    },
+    "quadrant": {
+      "feedforward_determined": "execute_directly",
+      "feedforward_inferred": "research_first",
+      "feedback_determined": "archive_and_codify",
+      "feedback_inferred": "verify_dont_guess"
+    },
+    "iron_laws": {
+      "law_8": "script_then_execute_then_verify",
+      "law_9": "verify_any_number_in_memory",
+      "law_10": "show_list_before_delete"
+    },
+    "immutable": true,
+    "note": "就算世界灭亡，这个标准不能丢"
+  },
+  "anti_drift": {
+    "check_interval": 5,
+    "checks": [
+      "task_aligned_with_king_instruction",
+      "no_cross_memory_read",
+      "need_king_confirmation",
+      "memory_synced"
+    ]
+  },
+  "economics_routing": {
+    "enabled": true,
+    "source": "Cursor Agent Swarm 研究 · v5.2 方向1",
+    "principle": "质量相近但成本可差10倍；便宜模型干worker(占~80% token)，前沿模型只用于planner(占~2/3成本)",
+    "pricing_table": "projects/kaf/pricing.json",
+    "calibration": {
+      "enabled": true,
+      "usage_log": "projects/kaf/usage_log.json",
+      "recalibrate": "kaf calibrate",
+      "effect": "动态重算 ROLE_TOKEN_SHARE 写入 calibration.json，路由实时采纳"
+    },
+    "note": "路由不再靠硬编码权重，而读真实计价表；随真实用量自我校准"
+  },
+  "dispatch": {
+    "enabled": true,
+    "source": "Cursor Agent Swarm 研究 · v5.2 方向2",
+    "principle": "route 只推荐，dispatch 才真正交付；无原生跨 agent API 的平台走共享派发队列",
+    "queue": "${KAF_SHARED_DIR}/dispatch_queue.json",
+    "command": "kaf dispatch \"<task>\" [target_agent]",
+    "rule": "目标 agent 启动自检时读取队列并执行；执行完回写 status=done"
+  },
+  "review_loop": {
+    "enabled": true,
+    "source": "Cursor Agent Swarm 研究 · v5.2 方向3",
+    "principle": "低相关多视角叠加审查；任一 blocker 即否决并写回共享 Field Guide",
+    "command": "kaf review <file>  /  kaf review-commit <findings.json>",
+    "write_back": "${KAF_SHARED_DIR}/铁律/review_findings.md",
+    "rule": "BLOCK 结论 MUST 写回铁律/review_findings.md（Field Guide 双向化：agent 写给 agent）"
+  },
+  "shared_ledger": {
+    "enabled": true,
+    "source": "cursor/minisqlite 研究 · v5.2 方向4",
+    "principle": "结构化操作审计落在共享层，所有 agent 可读写同一本账",
+    "db": "${KAF_SHARED_DIR}/.memory_ledger.db",
+    "api": "open/execute/query (minisqlite 风格，零外部依赖)",
+    "dedup_with_memory_integrity": {
+      "memory_integrity": "每 agent 的文件指纹（防覆盖丢失）",
+      "memory_ledger": "共享操作审计（谁/何时/改了什么，可追溯）",
+      "rule": "指纹答'是否被篡改'，账本答'变更是否可追溯'，二者互补不重复"
+    }
+  },
+  "governance": {
+    "enabled": true,
+    "source": "GitHub 同类 Top 10 拆解 · microsoft/agent-governance-toolkit 对照系 · v5.3",
+    "principle": "治理从硬编码升级为声明式、可审计、可归因；与520运行时护栏互补",
+    "policy_file": "policy.json",
+    "components": {
+      "policy_as_code": "PolicyEngine.evaluate() 结构化 DENY(reason)/ALLOW；DENY优先；require为豁免条件",
+      "kill_switch": "共享状态急停(${KAF_SHARED_DIR}/governance/kill_switch.json)，激活即全局DENY",
+      "tamper_evident_audit": "hash链式append-only审计(audit_chain.log)，verify()可检测篡改",
+      "agent_attestation": "HMAC身份归因(attest)，未归因agent动作被DENY"
+    },
+    "evaluate_order": ["kill_switch", "attestation", "guard520", "policy_as_code"],
+    "protected_assets": "MEMORY.md/520/铁律/constitution.json 须 king_confirmed 方可写删移"
+  },
+  "cognition": {
+    "enabled": true,
+    "source": "Claw 会话清理事故 8f6d42dc 实证：防错强但同类错重复4+次 -> 缺智慧层",
+    "principle": "经验从只写不读(坟场)变为可运行、可闭环、可对齐检验的智慧层；受治理层约束",
+    "code_base": "v5.4.2 全落地(kaf/cognition/ 五零件 + loop_driver)，接 kaf_gate.py（retrieve/loop 子命令）",
+    "components": {
+      "anti_pattern_lib": {
+        "desc": "anti_patterns.jsonl：id/name/trigger/wrong/why/right/severity/source",
+        "path": "kaf/cognition/anti_patterns.jsonl",
+        "seed_source": "Claw 会话清理事件 8f6d42dc（8 条真实种子）",
+        "implemented": true
+      },
+      "retrieval_inject": {
+        "desc": "任务起点拉相关反模式进上下文，输出「⚠️ 历史反模式」注入块",
+        "path": "kaf/cognition/retrieval_inject.py",
+        "wired_into": "kaf_gate.py retrieve 子命令 + __init__ 导出",
+        "implemented": true
+      },
+      "deliberate_gate": {
+        "desc": "高利害动作前 deliberate() 自检；命中 high 反模式->HOLD 软刹车(列清单+等你确认)",
+        "path": "kaf/cognition/deliberate.py",
+        "wired_into": "kaf_gate.py check（高利害动作前触发，不硬拦、不高于国王否决）",
+        "implemented": true
+      },
+      "distillation": {
+        "desc": "经验蒸馏 {context,action,outcome,confidence}；低置信不注入",
+        "path": "kaf/cognition/experience_distillation.py",
+        "wired_into": "经验库 experience.jsonl；get_high_conf 供检索注入复用",
+        "implemented": true
+      },
+      "calibration_engine": {
+        "desc": "相似决策比对历史 outcome/confidence，标注误校准",
+        "path": "kaf/cognition/calibration_engine.py",
+        "wired_into": "依赖 experience.jsonl 历史相似决策",
+        "implemented": true
+      },
+      "loop_driver": {
+        "desc": "交付质量闭环：候选->对齐检验->未达标修订->再检验->收敛",
+        "path": "kaf/cognition/loop_driver.py",
+        "wired_into": "kaf_gate.py loop 子命令（--instruction/--candidate/--mode/--auto-fix）",
+        "implemented": true
+      }
+    },
+    "loop_driver": {
+      "enabled": true,
+      "max_rounds": 5,
+      "abort_on": ["520_guard", "kill_switch"],
+      "threshold": {
+        "hard": "可量化指令=100%对齐，差一项即修订，无需确认自动收敛",
+        "soft": "半量化=关键约束零违反+意图对齐>=80%，达标收敛、留痕备抽查",
+        "king_fallback": "模糊指令=不设自动阈值，<=1轮后升国王确认，不擅自定稿"
+      }
+    },
+    "constraint": "deliberate()/Loop 触发 520 护栏/kill-switch 立即中止，不高于国王否决权，不绕过 kaf_gate.py"
+  },
+  "amendment": {
+    "procedure": "king_confirm_required",
+    "agent_can_propose": true,
+    "agent_cannot_self_amend": true
+  },
+  "open_source": {
+    "repo": "https://github.com/lsjpp2/king-agent-swarm",
+    "license": "MIT",
+    "contribution": "user_feedback -> coordinator_evaluate -> king_confirm -> merge"
+  }
+}
