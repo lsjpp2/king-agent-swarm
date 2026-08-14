@@ -1,0 +1,207 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+kaf_gate.py — KAF 强制门禁 (Mandatory Gate)
+
+在任何 删除/移动/覆盖 操作前 MUST 运行本门禁。
+- BLOCK  → 退出码 1，操作须停止，展示清单后获用户明确确认+理由方可 --confirmed 重跑
+- WARN   → 退出码 0，提醒但未拦
+- OK     → 退出码 0，放行
+
+这是 KAF 在「无 OS/客户端 hook 接口」平台（如 WorkBuddy 桌面端）上的
+真实强制层：agent 侧强制。平台不提供 PreToolUse 钩子，则由 agent 自己
+在每次破坏性操作前调用本门禁并服从其结果。
+
+每次调用都会写入 kaf_gate_audit.log（带时间戳/结果/理由），供 enforced 自核查
+验证门禁"近期真在跑"，而非仅文件存在（杜绝"文件在但从不调用"的装饰强制）。
+
+Usage:
+    python kaf_gate.py check --op delete --target "D:/x/y"
+    python kaf_gate.py check --op delete --target "D:/x/y" --confirmed --reason "清理已推送的临时克隆"
+    python kaf_gate.py check --op move  --target "D:/a" --script "move.py" --verified --confirmed --reason "..."
+    python kaf_gate.py check --op write  --target "MEMORY.md" --content "新内容..."
+"""
+import sys
+import os
+import json
+import argparse
+from datetime import datetime
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from guard520 import Guard520, GuardResult
+from memory_integrity import MemoryIntegrity
+
+# 进智脊柱⑤ + v5.4 Loop Driver（接 5.3.1 地基 + v5.4.2 闭环）
+try:
+    from cognition.deliberate import Deliberate
+    from cognition.retrieval_inject import build_injection
+    from cognition.loop_driver import run_loop, align, simple_revise
+    _COG_OK = True
+except Exception:
+    _COG_OK = False
+
+AUDIT_LOG = os.path.join(os.path.dirname(os.path.abspath(__file__)), "kaf_gate_audit.log")
+DESTRUCTIVE = {"delete", "rm", "rmtree", "mv", "copy", "write"}
+# 进智自省触发集（与 deliberate.HIGH_STAKES 对齐）
+COG_HIGH_STAKES = {
+    "delete", "rm", "rmtree", "mv", "move", "write", "copy",
+    "archive", "rename", "batch_write", "publish",
+}
+
+
+def audit(op, target, status, confirmed, reason):
+    """每次门禁调用留痕，供 enforced 自核查验证"真在跑"。"""
+    try:
+        with open(AUDIT_LOG, "a", encoding="utf-8") as f:
+            f.write(f"[{datetime.now().isoformat()}] op={op} target={target} result={status} confirmed={confirmed} reason={reason}\n")
+    except Exception:
+        pass
+
+
+def _read_candidate(s):
+    """loop 候选物：若是已存在的文件路径则读内容，否则当作文本。"""
+    s = (s or "").strip()
+    if s and os.path.exists(s) and os.path.isfile(s):
+        try:
+            with open(s, encoding="utf-8") as f:
+                return f.read()
+        except Exception:
+            pass
+    return s
+
+
+def main():
+    p = argparse.ArgumentParser(description="KAF 强制门禁")
+    p.add_argument("action", choices=["check", "retrieve", "loop"], help="门禁动作(check=强制门禁 / retrieve=输出历史反模式注入块 / loop=交付质量闭环)")
+    p.add_argument("--op", required=False, default="",
+                   choices=["", "delete", "rm", "move", "mv", "write", "copy", "rmtree"],
+                   help="操作类型(check 必填；retrieve 无需)")
+    p.add_argument("--target", default="", help="目标路径")
+    p.add_argument("--script", default="", help="破坏性操作的脚本路径(铁律8)")
+    p.add_argument("--verified", action="store_true", help="操作已验证(铁律8)")
+    p.add_argument("--confirmed", action="store_true", help="已展示清单并获用户确认(铁律10)")
+    p.add_argument("--reason", default="", help="操作理由(铁律12：确认删除/移动/覆盖须可追溯)")
+    p.add_argument("--content", default="", help="write 操作的新内容(用于520保护检查)")
+    p.add_argument("--task", default="", help="任务描述(供 deliberate 反模式匹配 / retrieve 检索)")
+    p.add_argument("--instruction", default="", help="loop 模式：原始指令(逐条比对候选物)")
+    p.add_argument("--candidate", default="", help="loop 模式：候选交付物(文本或文件路径)")
+    p.add_argument("--mode", default="soft", choices=["hard", "soft", "king"], help="loop 对齐阈值三档")
+    p.add_argument("--max-rounds", type=int, default=5, help="loop 最大迭代轮次(熔断)")
+    p.add_argument("--auto-fix", action="store_true", help="loop 启用最简自动修订(演示)；真实 agent 用 LLM 修订替换")
+    p.add_argument("--constitution", default=None, help="constitution.json 路径")
+    args = p.parse_args()
+
+    # 进智脊柱②：检索注入子命令（任务起点拉历史反模式进上下文）
+    if args.action == "retrieve":
+        if _COG_OK:
+            block = build_injection(args.task or args.target)
+            print(block or "（无命中历史反模式）")
+        else:
+            print("（cognition 模块不可用，跳过检索注入）")
+        return 0
+
+    # 进智脊柱 v5.4 Loop Driver：交付质量闭环（比对指令→修订→再比对→收敛）
+    if args.action == "loop":
+        instr = args.instruction.strip()
+        cand = _read_candidate(args.candidate)
+        if not instr or not cand:
+            print("BLOCK: loop 须提供 --instruction 与 --candidate(文本或文件路径)")
+            return 1
+        revise = simple_revise if args.auto_fix else (lambda c, g: c)
+        res = run_loop(instr, cand, revise_fn=revise, mode=args.mode, max_rounds=args.max_rounds)
+        print(json.dumps({k: v for k, v in res.items() if k != "final"},
+                         ensure_ascii=False, indent=2))
+        print("FINAL_CANDIDATE:\n" + res["final"])
+        if res["needs_king"]:
+            print("=> 模糊指令：已跑基础对齐，需国王(人类)确认后定稿，不擅自收敛。")
+        elif res["converged"]:
+            print("=> 闭环收敛：候选物已对齐指令，可交付。")
+        else:
+            print("=> 未收敛(达迭代上限/熔断)：请国王(人类)介入或放宽阈值。")
+        return 0
+
+    # check 动作必须提供 --op
+    if not args.op:
+        print("BLOCK: check 动作须提供 --op <delete|rm|move|mv|write|copy|rmtree>")
+        return 1
+
+    # 归一化别名：move→mv, rm/rmtree→delete，确保破坏性判定一致（修 move 绕过门禁的 bug）
+    op = {"move": "mv", "rm": "delete", "rmtree": "delete"}.get(args.op, args.op)
+
+    guard = Guard520(args.constitution) if args.constitution else Guard520()
+
+    action = {
+        "type": op,
+        "target": args.target,
+        "script": args.script or None,
+        "verified": args.verified,
+        "user_confirmed": args.confirmed,
+    }
+
+    # --- 进智脊柱⑤：元认知门控(软刹车) ---
+    # 高利害动作前自省，命中历史反模式则降级为「列清单+等你确认」。
+    # 仅软提示(不返回非零)，520 护栏仍负责硬拦；不高于国王否决权。
+    if _COG_OK and op in COG_HIGH_STAKES:
+        cog = Deliberate()
+        v = cog.check(op, args.target, args.task or args.content or "")
+        if v.status == "HOLD":
+            print(f"DELIBERATE_HOLD: 命中历史反模式 [{v.matched}]")
+            print(f"  错误做法: {v.wrong}")
+            print(f"  正确替代: {v.right}")
+            print("  => 等同 520 软刹车：请先列清单并向用户确认后，再 --confirmed 执行。")
+            audit(op, args.target, "DELIBERATE_HOLD", args.confirmed, args.reason)
+        elif v.status == "WARN":
+            print(f"DELIBERATE_WARN: 注意历史反模式 [{v.matched}] —— 正确替代: {v.right}")
+            audit(op, args.target, "DELIBERATE_WARN", args.confirmed, args.reason)
+
+    # --- write 操作：520 记忆保护(防止删除受保护段落) ---
+    if op == "write" and args.target and args.content:
+        mi = MemoryIntegrity()
+        if not mi.protect_write(args.target, args.content):
+            print("BLOCK: 520保护检查未通过 — 受保护内容(520规则/铁律)将被删除，禁止写入")
+            print("=> 如需修改受保护段落，须先取得国王(人类)明确授权。")
+            audit(op, args.target, "BLOCK", args.confirmed, args.reason)
+            return 1
+        print("OK: write 通过 520 记忆保护检查")
+        audit(op, args.target, "OK", args.confirmed, args.reason)
+        return 0
+
+    # --- 确认类破坏性操作 MUST 提供理由(铁律12 可追溯，杜绝提权删除无说明) ---
+    if args.confirmed and op in DESTRUCTIVE and not args.reason:
+        print("BLOCK: 铁律12违规 — 确认删除/移动/覆盖须提供 --reason 说明理由(可追溯)")
+        print("=> 例：--reason \"清理已推送的临时克隆，可从GitHub HEAD a10083a 还原\"")
+        audit(op, args.target, "BLOCK", args.confirmed, "(missing reason)")
+        return 1
+
+    # --- 删除类：pre_delete (列清单 + 确认) ---
+    if op in ("delete", "rm", "rmtree"):
+        r = guard.pre_delete(action)
+    else:
+        # mv/copy 等：pre_execute (铁律8：须有脚本+已验证)
+        r = guard.pre_execute(action)
+
+    if r.status == GuardResult.BLOCK:
+        print(f"BLOCK: {r.message}")
+        items = r.data.get("items", [])
+        for it in items[:30]:
+            sz = it.get("size", "?")
+            note = it.get("note", "")
+            print(f"  - {it.get('path')}  ({sz} bytes) {note}")
+        print("\n=> 操作被拦截。须向用户展示上述清单并取得明确确认+理由后，")
+        print("   再加 --confirmed --reason 重跑本门禁方可通过。绝不可绕过。")
+        audit(op, args.target, "BLOCK", args.confirmed, args.reason)
+        return 1
+    elif r.status == GuardResult.WARN:
+        print(f"WARN: {r.message}")
+        audit(op, args.target, "WARN", args.confirmed, args.reason)
+        return 0
+    else:
+        msg = r.message or "放行"
+        print(f"OK: {msg}")
+        audit(op, args.target, "OK", args.confirmed, args.reason)
+        return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
