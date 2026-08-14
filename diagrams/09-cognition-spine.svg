@@ -1,0 +1,84 @@
+<svg viewBox="0 0 680 444" role="img" xmlns="http://www.w3.org/2000/svg">
+  <title>脊柱对照：防错已强，进智为空</title>
+  <desc>KAF 5.3 治理/防错层齐备；"可进化"实为只写不读的坟场；进智脊柱五零件全缺</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <style>
+      .th{font-family:var(--font-sans,sans-serif);font-size:16px;font-weight:600;fill:#2C2C2A}
+      .ts{font-family:var(--font-sans,sans-serif);font-size:12px;font-weight:400;fill:#5F5E5A}
+      .cap{font-family:var(--font-sans,sans-serif);font-size:12.5px;font-weight:500;fill:#2C2C2A}
+    </style>
+  </defs>
+
+  <text class="th" x="40" y="34">脊柱对照 · 防错已强，进智为空</text>
+  <text class="ts" x="40" y="56">KAF 5.3 治理层齐备；"可进化"=skill 自动封装=只写不读=坟场</text>
+
+  <rect x="40" y="86" width="290" height="42" rx="8" fill="#EAF3DE" stroke="#3B6D11" stroke-width="0.8"/>
+  <text class="th" x="185" y="112" text-anchor="middle">防错脊柱 · 已强</text>
+
+  <rect x="350" y="86" width="290" height="42" rx="8" fill="#FCEBEB" stroke="#A32D2D" stroke-width="0.8"/>
+  <text class="th" x="495" y="112" text-anchor="middle">进智脊柱 · 空</text>
+
+  <text x="340" y="112" text-anchor="middle" font-size="13" font-weight="700" fill="#5F5E5A">VS</text>
+
+  <!-- 左：防错已强 -->
+  <g>
+    <rect x="40" y="146" width="290" height="38" rx="7" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+    <text class="cap" x="56" y="170">520 护栏 / 可恢复</text>
+    <text x="314" y="170" text-anchor="end" font-size="15" font-weight="700" fill="#3B6D11">✓</text>
+  </g>
+  <g>
+    <rect x="40" y="190" width="290" height="38" rx="7" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+    <text class="cap" x="56" y="214">kill-switch 熔断</text>
+    <text x="314" y="214" text-anchor="end" font-size="15" font-weight="700" fill="#3B6D11">✓</text>
+  </g>
+  <g>
+    <rect x="40" y="234" width="290" height="38" rx="7" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+    <text class="cap" x="56" y="258">防篡改审计链</text>
+    <text x="314" y="258" text-anchor="end" font-size="15" font-weight="700" fill="#3B6D11">✓</text>
+  </g>
+  <g>
+    <rect x="40" y="278" width="290" height="38" rx="7" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+    <text class="cap" x="56" y="302">agent HMAC 背书</text>
+    <text x="314" y="302" text-anchor="end" font-size="15" font-weight="700" fill="#3B6D11">✓</text>
+  </g>
+  <g>
+    <rect x="40" y="322" width="290" height="38" rx="7" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+    <text class="cap" x="56" y="346">记忆隔离（红墙）</text>
+    <text x="314" y="346" text-anchor="end" font-size="15" font-weight="700" fill="#3B6D11">✓</text>
+  </g>
+
+  <!-- 右：进智为空 -->
+  <g>
+    <rect x="350" y="146" width="290" height="38" rx="7" fill="#FCEBEB" stroke="#A32D2D" stroke-width="0.5"/>
+    <text class="cap" x="366" y="170" fill="#7A2222">① 反模式库 Anti-pattern</text>
+    <text x="624" y="170" text-anchor="end" font-size="15" font-weight="700" fill="#A32D2D">✗</text>
+  </g>
+  <g>
+    <rect x="350" y="190" width="290" height="38" rx="7" fill="#FCEBEB" stroke="#A32D2D" stroke-width="0.5"/>
+    <text class="cap" x="366" y="214" fill="#7A2222">② 检索注入 Retrieval</text>
+    <text x="624" y="214" text-anchor="end" font-size="15" font-weight="700" fill="#A32D2D">✗</text>
+  </g>
+  <g>
+    <rect x="350" y="234" width="290" height="38" rx="7" fill="#FCEBEB" stroke="#A32D2D" stroke-width="0.5"/>
+    <text class="cap" x="366" y="258" fill="#7A2222">③ 经验蒸馏（置信度）</text>
+    <text x="624" y="258" text-anchor="end" font-size="15" font-weight="700" fill="#A32D2D">✗</text>
+  </g>
+  <g>
+    <rect x="350" y="278" width="290" height="38" rx="7" fill="#FCEBEB" stroke="#A32D2D" stroke-width="0.5"/>
+    <text class="cap" x="366" y="302" fill="#7A2222">④ 决策校准引擎</text>
+    <text x="624" y="302" text-anchor="end" font-size="15" font-weight="700" fill="#A32D2D">✗</text>
+  </g>
+  <g>
+    <rect x="350" y="322" width="290" height="38" rx="7" fill="#FCEBEB" stroke="#A32D2D" stroke-width="0.5"/>
+    <text class="cap" x="366" y="346" fill="#7A2222">⑤ 元认知门控 deliberate()</text>
+    <text x="624" y="346" text-anchor="end" font-size="15" font-weight="700" fill="#A32D2D">✗</text>
+  </g>
+
+  <rect x="40" y="378" width="600" height="46" rx="8" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.8"/>
+  <text class="cap" x="340" y="400" text-anchor="middle" fill="#854F0B">记忆不断档，但同类错误（一刀切/数字反复/标题 bug）重复 4+ 次 → 缺"智慧"层</text>
+
+  <line x1="340" y1="128" x2="340" y2="144" stroke="#5F5E5A" stroke-width="1.2" marker-end="url(#arrow)"/>
+</svg>
