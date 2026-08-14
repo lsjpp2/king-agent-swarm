@@ -1,0 +1,72 @@
+{
+  "$schema": "https://kaf.dev/constitution/v1",
+  "version": "5.0",
+  "name": "Basic KAF Constitution Example",
+  "sovereign": {
+    "id": "human",
+    "title": "King",
+    "powers": ["veto", "amend", "appoint_coordinator"],
+    "irrevocable": true
+  },
+  "power_structure": {
+    "type": "hierarchical",
+    "coordinator": {
+      "title": "Prime Minister",
+      "votes": 3,
+      "rotatable": true
+    },
+    "agents": {
+      "default_votes": 1,
+      "can_be_coordinator": true
+    }
+  },
+  "memory_wall": {
+    "isolation": "strict",
+    "rule": "agents_must_not_read_others_private_memory",
+    "shared_layer": "./shared/",
+    "private_pattern": "./{{agent}}/memory/"
+  },
+  "rules": [
+    {
+      "id": "delete_auth",
+      "trigger": "pre:delete",
+      "require": "user_confirm",
+      "irreversible_action": "warn_and_block"
+    },
+    {
+      "id": "path_discipline",
+      "trigger": "pre:write",
+      "allow_only": "./workspace/**"
+    },
+    {
+      "id": "script_required",
+      "trigger": "pre:destructive_op",
+      "require": "script_file",
+      "verify_after": true
+    }
+  ],
+  "rule_520": {
+    "enabled": true,
+    "principles": {
+      "traceable": "every_action_has_script_and_log",
+      "recoverable": "deletes_go_to_recycle_bin",
+      "fixable": "errors_can_rollback",
+      "evolvable": "extract_workflows_and_skills"
+    },
+    "iron_laws": {
+      "law_8": "script_then_execute_then_verify",
+      "law_9": "verify_any_number_in_memory",
+      "law_10": "show_list_before_delete"
+    },
+    "immutable": true
+  },
+  "anti_drift": {
+    "check_interval": 5,
+    "checks": ["task_aligned", "no_cross_memory", "need_confirmation", "memory_synced"]
+  },
+  "amendment": {
+    "procedure": "sovereign_confirm_required",
+    "agent_can_propose": true,
+    "agent_cannot_self_amend": true
+  }
+}
