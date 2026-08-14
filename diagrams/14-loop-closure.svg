@@ -1,0 +1,89 @@
+<svg viewBox="0 0 680 560" xmlns="http://www.w3.org/2000/svg" style="font-family: system-ui, sans-serif;">
+  <defs>
+    <filter id="sh" x="-4%" y="-4%" width="108%" height="116%"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.18"/></filter>
+    <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#8b949e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+    <marker id="arg" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#3fb950" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+    <linearGradient id="gT" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2dd4bf"/><stop offset="1" stop-color="#0d9488"/></linearGradient>
+    <linearGradient id="gG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a78bfa"/><stop offset="1" stop-color="#7c3aed"/></linearGradient>
+  </defs>
+
+  <rect width="680" height="560" rx="14" fill="#0d1117"/>
+
+  <text x="340" y="36" text-anchor="middle" font-size="18" font-weight="800" fill="#f0f0f0">🔁  KAF v5.4 · 交付质量闭环（Loop Driver）</text>
+  <text x="340" y="58" text-anchor="middle" font-size="11" fill="#8b949e" font-style="italic">后台自动对齐检验 → 修订 → 再检验 → 收敛；把"查证核实"变成框架本能</text>
+
+  <!-- 候选产出 -->
+  <rect x="60" y="80" width="200" height="50" rx="9" fill="#21262d" stroke="#30363d" filter="url(#sh)"/>
+  <text x="160" y="102" text-anchor="middle" font-size="12" font-weight="800" fill="#e6edf3">① 候选产出</text>
+  <text x="160" y="120" text-anchor="middle" font-size="9" fill="#8b949e">不直接定稿</text>
+
+  <!-- 对齐检验 -->
+  <rect x="60" y="156" width="200" height="56" rx="9" fill="url(#gG)" filter="url(#sh)"/>
+  <text x="160" y="180" text-anchor="middle" font-size="12" font-weight="800" fill="white">④ 对齐检验</text>
+  <text x="160" y="198" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.9)">逐条比对指令</text>
+
+  <!-- 交付 -->
+  <rect x="60" y="430" width="200" height="50" rx="9" fill="#238636" filter="url(#sh)"/>
+  <text x="160" y="452" text-anchor="middle" font-size="12" font-weight="800" fill="white">✅ 交付最终成品</text>
+  <text x="160" y="470" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.9)">对齐达标/迭代上限</text>
+
+  <!-- 修订 -->
+  <rect x="400" y="156" width="200" height="56" rx="9" fill="url(#gT)" filter="url(#sh)"/>
+  <text x="500" y="180" text-anchor="middle" font-size="12" font-weight="800" fill="#042f2e">③ 修订策略</text>
+  <text x="500" y="198" text-anchor="middle" font-size="9" fill="rgba(4,47,46,0.9)">按差距清单+经验</text>
+
+  <!-- 下一版候选 -->
+  <rect x="400" y="240" width="200" height="50" rx="9" fill="#21262d" stroke="#30363d" filter="url(#sh)"/>
+  <text x="500" y="262" text-anchor="middle" font-size="12" font-weight="800" fill="#e6edf3">下一版候选</text>
+  <text x="500" y="280" text-anchor="middle" font-size="9" fill="#8b949e">喂回③蒸馏</text>
+
+  <!-- 主箭头 -->
+  <line x1="160" y1="130" x2="160" y2="154" stroke="#8b949e" stroke-width="1.6" marker-end="url(#ar)"/>
+  <!-- 检验 -> 修订 (未达标) -->
+  <line x1="262" y1="184" x2="398" y2="184" stroke="#8b949e" stroke-width="1.6" marker-end="url(#ar)"/>
+  <text x="330" y="176" text-anchor="middle" font-size="9" fill="#f0883e" font-weight="700">未达标</text>
+  <!-- 修订 -> 下一版 -->
+  <line x1="500" y1="212" x2="500" y2="238" stroke="#8b949e" stroke-width="1.6" marker-end="url(#ar)"/>
+  <!-- 下一版 -> 回检验 (绕过候选，直接再检验) -->
+  <path d="M400 266 C 320 290, 200 300, 160 212" fill="none" stroke="#2dd4bf" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#ar)"/>
+  <text x="250" y="300" text-anchor="middle" font-size="9" fill="#5eead4" font-style="italic">再检验</text>
+  <!-- 检验 -> 交付 (达标) -->
+  <line x1="160" y1="212" x2="160" y2="428" stroke="#3fb950" stroke-width="1.8" marker-end="url(#arg)"/>
+  <text x="178" y="330" font-size="9" fill="#3fb950" font-weight="700">对齐达标</text>
+
+  <!-- 阈值三档卡 -->
+  <g>
+    <rect x="40" y="356" width="190" height="150" rx="9" fill="#161b22" stroke="#3fb950" stroke-width="0.8"/>
+    <text x="135" y="380" text-anchor="middle" font-size="11" font-weight="800" fill="#3fb950">硬阈值</text>
+    <text x="50" y="400" font-size="9" fill="#8b949e">可量化指令</text>
+    <text x="50" y="416" font-size="9" fill="#8b949e">= 100% 对齐</text>
+    <text x="50" y="432" font-size="9" fill="#8b949e">差一项即修订</text>
+    <text x="50" y="448" font-size="9" fill="#8b949e">无需确认自动收敛</text>
+    <text x="50" y="470" font-size="8.5" fill="#5eead4">e.g. 归档N条+</text>
+    <text x="50" y="484" font-size="8.5" fill="#5eead4">search零命中</text>
+  </g>
+  <g>
+    <rect x="245" y="356" width="190" height="150" rx="9" fill="#161b22" stroke="#d4a030" stroke-width="0.8"/>
+    <text x="340" y="380" text-anchor="middle" font-size="11" font-weight="800" fill="#d4a030">软阈值</text>
+    <text x="255" y="400" font-size="9" fill="#8b949e">半量化指令</text>
+    <text x="255" y="416" font-size="9" fill="#8b949e">关键约束零违反</text>
+    <text x="255" y="432" font-size="9" fill="#8b949e">+ 意图对齐≥80%</text>
+    <text x="255" y="448" font-size="9" fill="#8b949e">达标即收敛</text>
+    <text x="255" y="470" font-size="8.5" fill="#d4a030">每轮留痕备抽查</text>
+    <text x="255" y="484" font-size="8.5" fill="#d4a030">e.g. 标题一目了然</text>
+  </g>
+  <g>
+    <rect x="450" y="356" width="190" height="150" rx="9" fill="#161b22" stroke="#f85149" stroke-width="0.8"/>
+    <text x="545" y="380" text-anchor="middle" font-size="11" font-weight="800" fill="#f85149">国王兜底</text>
+    <text x="460" y="400" font-size="9" fill="#8b949e">模糊指令</text>
+    <text x="460" y="416" font-size="9" fill="#8b949e">不设自动阈值</text>
+    <text x="460" y="432" font-size="9" fill="#8b949e">跑≤1轮基础对齐</text>
+    <text x="460" y="448" font-size="9" fill="#8b949e">升级国王确认</text>
+    <text x="460" y="470" font-size="8.5" fill="#f0883e">不擅自定稿</text>
+    <text x="460" y="484" font-size="8.5" fill="#f0883e">e.g. 整理好看点</text>
+  </g>
+
+  <!-- 熔断条 -->
+  <rect x="40" y="516" width="600" height="34" rx="8" fill="#161b22" stroke="#f85149" stroke-width="0.8"/>
+  <text x="340" y="538" text-anchor="middle" font-size="10" fill="#8b949e">🛑 默认最大 5 轮 · 触发 520 护栏 / kill-switch 立即中止交还国王 · 每轮可逆副本+审计链</text>
+</svg>
