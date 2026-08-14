@@ -1,0 +1,18 @@
+{
+  "version": "1.0",
+  "currency": "relative_index",
+  "baseline": "economy = 1.0",
+  "note": "相对计价指数（以 economy 档=1.0 为基准）。数值取自各平台公开定价的相对量级，可用 kaf calibrate 据 usage_log 动态校准。真实 USD 价以各平台官网为准。",
+  "agents": {
+    "claude":    { "tier": "frontier", "cost_per_1m_in": 15.0, "cost_per_1m_out": 75.0, "model": "Claude Opus 级(前沿)", "relative_index": 10.0 },
+    "workbuddy": { "tier": "balanced", "cost_per_1m_in": 3.0,  "cost_per_1m_out": 15.0, "model": "混合均衡",         "relative_index": 3.0 },
+    "cursor":    { "tier": "balanced", "cost_per_1m_in": 3.0,  "cost_per_1m_out": 15.0, "model": "Cursor 均衡",      "relative_index": 3.0 },
+    "opencode":  { "tier": "economy",  "cost_per_1m_in": 0.5,  "cost_per_1m_out": 1.5,  "model": "本地/轻量",       "relative_index": 1.0 },
+    "kimi":      { "tier": "economy",  "cost_per_1m_in": 0.5,  "cost_per_1m_out": 1.5,  "model": "Kimi 长文",        "relative_index": 1.0 }
+  },
+  "role_estimated_tokens": {
+    "planner": 8000,
+    "worker": 40000,
+    "reviewer": 4000
+  }
+}
