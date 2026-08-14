@@ -1,0 +1,100 @@
+<svg viewBox="0 0 680 520" xmlns="http://www.w3.org/2000/svg" style="font-family: system-ui, sans-serif;">
+  <defs>
+    <filter id="sh" x="-4%" y="-4%" width="108%" height="116%"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.18"/></filter>
+    <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#8b949e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+    <linearGradient id="gT" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2dd4bf"/><stop offset="1" stop-color="#0d9488"/></linearGradient>
+    <linearGradient id="gG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a78bfa"/><stop offset="1" stop-color="#7c3aed"/></linearGradient>
+  </defs>
+
+  <rect width="680" height="520" rx="14" fill="#0d1117"/>
+
+  <text x="340" y="36" text-anchor="middle" font-size="18" font-weight="800" fill="#f0f0f0">🧠  KAF v5.4 · Cognition Spine 全景</text>
+  <text x="340" y="58" text-anchor="middle" font-size="11" fill="#8b949e" font-style="italic">经验从"只写不读(坟场)"变为"注入→校准→门控→蒸馏→回环"的可运行脊柱</text>
+
+  <!-- 顶部数据流 -->
+  <rect x="34" y="92" width="108" height="50" rx="9" fill="url(#gT)" filter="url(#sh)"/>
+  <text x="88" y="114" text-anchor="middle" font-size="12" font-weight="800" fill="#042f2e">任务开始</text>
+  <text x="88" y="132" text-anchor="middle" font-size="9" fill="#042f2e">②注入</text>
+
+  <rect x="166" y="92" width="108" height="50" rx="9" fill="url(#gT)" filter="url(#sh)"/>
+  <text x="220" y="114" text-anchor="middle" font-size="12" font-weight="800" fill="#042f2e">④ 校准引擎</text>
+  <text x="220" y="132" text-anchor="middle" font-size="9" fill="#042f2e">比对历史</text>
+
+  <rect x="298" y="92" width="108" height="50" rx="9" fill="url(#gT)" filter="url(#sh)"/>
+  <text x="352" y="114" text-anchor="middle" font-size="12" font-weight="800" fill="#042f2e">⑤ deliberate()</text>
+  <text x="352" y="132" text-anchor="middle" font-size="9" fill="#042f2e">门控高利害</text>
+
+  <rect x="430" y="92" width="108" height="50" rx="9" fill="#21262d" stroke="#30363d" filter="url(#sh)"/>
+  <text x="484" y="114" text-anchor="middle" font-size="12" font-weight="800" fill="#e6edf3">执行</text>
+  <text x="484" y="132" text-anchor="middle" font-size="9" fill="#8b949e">落地产出</text>
+
+  <rect x="562" y="92" width="108" height="50" rx="9" fill="url(#gT)" filter="url(#sh)"/>
+  <text x="616" y="114" text-anchor="middle" font-size="12" font-weight="800" fill="#042f2e">③ 蒸馏</text>
+  <text x="616" y="132" text-anchor="middle" font-size="9" fill="#042f2e">带置信度回写</text>
+
+  <!-- 数据流箭头 -->
+  <line x1="142" y1="117" x2="164" y2="117" stroke="#8b949e" stroke-width="1.6" marker-end="url(#ar)"/>
+  <line x1="274" y1="117" x2="296" y2="117" stroke="#8b949e" stroke-width="1.6" marker-end="url(#ar)"/>
+  <line x1="406" y1="117" x2="428" y2="117" stroke="#8b949e" stroke-width="1.6" marker-end="url(#ar)"/>
+  <line x1="538" y1="117" x2="560" y2="117" stroke="#8b949e" stroke-width="1.6" marker-end="url(#ar)"/>
+  <!-- 回环 -->
+  <path d="M616 142 C 616 196, 88 196, 88 142" fill="none" stroke="#2dd4bf" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#ar)"/>
+  <text x="352" y="190" text-anchor="middle" font-size="10" fill="#5eead4" font-style="italic">回环：每轮修订策略喂回经验库，越跑越准</text>
+
+  <!-- 五零件说明卡 -->
+  <g>
+    <rect x="34" y="216" width="125" height="118" rx="9" fill="#161b22" stroke="#0d9488" stroke-width="0.8"/>
+    <text x="96" y="240" text-anchor="middle" font-size="12" font-weight="800" fill="#5eead4">① 反模式库</text>
+    <text x="44" y="262" font-size="9.5" fill="#8b949e">记录"绝对不要做"</text>
+    <text x="44" y="278" font-size="9.5" fill="#8b949e">+ 触发条件</text>
+    <text x="44" y="294" font-size="9.5" fill="#8b949e">+ 正确替代</text>
+    <text x="44" y="310" font-size="9.5" fill="#8b949e">种子: 8f6d42dc</text>
+    <text x="44" y="326" font-size="9.5" fill="#8b949e">(Claw清理事故)</text>
+  </g>
+  <g>
+    <rect x="171" y="216" width="125" height="118" rx="9" fill="#161b22" stroke="#0d9488" stroke-width="0.8"/>
+    <text x="233" y="240" text-anchor="middle" font-size="12" font-weight="800" fill="#5eead4">② 检索注入</text>
+    <text x="181" y="262" font-size="9.5" fill="#8b949e">任务起点主动</text>
+    <text x="181" y="278" font-size="9.5" fill="#8b949e">拉相关反模式</text>
+    <text x="181" y="294" font-size="9.5" fill="#8b949e">+ 高置信经验</text>
+    <text x="181" y="310" font-size="9.5" fill="#8b949e">进上下文</text>
+    <text x="181" y="326" font-size="9.5" fill="#8b949e">(解决只写不读)</text>
+  </g>
+  <g>
+    <rect x="308" y="216" width="125" height="118" rx="9" fill="#161b22" stroke="#0d9488" stroke-width="0.8"/>
+    <text x="370" y="240" text-anchor="middle" font-size="12" font-weight="800" fill="#5eead4">③ 经验蒸馏</text>
+    <text x="318" y="262" font-size="9.5" fill="#8b949e">{context, action,</text>
+    <text x="318" y="278" font-size="9.5" fill="#8b949e"> outcome, conf}</text>
+    <text x="318" y="294" font-size="9.5" fill="#8b949e">置信度累积</text>
+    <text x="318" y="310" font-size="9.5" fill="#8b949e">低置信不注入</text>
+    <text x="318" y="326" font-size="9.5" fill="#8b949e">防噪声污染</text>
+  </g>
+  <g>
+    <rect x="445" y="216" width="125" height="118" rx="9" fill="#161b22" stroke="#0d9488" stroke-width="0.8"/>
+    <text x="507" y="240" text-anchor="middle" font-size="12" font-weight="800" fill="#5eead4">④ 校准引擎</text>
+    <text x="455" y="262" font-size="9.5" fill="#8b949e">相似决策比对</text>
+    <text x="455" y="278" font-size="9.5" fill="#8b949e">历史 outcome/conf</text>
+    <text x="455" y="294" font-size="9.5" fill="#8b949e">标注误校准</text>
+    <text x="455" y="310" font-size="9.5" fill="#8b949e">不再从零推理</text>
+    <text x="455" y="326" font-size="9.5" fill="#8b949e">受治理约束</text>
+  </g>
+  <g>
+    <rect x="582" y="216" width="125" height="118" rx="9" fill="#161b22" stroke="#0d9488" stroke-width="0.8"/>
+    <text x="644" y="240" text-anchor="middle" font-size="12" font-weight="800" fill="#5eead4">⑤ deliberate()</text>
+    <text x="592" y="262" font-size="9.5" fill="#8b949e">高利害前自问</text>
+    <text x="592" y="278" font-size="9.5" fill="#8b949e">"是否重蹈覆辙"</text>
+    <text x="592" y="294" font-size="9.5" fill="#8b949e">命中→正确替代</text>
+    <text x="592" y="310" font-size="9.5" fill="#8b949e">或升国王确认</text>
+    <text x="592" y="326" font-size="9.5" fill="#8b949e">不高于否决权</text>
+  </g>
+
+  <!-- Loop Driver 条 -->
+  <rect x="34" y="356" width="673" height="60" rx="10" fill="#0d9488" filter="url(#sh)"/>
+  <text x="60" y="382" font-size="13" font-weight="800" fill="#042f2e">🔁  Loop Driver 闭环自修（v5.4 核心）</text>
+  <text x="60" y="402" font-size="10" fill="#042f2e">候选产出 → 后台对齐检验 → 未达标自动修订 → 再检验 → 收敛交付；阈值分三档（硬/软/国王兜底）</text>
+
+  <!-- 与 governance 关系 -->
+  <rect x="34" y="432" width="673" height="60" rx="10" fill="#161b22" stroke="#7c3aed" stroke-width="1"/>
+  <text x="60" y="458" font-size="12" font-weight="800" fill="#c4b5fd">🛡️ 进智受治理层约束（正交互补）</text>
+  <text x="60" y="478" font-size="10" fill="#8b949e">触发 520 护栏 / kill-switch → 循环立即中止交还国王；deliberate() 不优于国王否决；无兜底的自学习=灾难</text>
+</svg>
