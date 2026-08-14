@@ -1,0 +1,75 @@
+<svg viewBox="0 0 680 420" xmlns="http://www.w3.org/2000/svg" style="font-family: system-ui, sans-serif;">
+  <defs>
+    <filter id="sh" x="-4%" y="-4%" width="108%" height="116%"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.18"/></filter>
+    <linearGradient id="gK" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f0c040"/><stop offset="1" stop-color="#d4a030"/></linearGradient>
+    <linearGradient id="gP" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7be0a0"/><stop offset="1" stop-color="#4dc970"/></linearGradient>
+    <linearGradient id="gA" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#58a6ff"/><stop offset="1" stop-color="#2d6cdf"/></linearGradient>
+    <linearGradient id="gR" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f78166"/><stop offset="1" stop-color="#d45a3e"/></linearGradient>
+  </defs>
+
+  <rect width="680" height="420" rx="14" fill="#0d1117"/>
+
+  <!-- Title -->
+  <text x="340" y="38" text-anchor="middle" font-size="18" font-weight="800" fill="#f0f0f0" letter-spacing="0.5">👑  King Agent Swarm · Power Structure</text>
+  <text x="340" y="60" text-anchor="middle" font-size="11" fill="#8b949e" font-style="italic">King → Prime Minister → Agents (constitutional hierarchy)</text>
+
+  <!-- King box -->
+  <rect x="240" y="78" width="200" height="56" rx="12" fill="url(#gK)" filter="url(#sh)"/>
+  <text x="340" y="106" text-anchor="middle" font-size="16" font-weight="800" fill="#1a1a2e">👑  KING</text>
+  <text x="340" y="126" text-anchor="middle" font-size="11" fill="rgba(26,26,46,0.85)" font-weight="600">Sovereign · Absolute Veto</text>
+
+  <!-- PM box -->
+  <rect x="240" y="162" width="200" height="56" rx="12" fill="url(#gP)" filter="url(#sh)"/>
+  <text x="340" y="190" text-anchor="middle" font-size="15" font-weight="800" fill="#1a1a2e">🔶  PRIME MINISTER</text>
+  <text x="340" y="210" text-anchor="middle" font-size="10" fill="rgba(26,26,46,0.8)">Rotates on King's command · 3 votes in conflict</text>
+
+  <!-- Arrow: King → PM -->
+  <path d="M 340 134 L 340 156" stroke="#f0c040" stroke-width="2.5" fill="none" marker-end="url(#aK)"/>
+  <text x="358" y="148" font-size="10" fill="#f0c040" font-weight="600">appoints / commands</text>
+
+  <!-- Agents row -->
+  <!-- Agent 1 -->
+  <rect x="38" y="254" width="145" height="52" rx="10" fill="url(#gA)" filter="url(#sh)"/>
+  <text x="110" y="280" text-anchor="middle" font-size="13" font-weight="700" fill="white">🤖  Agent A</text>
+  <text x="110" y="298" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.8)">can be PM · 1 vote</text>
+
+  <!-- Agent 2 -->
+  <rect x="205" y="254" width="145" height="52" rx="10" fill="url(#gA)" filter="url(#sh)"/>
+  <text x="278" y="280" text-anchor="middle" font-size="13" font-weight="700" fill="white">🤖  Agent B</text>
+  <text x="278" y="298" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.8)">can be PM · 1 vote</text>
+
+  <!-- Agent 3 -->
+  < rect x="372" y="254" width="145" height="52" rx="10" fill="url(#gR)" filter="url(#sh)"/>
+  <text x="445" y="280" text-anchor="middle" font-size="13" font-weight="700" fill="white">🤖  Agent C</text>
+  <text x="445" y="298" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.8)">can be PM · 1 vote</text>
+
+  <!-- Agent N -->
+  <rect x="539" y="254" width="105" height="52" rx="10" fill="#30363d" filter="url(#sh)" stroke="#58a6ff" stroke-width="1" stroke-dasharray="4 3"/>
+  <text x="592" y="280" text-anchor="middle" font-size="13" font-weight="700" fill="#58a6ff">🤖  ...</text>
+  <text x="592" y="298" text-anchor="middle" font-size="9" fill="#8b949e">more agents</text>
+
+  <!-- Arrows: PM → Agents -->
+  <path d="M 262 218 L 110 250" stroke="#58a6ff" stroke-width="2" fill="none" marker-end="url(#aP)" opacity="0.8"/>
+  <path d="M 340 218 L 278 250" stroke="#58a6ff" stroke-width="2" fill="none" marker-end="url(#aP)" opacity="0.8"/>
+  <path d="M 418 218 L 445 250" stroke="#58a6ff" stroke-width="2" fill="none" marker-end="url(#aP)" opacity="0.8"/>
+  <path d="M 460 218 L 592 250" stroke="#58a6ff" stroke-width="1.5" fill="none" stroke-dasharray="4 3" marker-end="url(#aP)" opacity="0.6"/>
+
+  <!-- Coordination arrow (bidirectional) -->
+  <path d="M 178 280 L 196 280" stroke="#7be0a0" stroke-width="1.5" fill="none" marker-end="url(#aG)" opacity="0.5"/>
+  <path d="M 320 280 L 338 280" stroke="#7be0a0" stroke-width="1.5" fill="none" marker-end="url(#aG)" opacity="0.5"/>
+  <text x="340" y="274" text-anchor="middle" font-size="9" fill="#7be0a0" opacity="0.7">coordinate via shared layer</text>
+
+  <!-- Legend -->
+  <rect x="20" y="326" width="640" height="78" rx="8" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+  <text x="36" y="350" font-size="12" font-weight="700" fill="#f0c040">⚡  How it works</text>
+  <text x="36" y="370" font-size="10" fill="#8b949e">• King gives command → King says "X is PM now" → immediate rotation</text>
+  <text x="36" y="386" font-size="10" fill="#8b949e">• PM coordinates → PM dispatches tasks, resolves conflicts (3 votes vs 1)</text>
+  <text x="36" y="402" font-size="10" fill="#8b949e">• King's veto → King can override any decision at any time</text>
+
+  <!-- marker definitions -->
+  <defs>
+    <marker id="aK" markerWidth="8" markerHeight="8" refX="4" refY="4"><circle cx="4" cy="4" r="3" fill="#f0c040"/></marker>
+    <marker id="aP" markerWidth="8" markerHeight="8" refX="4" refY="4"><circle cx="4" cy="4" r="3" fill="#58a6ff"/></marker>
+    <marker id="aG" markerWidth="8" markerHeight="8" refX="4" refY="4"><circle cx="4" cy="4" r="2.5" fill="#7be0a0"/></marker>
+  </defs>
+</svg>
