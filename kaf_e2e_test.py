@@ -51,7 +51,7 @@ else:
 # 消费者：拉取本测试工单，真正执行（调用 economics_router 路由 = 真实干活），写结果，置 done
 if ticket is not None:
     tid = ticket["id"]
-    sys.path.insert(0, KAF_DIR)
+    sys.path.insert(0, os.path.join(KAF_DIR, "kaf"))
     from economics_router import EconomicsRouter
     res = EconomicsRouter().route(ticket["task"])
     result_text = f"routed->agent={res['agent']} cost={res['est_relative_cost']} reason={res['reason']}"

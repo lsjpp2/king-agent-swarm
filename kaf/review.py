@@ -37,8 +37,20 @@ PERSPECTIVES = {
         "prompt": "仅从代码风格与可维护性角度审查，列出改进点，不要评价其他方面。",
     },
     "economics": {
-        "focus": "经济性：是否用对了模型/是否过度设计/是否可用更便宜方案",
-        "prompt": "仅从成本-质量经济性角度审查，指出是否浪费前沿模型或过度工程，不要评价其他方面。",
+        "focus": ("经济性：是否用对了模型档位(T2 复杂度 80/15/5)/是否过度设计"
+                  "(Ponytail 7 级梯)/token 开销落在哪一层(T1 四层)"),
+        "prompt": (
+            "仅从成本-质量经济性角度审查，三条并行检查，不要评价其他方面：\n"
+            "(1) 过度设计[Ponytail 7 级梯]：need?→exists?→stdlib?→native?→dep?→oneliner?→minimal，"
+            "是否可用标准库/原生平台能力/已装依赖替代，是否可一行解决；\n"
+            "(2) 模型档位[v5.6 T2]：任务复杂度属 routine/moderate/complex 哪级？"
+            "是否把 routine 级活派给了 frontier 档模型（违反 80/15/5 纪律）？"
+            "或把 complex 级活压给了 economy 档（省钱省出返工）？\n"
+            "(3) token 层[v5.6 T1]：主要开销落在 code_read(-66%)/command_output(-65%)/"
+            "prose_output(-6%)/code_gen(-40%) 哪一层？"
+            "注意 Ponytail 只治 code_gen 层，若开销实际在读码/命令输出层，"
+            "则精简代码救不了成本，须指出真正的省钱着力点。"
+        ),
     },
 }
 

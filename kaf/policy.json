@@ -10,37 +10,106 @@
       "id": "gov-520-write-protect",
       "effect": "deny",
       "match": {
-        "action": ["write", "delete", "move"],
+        "action": [
+          "write",
+          "delete",
+          "move"
+        ],
         "resource_regex": ".*(MEMORY\\.md|520|铁律|constitution\\.json)"
       },
-      "require": { "king_confirmed": true },
+      "require": {
+        "king_confirmed": true
+      },
       "reason": "宪法/520/铁律/记忆为受保护资产，须国王显式确认(king_confirmed)方可写/删/移"
     },
     {
       "id": "gov-destructive-needs-script",
       "effect": "deny",
-      "match": { "action": ["delete", "move", "rm", "rmtree"] },
-      "require": { "has_script": true },
+      "match": {
+        "action": [
+          "delete",
+          "move",
+          "rm",
+          "rmtree"
+        ]
+      },
+      "require": {
+        "has_script": true
+      },
       "reason": "破坏性操作须先写脚本(铁律8)"
     },
     {
       "id": "gov-delete-needs-confirm",
       "effect": "deny",
-      "match": { "action": ["delete", "rm", "rmtree"] },
-      "require": { "user_confirmed": true },
+      "match": {
+        "action": [
+          "delete",
+          "rm",
+          "rmtree"
+        ]
+      },
+      "require": {
+        "user_confirmed": true
+      },
       "reason": "删除前须展示清单并获用户确认(铁律10)"
     },
     {
       "id": "gov-external-send-needs-approval",
       "effect": "deny",
-      "match": { "action": ["send_email", "publish", "external_call"] },
-      "require": { "user_confirmed": true },
+      "match": {
+        "action": [
+          "send_email",
+          "publish",
+          "external_call"
+        ]
+      },
+      "require": {
+        "user_confirmed": true
+      },
       "reason": "对外发送/发布须用户确认"
+    },
+    {
+      "id": "gov-pretask-coding-decision",
+      "effect": "deny",
+      "match": {
+        "action": [
+          "write",
+          "execute",
+          "implement"
+        ],
+        "task_type_regex": ".*(代码|实现|写|函数|脚本|重构|组件|api|接口|class|function|code|implement|refactor).*"
+      },
+      "require": {
+        "ponytail_decided": true
+      },
+      "reason": "编码类任务须先过 Ponytail L2 预执行决策梯（kaf ponytail），确认非过度设计方可落码(v5.5)"
+    },
+    {
+      "id": "gov-routine-no-frontier",
+      "effect": "deny",
+      "match": {
+        "action": [
+          "dispatch",
+          "route_commit",
+          "execute"
+        ],
+        "complexity_regex": "^routine$",
+        "cost_tier_regex": "^frontier$"
+      },
+      "require": {
+        "cost_justified": true
+      },
+      "reason": "routine 级任务派给 frontier 档模型违反 80/15/5 模型经济学纪律；须显式 cost_justified 说明为何必须上前沿模型(v5.6 T2)"
     },
     {
       "id": "gov-read-allow",
       "effect": "allow",
-      "match": { "action": ["read", "list"] },
+      "match": {
+        "action": [
+          "read",
+          "list"
+        ]
+      },
       "reason": "只读操作默认放行"
     }
   ]

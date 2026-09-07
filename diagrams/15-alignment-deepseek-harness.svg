@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 600" font-family="'PingFang SC','Microsoft YaHei',sans-serif">
+  <rect x="0" y="0" width="680" height="600" fill="#f7f7f4"/>
+  <text x="340" y="34" font-size="20" font-weight="700" text-anchor="middle" fill="#2b2b2b">KAF v5.4 ↔ DeepSeek Harness 对齐概念图</text>
+  <text x="340" y="54" font-size="12" text-anchor="middle" fill="#777">Everything is a Plugin（Cordis）× 国王-Agent蜂群治理脊柱</text>
+
+  <!-- 列标题 -->
+  <text x="145" y="80" font-size="13" font-weight="700" text-anchor="middle" fill="#4a2f12">KAF v5.4 组件</text>
+  <text x="535" y="80" font-size="13" font-weight="700" text-anchor="middle" fill="#15324a">DeepSeek Harness (dsh)</text>
+
+  <!-- 行模板：KAF box x=20 w=250 | 中 tag x=290 w=100 | dsh box x=410 w=250 -->
+  <!-- row 1 -->
+  <rect x="20" y="96" width="250" height="40" rx="6" fill="#f3e9d8" stroke="#b08d57"/>
+  <text x="145" y="120" font-size="12" text-anchor="middle" fill="#4a2f12">声明式宪法 constitution.json</text>
+  <rect x="290" y="96" width="100" height="40" rx="6" fill="#ffffff" stroke="#999"/>
+  <text x="340" y="113" font-size="11" text-anchor="middle" fill="#444">正交</text>
+  <text x="340" y="127" font-size="9" text-anchor="middle" fill="#888">治理 vs 能力</text>
+  <rect x="410" y="96" width="250" height="40" rx="6" fill="#e3eef7" stroke="#6a9bc4"/>
+  <text x="535" y="120" font-size="12" text-anchor="middle" fill="#15324a">profile + bundle + cordis.patch.yml</text>
+
+  <!-- row 2 -->
+  <rect x="20" y="148" width="250" height="40" rx="6" fill="#f3e9d8" stroke="#b08d57"/>
+  <text x="145" y="172" font-size="12" text-anchor="middle" fill="#4a2f12">520 护栏 guard520 + kaf_gate</text>
+  <rect x="290" y="148" width="100" height="40" rx="6" fill="#eaf6ea" stroke="#5aa75a"/>
+  <text x="340" y="165" font-size="11" text-anchor="middle" fill="#2f7a2f">高度同构</text>
+  <text x="340" y="179" font-size="9" text-anchor="middle" fill="#888">执行前拦截</text>
+  <rect x="410" y="148" width="250" height="40" rx="6" fill="#e3eef7" stroke="#6a9bc4"/>
+  <text x="535" y="172" font-size="12" text-anchor="middle" fill="#15324a">tools/pre-execute + ToolGuard</text>
+
+  <!-- row 3 -->
+  <rect x="20" y="200" width="250" height="40" rx="6" fill="#f3e9d8" stroke="#b08d57"/>
+  <text x="145" y="224" font-size="12" text-anchor="middle" fill="#4a2f12">治理层 policy+kill+审计+归因</text>
+  <rect x="290" y="200" width="100" height="40" rx="6" fill="#fdeaea" stroke="#d98a8a"/>
+  <text x="340" y="217" font-size="11" text-anchor="middle" fill="#b13a3a">KAF 超集</text>
+  <text x="340" y="231" font-size="9" text-anchor="middle" fill="#888">dsh 缺急停/审计</text>
+  <rect x="410" y="200" width="250" height="40" rx="6" fill="#e3eef7" stroke="#6a9bc4"/>
+  <text x="535" y="218" font-size="12" text-anchor="middle" fill="#15324a">approval policy +</text>
+  <text x="535" y="233" font-size="11" text-anchor="middle" fill="#15324a">fs-observation-policy</text>
+
+  <!-- row 4 -->
+  <rect x="20" y="252" width="250" height="40" rx="6" fill="#f3e9d8" stroke="#b08d57"/>
+  <text x="145" y="276" font-size="12" text-anchor="middle" fill="#4a2f12">动态国王 king.resolve_king</text>
+  <rect x="290" y="252" width="100" height="40" rx="6" fill="#f5f0e0" stroke="#c9b36a"/>
+  <text x="340" y="269" font-size="11" text-anchor="middle" fill="#8a6d1a">不同</text>
+  <text x="340" y="283" font-size="9" text-anchor="middle" fill="#888">主权 vs 组合</text>
+  <rect x="410" y="252" width="250" height="40" rx="6" fill="#e3eef7" stroke="#6a9bc4"/>
+  <text x="535" y="276" font-size="12" text-anchor="middle" fill="#15324a">harness home + profile owner</text>
+
+  <!-- row 5 -->
+  <rect x="20" y="304" width="250" height="40" rx="6" fill="#f3e9d8" stroke="#b08d57"/>
+  <text x="145" y="328" font-size="12" text-anchor="middle" fill="#4a2f12">经济学路由 frontier/balanced</text>
+  <rect x="290" y="304" width="100" height="40" rx="6" fill="#eaf6ea" stroke="#5aa75a"/>
+  <text x="340" y="321" font-size="11" text-anchor="middle" fill="#2f7a2f">同构</text>
+  <text x="340" y="335" font-size="9" text-anchor="middle" fill="#888">按档选模型</text>
+  <rect x="410" y="304" width="250" height="40" rx="6" fill="#e3eef7" stroke="#6a9bc4"/>
+  <text x="535" y="328" font-size="12" text-anchor="middle" fill="#15324a">ctx.llm 路由 + 双 LLM(ADR10)</text>
+
+  <!-- row 6 -->
+  <rect x="20" y="356" width="250" height="40" rx="6" fill="#f3e9d8" stroke="#b08d57"/>
+  <text x="145" y="380" font-size="12" text-anchor="middle" fill="#4a2f12">宰相轮值 coordinator.json</text>
+  <rect x="290" y="356" width="100" height="40" rx="6" fill="#f5f0e0" stroke="#c9b36a"/>
+  <text x="340" y="373" font-size="11" text-anchor="middle" fill="#8a6d1a">部分同构</text>
+  <text x="340" y="387" font-size="9" text-anchor="middle" fill="#888">缺轮值角色</text>
+  <rect x="410" y="356" width="250" height="40" rx="6" fill="#e3eef7" stroke="#6a9bc4"/>
+  <text x="535" y="380" font-size="12" text-anchor="middle" fill="#15324a">ctx.agents 注册表 + agent/*</text>
+
+  <!-- row 7 -->
+  <rect x="20" y="408" width="250" height="40" rx="6" fill="#f3e9d8" stroke="#b08d57"/>
+  <text x="145" y="432" font-size="12" text-anchor="middle" fill="#4a2f12">记忆完整性 SHA-256+drift</text>
+  <rect x="290" y="408" width="100" height="40" rx="6" fill="#eaf6ea" stroke="#5aa75a"/>
+  <text x="340" y="425" font-size="11" text-anchor="middle" fill="#2f7a2f">同构</text>
+  <text x="340" y="439" font-size="9" text-anchor="middle" fill="#888">不可变可校验</text>
+  <rect x="410" y="408" width="250" height="40" rx="6" fill="#e3eef7" stroke="#6a9bc4"/>
+  <text x="535" y="432" font-size="12" text-anchor="middle" fill="#15324a">会话日志不变式(模型可见=记录)</text>
+
+  <!-- row 8 -->
+  <rect x="20" y="460" width="250" height="40" rx="6" fill="#f3e9d8" stroke="#b08d57"/>
+  <text x="145" y="484" font-size="12" text-anchor="middle" fill="#4a2f12">进智脊柱 cognition spine</text>
+  <rect x="290" y="460" width="100" height="40" rx="6" fill="#fdeaea" stroke="#d98a8a"/>
+  <text x="340" y="477" font-size="11" text-anchor="middle" fill="#b13a3a">KAF 独有</text>
+  <text x="340" y="491" font-size="9" text-anchor="middle" fill="#888">反模式/闭环</text>
+  <rect x="410" y="460" width="250" height="40" rx="6" fill="#e3eef7" stroke="#6a9bc4"/>
+  <text x="535" y="484" font-size="12" text-anchor="middle" fill="#15324a">self-modification + workflow</text>
+
+  <!-- 底部结论条 -->
+  <rect x="20" y="516" width="640" height="64" rx="8" fill="#2b2b2b"/>
+  <text x="340" y="540" font-size="13" font-weight="700" text-anchor="middle" fill="#ffffff">dsh 提供运行时基座（插件/事件瀑布/接缝/日志）</text>
+  <text x="340" y="560" font-size="12" text-anchor="middle" fill="#d8c9a8">KAF 提供治理脊柱（国王/520/治理层/进智）→ 结合 = 被治理的插件化 harness</text>
+  <text x="340" y="575" font-size="10" text-anchor="middle" fill="#9aa0a6">装载载体：kaf/adapters/deepseek_harness.py（原生事件监听者，已自测通过）</text>
+</svg>

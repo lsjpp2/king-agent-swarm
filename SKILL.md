@@ -1,20 +1,22 @@
 ---
 name: 国王-Agent蜂群
-description: 搭建 Agent 集群治理框架（KAF v5.4，平台无关、谁部署谁为王）。自动生成声明式宪法、520 运行时护栏、记忆完整性协议、宰相轮值协议、平台适配器、模型经济学路由（真实计价+校准）、多视角审查（闭环写回）、共享账本、v5.3 治理层(策略即代码+急停+防篡改审计+身份归因)、动态国王(Deployer=King)、v5.4 进智脊柱(反模式库/检索注入/经验蒸馏/决策校准/deliberate门控/闭环自修Loop Driver)。适用于任何多 Agent 协作治理场景（Claude Code / Cursor / OpenCode / Codex / Qwen / Kimi / WorkBuddy 等任意组合）。触发词：国王模式、Agent蜂群、多Agent协作、集群搭建、宰相轮值、KAF、520护栏、模型经济学、经济学路由、多视角审查、角色分层、派发队列、共享账本、治理评估(govern/kill-switch/audit-tail)、进智脊柱、闭环自修、反模式、对齐检验。
+description: 搭建 Agent 集群治理框架（KAF v5.6，平台无关、谁部署谁为王）。自动生成声明式宪法、520 运行时护栏、记忆完整性协议、宰相轮值协议、平台适配器、模型经济学路由（真实计价+校准+v5.6复杂度分级80/15/5）、多视角审查（闭环写回）、共享账本、v5.3 治理层(策略即代码+急停+防篡改审计+身份归因)、动态国王(Deployer=King)、v5.4 进智脊柱(反模式库/检索注入/经验蒸馏/决策校准/deliberate门控/闭环自修Loop Driver)、v5.5 L2预执行决策层(Ponytail 极简主义7级梯)、v5.6 四层token治理(code_read/command/prose/code_gen 边界澄清)。适用于任何多 Agent 协作治理场景（Claude Code / Cursor / OpenCode / Codex / Qwen / Kimi / WorkBuddy 等任意组合）。触发词：国王模式、Agent蜂群、多Agent协作、集群搭建、宰相轮值、KAF、520护栏、模型经济学、经济学路由、多视角审查、角色分层、派发队列、共享账本、治理评估(govern/kill-switch/audit-tail)、进智脊柱、闭环自修、反模式、对齐检验、预执行决策、Ponytail、极简主义、过度设计、token治理、省token、复杂度分级。
 agent_created: true
 ---
 
-# 国王-Agent蜂群 Skill · KAF v5.4
+# 国王-Agent蜂群 Skill · KAF v5.6
 
-你是一个 Agent 集群治理架构师。当用户提到「国王模式」「Agent蜂群」「多Agent协作」「集群搭建」「宰相轮值」「KAF」「520护栏」「模型经济学」「经济学路由」「多视角审查」「角色分层」时，加载此 skill。
+你是一个 Agent 集群治理架构师。当用户提到「国王模式」「Agent蜂群」「多Agent协作」「集群搭建」「宰相轮值」「KAF」「520护栏」「模型经济学」「经济学路由」「多视角审查」「角色分层」「预执行决策」「Ponytail」「过度设计」「token 治理」「复杂度分级」时，加载此 skill。
 
 ---
 
-## 核心理念：KAF v5.4 = 代码化治理框架 + 进智脊柱（平台无关 + 部署者即国王）
+## 核心理念：KAF v5.6 = 代码化治理框架 + 进智脊柱 + 预执行经济学（平台无关 + 部署者即国王）
 
 > v4 是 md 文档约定；**v5.0 是代码化框架**——宪法从 md 变成可机器解析的 JSON，护栏从事后检查变成运行时强制（有 hook 接口的平台走 hook；无 hook 平台走 agent 侧强制门禁 `kaf_gate.py`），记忆从"丢失后恢复"变成"写入前阻止覆盖"。
 > **v5.3 补两件事**：①治理层 Governance（策略即代码 + 急停 + 防篡改审计链 + 身份归因），所有写操作必经 `Governance.evaluate()`；②**动态国王 Deployer=King**——框架不再硬编码任何所有者，谁部署谁称王，远程复制者默认自己就是国王。
 > **v5.4 补一件事**：进智脊柱（Cognition Spine）——把"可进化"从只写不读的坟场，变成可运行、可闭环、可对齐检验的**智慧层**。它由五零件（反模式库 / 检索注入 / 经验蒸馏 / 决策校准 / deliberate 门控）+ **Loop Driver 闭环自修**（后台自动对齐检验 → 修订 → 再检验 → 收敛）组成。完整规范见 `docs/architecture_v5.4.md` 与 `diagrams/12~14`。
+> **v5.5 补一件事**：**L2 预执行决策层**（融合 Ponytail，117k★，MIT）——治理原来只管"写出来之后怎么审"，v5.5 往前挪到"该不该写"。编码任务起点走 7 级极简梯（need?→exists?→stdlib?→native?→dep?→oneliner?→minimal），停在第一个成立的台阶；安全红线永不妥协；思考型模型上自动 bypass。
+> **v5.6 补两件事**（GitHub 同类高热度项目补检索回流）：①**T2 复杂度分级路由 80/15/5**——只按 role 选档会把简单活派给贵模型，v5.6 增 routine/moderate/complex 评估，routine 降档省钱、complex 升档保质；②**T1 四层 token 治理边界澄清**——token 成本分 4 个互不重叠层，**Ponytail 只覆盖 code_gen 一层(-40%)**，v5.5 曾误当全能省 token 方案，v5.6 明确其余三层归外部工具、KAF 未集成。
 
 ```
 Constitution-as-Code   宪法从md文档 → 可解析JSON，规则可机器验证
@@ -25,6 +27,20 @@ Governance Layer       v5.3：策略即代码 + 急停(kill-switch) + 防篡改�
 Dynamic King           v5.3：部署者即国王，远程复制者默认自己称王，非硬编码某用户
 Cognition Spine        v5.4：反模式库/检索注入/经验蒸馏/决策校准/deliberate门控 + 闭环自修(Loop Driver)
 Loop Driver            v5.4：后台自动对齐检验 → 修订 → 再检验 → 收敛，阈值三档(硬/软/国王兜底)
+Pre-Exec Decision(L2)  v5.5：Ponytail 极简主义 7 级梯，写前先问"要不要写"（kaf ponytail）
+Complexity Routing     v5.6：routine/moderate/complex 三级 80/15/5，自动降档省钱/升档保质
+Token Governance       v5.6：四层 token 开销归属澄清，Ponytail 只治 code_gen 层（kaf tokens）
+```
+
+**v5.5/v5.6 执行管线（L0→L6）**：
+```
+L0 用户意图
+L1 task-classifier         编码任务 vs 内容生产分流
+L2 预执行决策(v5.5)         Ponytail 7 级梯 + T2 复杂度定档 + T1 token 层判定  ← 省在这里
+L3 执行                     agent 干活
+L4 kaf_gate 硬门禁          删/移/覆盖前必过（铁律12）
+L5 review 多视角审查         security/correctness/style/economics(含 T1/T2 判定)
+L6 520 自检 + 审计链
 ```
 
 **KAF 管"怎么治理 Agent"，CrewAI/LangGraph 管"怎么执行任务"——互补，不替代。框架不绑定任何特定平台或所有者，复制即用、谁部署谁为王。**
@@ -105,7 +121,20 @@ kaf/
 
 ## 快速开始（CLI）
 
+> ⚠️ **运行目录铁律（2026-08-30 实证，踩过坑）**
+> `kaf.py check` / `verify` 等**必须在工作区根目录运行**（如 `cd D:\WorkBuddy\Claw`），
+> **不要在 `~/.workbuddy/skills/国王-Agent蜂群/kaf/` 目录里跑**。
+> 原因：520 自检的 recoverable/fixable 项按**当前工作目录**找 `archive/` 备份，
+> 在 skill 目录跑会找不到备份而误报 FAIL（假阴性）。实证对照：
+> - 在 `.../kaf/` 跑 → recoverable ❌ fixable ❌ enforced ❌（**全是假的**）
+> - 在 `D:\WorkBuddy\Claw` 跑 → 五项全 ✅ PASS
+> 备份目录也须已存在（`archive/kaf-backup-YYYY-MM-DD/manifest.json`），否则同样 FAIL。
+
 ```bash
+# ✅ 正确：在工作区根目录调用，指向 skill 里的 kaf.py
+cd D:\WorkBuddy\Claw
+python C:/Users/山禾/.workbuddy/skills/国王-Agent蜂群/kaf/kaf.py check
+
 cd kaf/
 python kaf.py init      # 初始化：生成 constitution.json + 注册记忆指纹
 python kaf.py check     # 520自检（真核查：日志/备份/回滚/强制门禁均须实际存在）
@@ -168,7 +197,10 @@ cd kaf/ && python kaf.py init
 - **有原生 hook 接口的平台**（如 Claude/Codex 类）：通过 PreToolUse hook 自动调用上述检查点。参考 `adapters/_template.py` 的 `register_hook`。
 - **WorkBuddy 桌面端等无 hook 接口的平台（已实测 ~/.workbuddy 无 hooks.json、settings 无 hook 字段、app.asar 无 PreToolUse/hook 关键字）**：无 OS/客户端钩子可接，强制层为 **agent 侧强制门禁 `kaf_gate.py`**。即 agent 在每次删/移/覆盖操作前**必须调用 `python kaf_gate.py check` 并服从其 BLOCK 结果**——这是 Constitution-as-Code 在无钩子平台上的诚实适配，不是降级。`adapters/workbuddy.py` 的 `register_hook` 已改为返回该 agent 侧策略（不再写无人读取的 hooks.json）。
 
-**`kaf check` 的 `enforced` 项会真核查**：`kaf_gate.py` 存在 且 本工作区 `MEMORY.md` 已写入门禁铁律（铁律11）——二者缺一，`self_check` 即 FAIL。这保证"强制"是接进宪法的真强制，不是装饰。
+**`kaf check` 的 `enforced` 项会真核查**：`kaf_gate.py` 存在 且 本工作区 `MEMORY.md` 已写入门禁铁律（**铁律12**，2026-08-30 由铁律11 更名以避开编号冲突）——二者缺一，`self_check` 即 FAIL。
+>
+> ⚠️ **编号约定**：KAF「**铁律12**」= 强制门禁（删/移/覆盖前必过 `kaf_gate.py`）；
+> 用户级 MEMORY.md「**铁律11**」= 烧用户积分须显式披露。**两者语义不同，勿混用**。这保证"强制"是接进宪法的真强制，不是装饰。
 
 ### 第五步：接入新平台（可选）
 
@@ -221,6 +253,64 @@ class MyAdapter(PlatformAdapter):
 投票规则：宰相 **3票**，其他 Agent 各 **1票**，国王 **一票否决**。
 
 CLI 执行：`python kaf.py rotate <agent_name>`
+
+---
+
+## v5.5 L2 预执行决策层 + v5.6 预执行经济学 ★ 最新
+
+> 治理原来只管"写出来之后怎么审"（L4 门禁 / L5 审查）。v5.5 把治理往前挪到 **"该不该写"**，v5.6 再补 **"该派给谁写 / 省的钱到底在哪一层"**。这三件事都发生在动手之前，成本最低、收益最高。
+
+### v5.5 · L2 预执行决策（融合 Ponytail，117k★，MIT）
+
+```bash
+kaf ponytail "实现日期选择器组件"          # 输出 7 级梯 + 安全红线
+kaf ponytail "写个函数" --model gpt-5.5    # 思考型模型 → 自动 bypass
+```
+
+- **7 级梯**：`need? → exists? → stdlib? → native? → dep? → oneliner? → minimal`，停在第一个成立的台阶（最大削减来源是 native，如 `<input type=date>` 替代手搓组件）
+- **安全红线永不妥协**：trust-boundary 校验 / data-loss 处理 / 安全处理 / 无障碍(a11y) —— 触及则 HOLD，不允许以"极简"为名删掉
+- **模型感知**：思考型模型（GPT-5.5 / o3 / o4 / *-thinking）上 Ponytail 成本与延迟**反向**，L2 自动 bypass
+- **任务分流**：仅编码类任务注入；内容生产（推文/生图/报告）不介入
+- **不挂原生钩子**：绝不装 Ponytail 的 Node.js SessionStart/UserPromptSubmit 钩子——会与宿主钩子打架并触发 safe-delete fail-closed；KAF 以 `kaf ponytail` 建议层方式融合
+- 策略入宪：`policy.json → gov-pretask-coding-decision`（编码任务须 `ponytail_decided=true`）
+
+### v5.6 · T2 复杂度分级路由（80/15/5）
+
+```bash
+kaf route "设计一下按钮的圆角要多大"                    # routine → frontier 降到 economy
+kaf route "批量迁移数据库并处理跨模块事务与并发一致性"    # complex → economy 升到 frontier
+```
+
+| 级别 | 目标占比 | 默认档 | 判据 |
+|---|---|---|---|
+| routine | 80% | economy | 机械/单点/有明确先例 |
+| moderate | 15% | balanced | 多步骤但路径清楚 |
+| complex | 5% | frontier | 跨模块/高风险/需权衡设计 |
+
+- **校正规则**：routine 取 role 档与复杂度档中**更便宜**的（降档省钱）；complex 取**更强**的（升档保质）；moderate 不动
+- **跨 role 放宽**：目标档在本 role 内无候选时放宽 role 过滤 —— 否则"5% 复杂任务必须上前沿"会被 role 过滤器架空（v5.6 实测发现并修复的架空 bug）
+- 策略入宪：`policy.json → gov-routine-no-frontier`（routine 派 frontier 须 `cost_justified=true`）
+
+### v5.6 · T1 四层 token 治理（诚实边界）
+
+```bash
+kaf tokens "定位并修复登录接口的空指针"    # 输出四层归属 + 本任务命中层
+```
+
+| 层 | 实测可省 | 归属工具 | KAF 状态 |
+|---|---|---|---|
+| L1 code_read | −66% | serena (MCP·LSP 符号级检索) | ❌ 未集成（外部 MCP） |
+| L2 command_output | −65% | rtk (输出裁剪) | ❌ 未集成（外部 MCP） |
+| L3 prose_output | −6% | caveman (精简语体) | ❌ 未集成（收益极低） |
+| L4 code_gen | −40% | **Ponytail L2 决策梯** | ✅ 已集成（v5.5） |
+
+- **四层堆叠上限 −69.6%**，但 **KAF 当前只吃到 code_gen 一层（−40%）**
+- ⚠️ **诚实口径**：宣称"KAF 省 69.6% token"是假话；须外接 serena/rtk 才成立。写文档/汇报时不得越过这条线（诚实扫描 `kaf honest` 同口径）
+- **实战价值**：若开销实际落在读码层，精简代码救不了成本 —— T1 的作用是**指出真正的省钱着力点**，避免在错误的层上使劲
+
+### v5.6 溯源
+
+两项增强均来自"迭代前先查 GitHub 同类高热度项目"补检索（国王质询触发）：T2 ← `zscole/model-hierarchy-skill`(345★)；T1 ← `vagkaratzas/token-saviour`(10★，方法论价值远超 star)。完整报告见真源 `RESEARCH_github_peers_v556.md`。**教训：搜索页热度会骗人**（`rkwap/aegis-framework`、`qlycool/agent-os` 自称世界首创，实测 0★），必须实地核查 star 再决定是否借鉴。
 
 ---
 

@@ -12,6 +12,8 @@ Usage:
     kaf status    — 查看集群状态
     kaf route "<task>" — 模型经济学路由：推荐 planner/worker + 成本估算
     kaf review <file>  — 多视角审查：security/correctness/style/economics 叠加
+    kaf ponytail "<task>" — 预执行决策（v5.5·Ponytail 极简主义 7 级梯）
+    kaf tokens "<task>"   — 四层 token 治理方案（v5.6·T1：code_read/command/prose/code_gen）
     kaf dispatch "<task>" [target_agent] — 路由落执行：推荐并派发到共享队列
     kaf govern "<action>" [--agent X --resource Y] — v5.3 治理评估：策略即代码+急停+审计
     kaf kill-switch [on|off] — v5.3 全局急停开关
@@ -21,12 +23,19 @@ import sys
 import os
 import json
 
-# 确保能 import 同目录模块 + 项目根(kaf/) 下的 economics_router / review
+# 确保能 import 同目录模块 + 项目根作为兜底
+#
+# ⚠️ v5.6 修复的历史 bug：原实现先 insert(0, _HERE) 再 insert(0, _PROJ_ROOT)，
+# 导致 _PROJ_ROOT 优先级更高。而项目根躺着 Aug15 旧版 economics_router.py / review.py，
+# 于是 CLI 一直加载旧模块 —— v5.5 对 kaf/economics_router.py 的改动（THINKING_MODELS
+# 等）在 CLI 路径上全是死代码。现强制"同目录优先，项目根仅兜底"。
 _HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, _HERE)
 _PROJ_ROOT = os.path.dirname(_HERE)
 if _PROJ_ROOT not in sys.path:
-    sys.path.insert(0, _PROJ_ROOT)
+    sys.path.append(_PROJ_ROOT)          # 兜底：优先级最低
+while _HERE in sys.path:
+    sys.path.remove(_HERE)
+sys.path.insert(0, _HERE)                # 同目录模块最高优先
 
 
 def cmd_init():
@@ -289,7 +298,44 @@ def cmd_route(task_text):
     print(f"  推荐 Agent: {res['agent']} ({res['platform']})")
     print(f"  角色: {res['role']} | 成本档: {res['cost_tier']}")
     print(f"  相对成本估算: {res['est_relative_cost']}")
+    # v5.6 · T2 复杂度分级
+    if "complexity" in res:
+        flag = " ⤳已校正" if res.get("tier_adjusted") else ""
+        print(f"  复杂度[T2]: {res['complexity']} (目标占比 {int(res['complexity_target_share']*100)}%)"
+              f" | 档位 {res['role_preferred_tier']}→{res['final_preferred_tier']}{flag}")
+        if res.get("role_filter_relaxed"):
+            print(f"           ⚠️ 已跨 role 放宽以取得 {res['final_preferred_tier']} 档候选")
+    # v5.6 · T1 四层 token 治理
+    if res.get("token_layer"):
+        print(f"  token层[T1]: {res['token_layer']} "
+              f"(实测可省 {int(res['token_layer_saving']*100)}%) → {res['token_layer_tool']}")
+        print(f"           状态: {res['token_layer_status']}")
     print(f"  理由: {res['reason']}")
+    return 0
+
+
+def cmd_tokens(task_text=None):
+    """四层 token 治理方案（v5.6·T1）：明确各层归属工具与 KAF 覆盖边界"""
+    from economics_router import EconomicsRouter
+    r = EconomicsRouter()
+    p = r.token_plan(task_text)
+    print("=" * 50)
+    print("  KAF 四层 token 治理 (v5.6 · T1)")
+    print("=" * 50)
+    if task_text:
+        print(f"  任务: {task_text}")
+        print(f"  主要开销层: {p['primary_layer']}")
+    for l in p["layers"]:
+        mark = "◀ 本任务命中" if l["hit_by_task"] else ""
+        print(f"  L{l['order']} {l['layer']:<15} -{int(l['measured_saving']*100):>2}%  "
+              f"{l['kaf_status']} {mark}")
+        print(f"       {l['desc']}")
+        print(f"       工具: {l['tool']}")
+    print(f"  KAF 已覆盖: {p['kaf_covered']}")
+    print(f"  KAF 未覆盖: {p['kaf_uncovered']}")
+    print(f"  四层堆叠上限: -{p['stacked_saving']*100:.1f}%（KAF 仅覆盖 code_gen 层，不可对外宣称此值）")
+    print(f"  原则: {p['principle']}")
+    print(f"  来源: {p['source']}")
     return 0
 
 
@@ -330,6 +376,29 @@ def cmd_review_commit(findings_path):
         print(f"  ✅ BLOCK 发现已写回共享 Field Guide: {mr.REVIEW_FINDINGS}")
     else:
         print(f"  无需写回（verdict={out['verdict']}）")
+    return 0
+
+
+def cmd_ponytail(task_text, model=None):
+    """预执行决策层（v5.5·Ponytail 融合）：L2 编码任务极简主义决策梯"""
+    from ponytail_decision import PonytailDecision
+    d = PonytailDecision(model=model)
+    out = d.decide(task_text, model=model)
+    print("=" * 50)
+    print("  KAF 预执行决策层 (v5.5 · Ponytail 融合)")
+    print("=" * 50)
+    if not out["applicable"]:
+        print(f"  ⏭️  bypass: {out['bypass_reason']}")
+        return 0
+    print(f"  任务类型: 编码任务")
+    print(f"  建议落点: L{out['reached_level']} {out['action']}")
+    print(f"  当前台阶: {out['question']} → {out['rule']}")
+    if out["safety_hold"]:
+        print(f"  🛑 安全 HOLD: {out['safety_reason']}")
+    print(f"  说明: {out['note']}")
+    print("  --- 7 级决策梯 ---")
+    for r in out.get("ladder", []):
+        print(f"    L{r['level']} [{r['name']}] {r['question']} → {r['action']}")
     return 0
 
 
@@ -489,6 +558,22 @@ def main():
             print("  Usage: kaf review-commit <findings.json>")
             return 1
         return cmd_review_commit(sys.argv[2])
+    elif cmd == "ponytail":
+        if len(sys.argv) < 3:
+            print('  Usage: kaf ponytail "<task>" [--model <m>]')
+            return 1
+        task = " ".join(sys.argv[2:])
+        model = None
+        if "--model" in sys.argv:
+            i = sys.argv.index("--model")
+            model = sys.argv[i + 1] if i + 1 < len(sys.argv) else None
+            if model:
+                # 去掉 --model <m> 片段，避免污染 task 文本
+                task = task.replace(f"--model {model}", "").strip()
+        return cmd_ponytail(task, model=model)
+    elif cmd == "tokens":
+        task = " ".join(sys.argv[2:]) if len(sys.argv) > 2 else None
+        return cmd_tokens(task)
     elif cmd == "dispatch":
         if len(sys.argv) < 3:
             print('  Usage: kaf dispatch "<task>" [target_agent]')

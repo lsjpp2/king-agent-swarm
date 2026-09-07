@@ -226,23 +226,74 @@ class Guard520:
                 return {"pass": True, "detail": f"skill目录: {sdir} ({len(os.listdir(sdir))}个skill)"}
         return {"pass": False, "detail": "未找到skill目录"}
 
+    def _find_memory_md(self):
+        """定位工作区 MEMORY.md：env > cwd 向上递归 > 硬编码候选。
+
+        修复 2026-08-30：原实现只查 3 个硬编码路径，漏掉真实工作区
+        （如 D:\\WorkBuddy\\Claw），导致合规环境被误判为 FAIL（假阴性）。
+        """
+        candidates = []
+
+        # 1) 环境变量显式指定（最高优先）
+        for var in ("KAF_WORKSPACE", "CLAW_WORKSPACE", "KAF_MEMORY_DIR"):
+            v = os.environ.get(var)
+            if v:
+                if os.path.basename(v).lower() == "memory.md" and os.path.exists(v):
+                    candidates.append(v)
+                else:
+                    candidates.append(os.path.join(v, ".workbuddy", "memory", "MEMORY.md"))
+
+        # 2) 从当前工作目录向上递归查找 .workbuddy/memory/MEMORY.md（最多 6 层）
+        try:
+            cur = os.path.abspath(os.getcwd())
+        except Exception:
+            cur = None
+        for _ in range(6):
+            if not cur:
+                break
+            candidates.append(os.path.join(cur, ".workbuddy", "memory", "MEMORY.md"))
+            parent = os.path.dirname(cur)
+            if parent == cur:
+                break
+            cur = parent
+
+        # 3) 从 kaf 目录自身向上递归（skill 常被放在 ~/.workbuddy 下）
+        cur = os.path.dirname(os.path.abspath(__file__))
+        for _ in range(6):
+            candidates.append(os.path.join(cur, ".workbuddy", "memory", "MEMORY.md"))
+            parent = os.path.dirname(cur)
+            if parent == cur:
+                break
+            cur = parent
+
+        # 4) 原硬编码候选（向后兼容）
+        candidates += [
+            os.path.join(os.path.expanduser("~"), "workbuddy-workspace", ".workbuddy", "memory", "MEMORY.md"),
+            os.path.expanduser("~/.workbuddy/memory/MEMORY.md"),
+        ]
+
+        for c in candidates:
+            if c and os.path.exists(c):
+                return c
+        return None
+
+
     def _check_enforced(self):
         # 无钩子环境：强制靠 agent 侧门禁(kaf_gate.py) + 铁律接入 + 真在跑(审计日志)
         kaf_dir = os.path.dirname(os.path.abspath(__file__))
         gate = os.path.join(kaf_dir, "kaf_gate.py")
         audit_log = os.path.join(kaf_dir, "kaf_gate_audit.log")
-        mem_candidates = [
-            os.path.join(os.path.expanduser("~"), "workbuddy-workspace", ".workbuddy", "memory", "MEMORY.md"),
-            os.path.join(os.getcwd(), ".workbuddy", "memory", "MEMORY.md"),
-            os.path.expanduser("~/.workbuddy/memory/MEMORY.md"),
-        ]
-        mem = next((m for m in mem_candidates if os.path.exists(m)), None)
+        mem = self._find_memory_md()
         gate_ok = os.path.exists(gate)
         rule_ok = False
-        if os.path.exists(mem):
+        if mem is not None and os.path.exists(mem):
             with open(mem, "r", encoding="utf-8", errors="ignore") as f:
                 _content = f.read()
-            rule_ok = ("铁律11" in _content) or ("kaf_gate" in _content)
+            # 编号说明（2026-08-30 决议）：KAF 侧「铁律12」= 强制门禁，
+            # 与部分 MEMORY.md 的「铁律11(烧积分披露)」语义不同，已错开编号。
+            # 匹配优先级：铁律12 > 强制门禁 > kaf_gate > 铁律11(向后兼容别名，勿删)。
+            rule_ok = ("铁律12" in _content) or ("强制门禁" in _content) \
+                or ("kaf_gate" in _content) or ("铁律11" in _content)
         exercised_ok = False
         last_run = None
         if os.path.exists(audit_log):
@@ -258,7 +309,7 @@ class Guard520:
         if not gate_ok:
             missing.append("kaf_gate.py")
         if not rule_ok:
-            missing.append("MEMORY.md 铁律11")
+            missing.append("MEMORY.md 铁律12/强制门禁")
         if not exercised_ok:
             missing.append("kaf_gate_audit.log 无运行记录(门禁从未被调用=装饰)")
         return {"pass": False, "detail": f"未真正强制: 缺 {missing}"}

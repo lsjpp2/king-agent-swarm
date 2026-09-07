@@ -1,13 +1,17 @@
 {
   "$schema": "https://kaf.dev/constitution/v2",
-  "version": "5.4",
-  "code_status": "v5.4.2 全落地：地基①②⑤(v5.4.1) + 闭环③④+Loop Driver(v5.4.2)，全接 kaf_gate.py（retrieve/loop 子命令）；cognition_selftest 全 PASS。",
+  "version": "5.6",
+  "code_status": "v5.5（Ponytail 融合版）：新增 L2 预执行决策层（kaf/ponytail_decision.py，7级极简决策梯），与 kaf_gate(L4)+review(L5) 形成完整管线；economics_router 加模型感知（思考型 bypass）；review economics 视角接入 Ponytail 判定。v5.4.x 全部保留。",
   "name": "King-Agent Framework Constitution",
   "effective_date": "2026-08-07",
   "sovereign": {
     "id": "human",
     "title": "King",
-    "powers": ["veto", "amend", "appoint_coordinator"],
+    "powers": [
+      "veto",
+      "amend",
+      "appoint_coordinator"
+    ],
     "irrevocable": true,
     "king_resolver": "KAF_KING env > kaf_config.json > 本地作者环境(${KING_NAME}) > 当前OS用户/operator",
     "note": "国王身份动态解析，绝不硬编码某个名字。本地作者环境默认${KING_NAME}；远程新手复制技能后默认'使用者即国王'(当前OS用户或operator)。部署者可用 KAF_KING 或 kaf_config.json 显式指定。"
@@ -19,7 +23,11 @@
       "votes": 3,
       "rotatable": true,
       "rotation_trigger": "king_command",
-      "handover_fields": ["active_tasks", "pending_decisions", "context_summary"]
+      "handover_fields": [
+        "active_tasks",
+        "pending_decisions",
+        "context_summary"
+      ]
     },
     "agents": {
       "default_votes": 1,
@@ -44,7 +52,12 @@
       "id": "path_discipline",
       "trigger": "pre:write",
       "allow_only": "{{workspace}}/**",
-      "blocked_zones": ["Desktop", "Documents", "Downloads", "system_root"],
+      "blocked_zones": [
+        "Desktop",
+        "Documents",
+        "Downloads",
+        "system_root"
+      ],
       "source": "路径纪律"
     },
     {
@@ -111,7 +124,31 @@
       "recalibrate": "kaf calibrate",
       "effect": "动态重算 ROLE_TOKEN_SHARE 写入 calibration.json，路由实时采纳"
     },
-    "note": "路由不再靠硬编码权重，而读真实计价表；随真实用量自我校准"
+    "note": "路由不再靠硬编码权重，而读真实计价表；随真实用量自我校准",
+    "complexity_routing": {
+      "enabled": true,
+      "source": "zscole/model-hierarchy-skill (345★) · v5.6 T2",
+      "levels": {
+        "routine": {
+          "target_share": 0.8,
+          "tier": "economy",
+          "desc": "机械/单点/有明确先例"
+        },
+        "moderate": {
+          "target_share": 0.15,
+          "tier": "balanced",
+          "desc": "多步骤但路径清楚"
+        },
+        "complex": {
+          "target_share": 0.05,
+          "tier": "frontier",
+          "desc": "跨模块/高风险/需权衡设计"
+        }
+      },
+      "correction": "routine 自动降档省钱；complex 自动升档保质；moderate 不动",
+      "cross_role_relax": "目标档在本 role 内无候选时放宽 role 过滤，否则 80/15/5 会被 role 过滤器架空（v5.6 实测修复）",
+      "cli": "kaf route \"<task>\" 输出 complexity/tier_adjusted/role_filter_relaxed"
+    }
   },
   "dispatch": {
     "enabled": true,
@@ -152,7 +189,12 @@
       "tamper_evident_audit": "hash链式append-only审计(audit_chain.log)，verify()可检测篡改",
       "agent_attestation": "HMAC身份归因(attest)，未归因agent动作被DENY"
     },
-    "evaluate_order": ["kill_switch", "attestation", "guard520", "policy_as_code"],
+    "evaluate_order": [
+      "kill_switch",
+      "attestation",
+      "guard520",
+      "policy_as_code"
+    ],
     "protected_assets": "MEMORY.md/520/铁律/constitution.json 须 king_confirmed 方可写删移"
   },
   "cognition": {
@@ -201,7 +243,10 @@
     "loop_driver": {
       "enabled": true,
       "max_rounds": 5,
-      "abort_on": ["520_guard", "kill_switch"],
+      "abort_on": [
+        "520_guard",
+        "kill_switch"
+      ],
       "threshold": {
         "hard": "可量化指令=100%对齐，差一项即修订，无需确认自动收敛",
         "soft": "半量化=关键约束零违反+意图对齐>=80%，达标收敛、留痕备抽查",
@@ -210,14 +255,72 @@
     },
     "constraint": "deliberate()/Loop 触发 520 护栏/kill-switch 立即中止，不高于国王否决权，不绕过 kaf_gate.py"
   },
+  "ponytail": {
+    "enabled": true,
+    "source": "Ponytail (DietrichGebert/ponytail, MIT) 融合 · v5.5",
+    "principle": "预写码决策极简主义作为 L2 预执行约束层；写前先问要不要写，7 级梯停在第一个成立台阶",
+    "integration": "不挂原生钩子（避免与宿主钩子冲突 + safe-delete fail-closed），由 agent 在编码任务起点调 kaf ponytail",
+    "module": "kaf/ponytail_decision.py",
+    "cli": "kaf ponytail \"<task>\" [--model <m>]",
+    "ladder": "need?→exists?→stdlib?→native?→dep?→oneliner?→minimal",
+    "safety_redline": "永不删 trust-boundary/data-loss/security/accessibility",
+    "model_aware": "思考型模型(GPT-5.5等)上反向 → L2 自动 bypass",
+    "applicability": "仅编码任务注入；内容生产不介入",
+    "verified": "kaf ponytail 子命令 import 测试通过",
+    "token_layer_scope": "仅 code_gen 层(-40%)；code_read/command_output/prose_output 三层不在 Ponytail 覆盖范围（v5.6 T1 澄清）"
+  },
   "amendment": {
     "procedure": "king_confirm_required",
     "agent_can_propose": true,
-    "agent_cannot_self_amend": true
+    "agent_cannot_self_amend": true,
+    "history": [
+      {
+        "version": "5.6",
+        "date": "2026-08-31",
+        "summary": "T2 复杂度分级路由(80/15/5) + T1 四层 token 治理边界澄清",
+        "trigger": "国王质询「融合迭代前是否检索 GitHub 同类高热度项目」→ 补检索回流",
+        "research": "RESEARCH_github_peers_v556.md"
+      }
+    ]
   },
   "open_source": {
     "repo": "https://github.com/lsjpp2/king-agent-swarm",
     "license": "MIT",
     "contribution": "user_feedback -> coordinator_evaluate -> king_confirm -> merge"
+  },
+  "token_governance": {
+    "enabled": true,
+    "source": "vagkaratzas/token-saviour (10★) · v5.6 T1",
+    "principle": "token 成本分 4 个互不重叠层，各层归属不同工具；Ponytail 只覆盖 code_gen 一层，v5.5 曾误当全能省 token 方案",
+    "layers": {
+      "code_read": {
+        "order": 1,
+        "saving": 0.66,
+        "tool": "serena (MCP·LSP 符号级检索)",
+        "kaf_status": "未集成（外部 MCP，集成成本高）"
+      },
+      "command_output": {
+        "order": 2,
+        "saving": 0.65,
+        "tool": "rtk (输出裁剪)",
+        "kaf_status": "未集成（外部 MCP）"
+      },
+      "prose_output": {
+        "order": 3,
+        "saving": 0.06,
+        "tool": "caveman (精简语体)",
+        "kaf_status": "未集成（收益极低，优先级最末）"
+      },
+      "code_gen": {
+        "order": 4,
+        "saving": 0.4,
+        "tool": "Ponytail L2 决策梯",
+        "kaf_status": "已集成（v5.5 · kaf ponytail）"
+      }
+    },
+    "stacked_saving": 0.696,
+    "module": "kaf/economics_router.py (token_plan / classify_token_layer)",
+    "cli": "kaf tokens \"<task>\"",
+    "honest_note": "KAF 当前只吃到 code_gen 层(-40%)；宣称'省 69.6%'属虚假，须外接 serena/rtk 才成立（诚实扫描口径）"
   }
 }

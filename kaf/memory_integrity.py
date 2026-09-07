@@ -83,7 +83,11 @@ class MemoryIntegrity:
         """注册文件指纹（首次或更新）"""
         fp = self.calculate_fingerprint(filepath)
         if fp:
-            rel = os.path.relpath(filepath, self.memory_dir)
+            try:
+                rel = os.path.relpath(filepath, self.memory_dir)
+            except ValueError:
+                # 跨盘符场景：回退使用绝对路径
+                rel = filepath
             self.fingerprints[rel] = {
                 "sha256": fp,
                 "registered_at": datetime.now().isoformat(),
