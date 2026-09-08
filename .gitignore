@@ -8,3 +8,7 @@ kaf/coordinator.json
 github_skill_analysis/
 _release_body.md
 *.bak
+
+# never publish local sync backups
+*.bak.*
+*.bak
