@@ -1,0 +1,95 @@
+<svg viewBox="0 0 680 768" xmlns="http://www.w3.org/2000/svg" style="font-family: system-ui, -apple-system, 'Segoe UI', 'Microsoft YaHei', sans-serif;">
+  <defs>
+    <filter id="sh" x="-4%" y="-4%" width="108%" height="116%"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.18"/></filter>
+    <linearGradient id="g6" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fbbf24"/><stop offset="1" stop-color="#d97706"/></linearGradient>
+    <linearGradient id="g5" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c4b5fd"/><stop offset="1" stop-color="#7c3aed"/></linearGradient>
+    <linearGradient id="g4" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6ee7b7"/><stop offset="1" stop-color="#059669"/></linearGradient>
+    <linearGradient id="g3" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7dd3fc"/><stop offset="1" stop-color="#2563eb"/></linearGradient>
+    <linearGradient id="c5" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b6c2d1"/><stop offset="1" stop-color="#64748b"/></linearGradient>
+    <linearGradient id="c6" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a9b6c6"/><stop offset="1" stop-color="#5b6b7f"/></linearGradient>
+    <linearGradient id="c7" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9daab9"/><stop offset="1" stop-color="#526173"/></linearGradient>
+    <linearGradient id="c8" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#91a0b0"/><stop offset="1" stop-color="#4a5866"/></linearGradient>
+    <linearGradient id="c9" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8695a5"/><stop offset="1" stop-color="#43505c"/></linearGradient>
+  </defs>
+
+  <rect width="680" height="768" fill="#f8fafc"/>
+
+  <!-- Header -->
+  <text x="340" y="38" text-anchor="middle" font-size="23" font-weight="700" fill="#0f172a">KAF v5.6 · 完整系统架构</text>
+  <text x="340" y="62" text-anchor="middle" font-size="12" fill="#64748b">九层治理栈 · 平台无关 · 部署者即国王（Deployer = King）</text>
+
+  <!-- Layer 1 : v5.6 -->
+  <g filter="url(#sh)">
+    <rect x="40" y="84" width="600" height="62" rx="10" fill="url(#g6)"/>
+  </g>
+  <text x="60" y="110" font-size="14" font-weight="700" fill="#ffffff">① 预执行经济学 Pre-Execution Economics</text>
+  <text x="60" y="130" font-size="11" fill="#fffbeb" opacity="0.95">T2 复杂度分级路由 80/15/5 · T1 四层 token 治理（诚实边界：只吃到 code_gen −40%）</text>
+  <rect x="556" y="94" width="66" height="20" rx="10" fill="#ffffff" opacity="0.25"/>
+  <text x="589" y="108" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff">v5.6 NEW</text>
+
+  <!-- Layer 2 : v5.5 -->
+  <g filter="url(#sh)">
+    <rect x="40" y="154" width="600" height="62" rx="10" fill="url(#g5)"/>
+  </g>
+  <text x="60" y="180" font-size="14" font-weight="700" fill="#ffffff">② L2 预执行决策层（融合 Ponytail）</text>
+  <text x="60" y="200" font-size="11" fill="#f5f3ff" opacity="0.95">7 级梯 need?→exists?→stdlib?→native?→dep?→oneliner?→minimal · 思考型模型自动 bypass</text>
+  <rect x="556" y="164" width="66" height="20" rx="10" fill="#ffffff" opacity="0.25"/>
+  <text x="589" y="178" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff">v5.5</text>
+
+  <!-- Layer 3 : v5.4 -->
+  <g filter="url(#sh)">
+    <rect x="40" y="224" width="600" height="62" rx="10" fill="url(#g4)"/>
+  </g>
+  <text x="60" y="250" font-size="14" font-weight="700" fill="#ffffff">③ 进智脊柱 Cognition Spine</text>
+  <text x="60" y="270" font-size="11" fill="#ecfdf5" opacity="0.95">反模式库 · 检索注入 · 经验蒸馏 · 决策校准 · deliberate 门控 · Loop Driver 闭环自修</text>
+  <rect x="574" y="234" width="48" height="20" rx="10" fill="#ffffff" opacity="0.22"/>
+  <text x="598" y="248" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff">v5.4</text>
+
+  <!-- Layer 4 : v5.3 -->
+  <g filter="url(#sh)">
+    <rect x="40" y="294" width="600" height="62" rx="10" fill="url(#g3)"/>
+  </g>
+  <text x="60" y="320" font-size="14" font-weight="700" fill="#ffffff">④ 治理层 Governance Layer</text>
+  <text x="60" y="340" font-size="11" fill="#eff6ff" opacity="0.95">策略即代码 policy.json · 急停 kill-switch · 防篡改审计链 · HMAC 身份归因</text>
+  <rect x="574" y="304" width="48" height="20" rx="10" fill="#ffffff" opacity="0.22"/>
+  <text x="598" y="318" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff">v5.3</text>
+
+  <!-- Layer 5 -->
+  <g filter="url(#sh)">
+    <rect x="40" y="364" width="600" height="62" rx="10" fill="url(#c5)"/>
+  </g>
+  <text x="60" y="390" font-size="14" font-weight="700" fill="#ffffff">⑤ 平台适配器 Platform Adapters</text>
+  <text x="60" y="410" font-size="11" fill="#f1f5f9" opacity="0.95">5 行代码接入任意平台 · Claude / Cursor / OpenCode / Codex / WorkBuddy …</text>
+
+  <!-- Layer 6 -->
+  <g filter="url(#sh)">
+    <rect x="40" y="434" width="600" height="62" rx="10" fill="url(#c6)"/>
+  </g>
+  <text x="60" y="460" font-size="14" font-weight="700" fill="#ffffff">⑥ 宰相轮值协议 Coordinator Protocol</text>
+  <text x="60" y="480" font-size="11" fill="#f1f5f9" opacity="0.95">单一 Planner（宰相 3 票）· Worker 各 1 票 · 国王一票否决 · 禁止 Agent 自改宰相</text>
+
+  <!-- Layer 7 -->
+  <g filter="url(#sh)">
+    <rect x="40" y="504" width="600" height="62" rx="10" fill="url(#c7)"/>
+  </g>
+  <text x="60" y="530" font-size="14" font-weight="700" fill="#ffffff">⑦ 520 运行时护栏 Runtime Guard</text>
+  <text x="60" y="550" font-size="11" fill="#f1f5f9" opacity="0.95">可追溯 · 可恢复 · 可修复 · 可进化（铁律 8/9/10/12：脚本 + 核验 + 清单 + 强制门禁）</text>
+
+  <!-- Layer 8 -->
+  <g filter="url(#sh)">
+    <rect x="40" y="574" width="600" height="62" rx="10" fill="url(#c8)"/>
+  </g>
+  <text x="60" y="600" font-size="14" font-weight="700" fill="#ffffff">⑧ 声明式宪法 Constitution-as-Code</text>
+  <text x="60" y="620" font-size="11" fill="#f1f5f9" opacity="0.95">constitution.json 可机器解析 · 规则可验证 · 国王动态解析，绝不硬编码名字</text>
+
+  <!-- Layer 9 -->
+  <g filter="url(#sh)">
+    <rect x="40" y="644" width="600" height="62" rx="10" fill="url(#c9)"/>
+  </g>
+  <text x="60" y="670" font-size="14" font-weight="700" fill="#ffffff">⑨ 记忆完整性 Memory Integrity</text>
+  <text x="60" y="690" font-size="11" fill="#f1f5f9" opacity="0.95">SHA-256 指纹 + drift 检测 · 写入前阻止覆盖（不是丢失后恢复）· 记忆隔离墙 strict</text>
+
+  <!-- Footer -->
+  <text x="340" y="732" text-anchor="middle" font-size="11" fill="#94a3b8">执行管线 L0 意图 → L1 分流 → L2 预执行决策(v5.5/5.6) → L3 执行 → L4 kaf_gate 门禁 → L5 多视角审查 → L6 520 自检</text>
+  <text x="340" y="752" text-anchor="middle" font-size="11" fill="#94a3b8">KAF 管「怎么治理 Agent」，CrewAI / LangGraph 管「怎么执行任务」——互补，不替代</text>
+</svg>

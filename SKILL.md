@@ -47,10 +47,14 @@ L6 520 自检 + 审计链
 
 ---
 
-## 七层架构（v5.3 加治理层，v5.4 加进智脊柱层）
+## 九层架构（v5.3 治理层 / v5.4 进智脊柱 / v5.5 预执行决策 / v5.6 预执行经济学）
 
 ```
 ┌─────────────────────────────────────────┐
+│  预执行经济学(v5.6)                      │  T2 复杂度路由 80/15/5 · T1 四层 token 治理
+├─────────────────────────────────────────┤
+│  L2 预执行决策层(v5.5·Ponytail)          │  7级梯 need?→exists?→stdlib?→native?→dep?→oneliner?→minimal
+├─────────────────────────────────────────┤
 │  Cognition Spine  进智脊柱(v5.4)         │  反模式/检索注入/蒸馏/校准/deliberate/闭环(与治理层正交)
 ├─────────────────────────────────────────┤
 │  Governance Layer  治理层(v5.3)          │  策略即代码/急停/审计链/身份归因
@@ -73,6 +77,10 @@ L6 520 自检 + 审计链
 
 本 skill 自带 `diagrams/`（SVG，可离线看）。
 
+**★ v5.6 完整系统架构（九层全栈，最新）**：`diagrams/16-architecture-v5.6.svg`
+> 含 v5.5 L2 预执行决策层 + v5.6 预执行经济学（T2 复杂度路由 80/15/5 / T1 四层 token 治理）。
+> ⚠️ `04-architecture.svg` 标 v5.3、`12-architecture-v5.4.svg` 标 v5.4，均为**历史架构图，保留供版本对照**，不代表当前版本。
+
 **v5.4 新增（进智脊柱）**：
 - v5.4 七层架构（含进智层）：`diagrams/12-architecture-v5.4.svg`
 - 进智脊柱全景（五零件 + 数据流）：`diagrams/13-cognition-full.svg`
@@ -83,7 +91,7 @@ L6 520 自检 + 审计链
 - 治理流（写操作必经 evaluate + 审计链）：`diagrams/05-governance-flow.svg`
 - 国王解析（部署者即国王）：`diagrams/08-king-resolution.svg`
 
-完整图解清单（01 权力结构 / 02 记忆隔离 / 03 宰相轮值 / 04 架构 / 05 治理流 / 06 审计链 / 07 共享状态 / 08 国王解析 / 12 v5.4架构 / 13 进智全景 / 14 闭环）+ 离线 `index.html` 导览，见技能根目录 `diagrams/`。
+完整图解清单（01 权力结构 / 02 记忆隔离 / 03 宰相轮值 / 04 架构 / 05 治理流 / 06 审计链 / 07 共享状态 / 08 国王解析 / 12 v5.4架构 / 13 进智全景 / 14 闭环 / 15 对齐harness / **16 v5.6全栈架构**）+ 离线 `index.html` 导览，见技能根目录 `diagrams/`。
 完整架构规范见 `docs/architecture_v5.4.md`。
 
 ---
@@ -520,4 +528,4 @@ python governance_selftest.py     # 真跑通：PASS=8 FAIL=0
 
 ---
 
-*End of 国王-Agent蜂群 Skill · KAF v5.3*
+*End of 国王-Agent蜂群 Skill · KAF v5.6*
