@@ -14,7 +14,7 @@ agent_created: true
 
 > v4 是 md 文档约定；**v5.0 是代码化框架**——宪法从 md 变成可机器解析的 JSON，护栏从事后检查变成运行时强制（有 hook 接口的平台走 hook；无 hook 平台走 agent 侧强制门禁 `kaf_gate.py`），记忆从"丢失后恢复"变成"写入前阻止覆盖"。
 > **v5.3 补两件事**：①治理层 Governance（策略即代码 + 急停 + 防篡改审计链 + 身份归因），所有写操作必经 `Governance.evaluate()`；②**动态国王 Deployer=King**——框架不再硬编码任何所有者，谁部署谁称王，远程复制者默认自己就是国王。
-> **v5.4 补一件事**：进智脊柱（Cognition Spine）——把"可进化"从只写不读的坟场，变成可运行、可闭环、可对齐检验的**智慧层**。它由五零件（反模式库 / 检索注入 / 经验蒸馏 / 决策校准 / deliberate 门控）+ **Loop Driver 闭环自修**（后台自动对齐检验 → 修订 → 再检验 → 收敛）组成。完整规范见 `docs/architecture_v5.4.md` 与 `diagrams/12~14`。
+> **v5.4 补一件事**：进智脊柱（Cognition Spine）——把"可进化"从只写不读的坟场，变成可运行、可闭环、可对齐检验的**智慧层**。它由五零件（反模式库 / 检索注入 / 经验蒸馏 / 决策校准 / deliberate 门控）+ **Loop Driver 闭环自修**（后台自动对齐检验 → 修订 → 再检验 → 收敛）组成。完整规范见 `docs/architecture_v5.6.md` 与 `diagrams/13~14`。
 > **v5.5 补一件事**：**L2 预执行决策层**（融合 Ponytail，117k★，MIT）——治理原来只管"写出来之后怎么审"，v5.5 往前挪到"该不该写"。编码任务起点走 7 级极简梯（need?→exists?→stdlib?→native?→dep?→oneliner?→minimal），停在第一个成立的台阶；安全红线永不妥协；思考型模型上自动 bypass。
 > **v5.6 补两件事**（GitHub 同类高热度项目补检索回流）：①**T2 复杂度分级路由 80/15/5**——只按 role 选档会把简单活派给贵模型，v5.6 增 routine/moderate/complex 评估，routine 降档省钱、complex 升档保质；②**T1 四层 token 治理边界澄清**——token 成本分 4 个互不重叠层，**Ponytail 只覆盖 code_gen 一层(-40%)**，v5.5 曾误当全能省 token 方案，v5.6 明确其余三层归外部工具、KAF 未集成。
 
@@ -79,21 +79,22 @@ L6 520 自检 + 审计链
 
 **★ v5.6 完整系统架构（九层全栈，最新）**：`diagrams/16-architecture-v5.6.svg`
 > 含 v5.5 L2 预执行决策层 + v5.6 预执行经济学（T2 复杂度路由 80/15/5 / T1 四层 token 治理）。
-> ⚠️ `04-architecture.svg` 标 v5.3、`12-architecture-v5.4.svg` 标 v5.4，均为**历史架构图，保留供版本对照**，不代表当前版本。
+> 历史架构图（`04-architecture.svg` v5.3 / `12-architecture-v5.4.svg` v5.4）**已删除**——v5.6 只保留最新架构图，避免旧图误导。
 
-**v5.4 新增（进智脊柱）**：
-- v5.4 七层架构（含进智层）：`diagrams/12-architecture-v5.4.svg`
+**进智脊柱（v5.4 引入，v5.6 沿用）**：
 - 进智脊柱全景（五零件 + 数据流）：`diagrams/13-cognition-full.svg`
 - 交付质量闭环 Loop Driver（阈值三档）：`diagrams/14-loop-closure.svg`
+- 脊柱机制三图：`diagrams/09-cognition-spine.svg` / `10-cognition-flow.svg` / `11-cognition-roadmap.svg`
 
-**v5.3 经典三图**：
-- 六层架构（治理层在顶，国王动态解析）：`diagrams/04-architecture.svg`
+**治理机制图（v5.3 引入）**：
 - 治理流（写操作必经 evaluate + 审计链）：`diagrams/05-governance-flow.svg`
+- 审计链：`diagrams/06-audit-chain.svg`
 - 国王解析（部署者即国王）：`diagrams/08-king-resolution.svg`
 
-完整图解清单（01 权力结构 / 02 记忆隔离 / 03 宰相轮值 / 04 架构 / 05 治理流 / 06 审计链 / 07 共享状态 / 08 国王解析 / 12 v5.4架构 / 13 进智全景 / 14 闭环 / 15 对齐harness / **16 v5.6全栈架构**）+ 离线 `index.html` 导览，见技能根目录 `diagrams/`。
+完整图解清单（01 权力结构 / 02 记忆隔离 / 03 宰相轮值 / 05 治理流 / 06 审计链 / 07 共享状态 / 08 国王解析 / 09~11 进智脊柱 / 13 进智全景 / 14 闭环 / 15 对齐harness / **16 v5.6全栈架构★最新**）+ 离线 `index.html` 导览，见技能根目录 `diagrams/`。
+> 架构图唯一真相 = **16**（九层全栈）。04/12 两张历史架构图已删除。
 完整架构规范见 **`docs/architecture_v5.6.md`**（含 v5.5 L2 预执行决策层与 v5.6 预执行经济学的完整设计说明）；
-`docs/architecture_v5.4.md` 为历史版本，保留供对照。
+旧版 `docs/architecture_v5.4.md` 与 `docs/kaf_v5.4_full.html` 已删除，架构规范以 **v5.6** 为唯一版本。
 
 ---
 
@@ -104,7 +105,7 @@ L6 520 自检 + 审计链
 ```
 kaf/
 ├── constitution.json      声明式宪法 v5.4（可机器解析，含 economics_routing/dispatch/review_loop/shared_ledger/governance/cognition 六节 + sovereign.king_resolver 动态国王；cognition=进智脊柱规范）
-├── cognition/             v5.4 进智脊柱（★v5.3.1 已实现：anti_patterns.jsonl 种子 + retrieval_inject.py + deliberate.py + cognition_selftest.py；③④+Loop 待 v5.4 代码；规范见 docs/architecture_v5.4.md 与 diagrams/12~14）
+├── cognition/             v5.4 进智脊柱（★v5.3.1 已实现：anti_patterns.jsonl 种子 + retrieval_inject.py + deliberate.py + cognition_selftest.py；③④+Loop 待 v5.4 代码；规范见 docs/architecture_v5.6.md 与 diagrams/13~14）
 ├── coordinator.json       宰相注册表（role/cost_tier/轮值/投票/handover + 共享账本/派发队列引用）
 ├── guard520.py            520运行时护栏（4检查点 + self_check，真核查）
 ├── memory_integrity.py    记忆完整性（SHA-256指纹 + drift检测 + protect_write）
@@ -325,7 +326,7 @@ kaf tokens "定位并修复登录接口的空指针"    # 输出四层归属 + �
 
 ## v5.4 进智脊柱（Cognition Spine）★ v5.4 核心新增
 
-> v5.3 的"可进化"是假的：经验封装成 skill 但**只写不读 = 坟场**，同类错误照犯（实证：Claw 会话清理事件 `8f6d42dc`，数据零丢失但一刀切 / 数字反复 / 标题 bug 重复 4+ 次）。v5.4 把进智做成可运行、可闭环、可对齐检验的**智慧层**。完整规范与图解见 `docs/architecture_v5.4.md` + `diagrams/12~14`。
+> v5.3 的"可进化"是假的：经验封装成 skill 但**只写不读 = 坟场**，同类错误照犯（实证：Claw 会话清理事件 `8f6d42dc`，数据零丢失但一刀切 / 数字反复 / 标题 bug 重复 4+ 次）。v5.4 把进智做成可运行、可闭环、可对齐检验的**智慧层**。完整规范与图解见 `docs/architecture_v5.6.md` + `diagrams/13~14`。
 
 **五零件**（★ = v5.3.1 地基已实现并接 `kaf_gate.py`，随 v5.4.1 发布）：
 1. **★① 反模式库 Anti-pattern**（`kaf/cognition/anti_patterns.jsonl`，8 条 `8f6d42dc` 真实种子）：记录"绝对不要做" + 触发条件 + 正确替代。种子：`8f6d42dc`（Claw 会话清理事故：一刀切判备份 / 数字未实地核查 / 只改 title 未改 custom_title 致左列不显）。

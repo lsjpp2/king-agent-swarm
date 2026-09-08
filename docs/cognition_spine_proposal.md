@@ -2,7 +2,8 @@
 
 > 提案日期：2026-08-07
 > 状态：**草案**（待国王审阅；未改动 `SKILL.md` / `constitution.json` / `kaf/*.py`）
-> 关联文档：`architecture.md`（六层架构）、`RELEASE_v5.3.md`（治理层 + 动态国王）、`principles.md`（各规则 Why）
+> 关联文档：`architecture.md`（设计哲学）、`principles.md`（各规则 Why）、`docs/architecture_v5.6.md`（现行九层架构规范）
+> ⚠️ 原引用的 `RELEASE_v5.3.md` 已于 v5.6 发布时清理；治理层与动态国王的现行说明见 `RELEASE_v5.6.md`。
 
 ---
 

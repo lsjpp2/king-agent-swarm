@@ -85,8 +85,6 @@ need? → exists? → stdlib? → native? → dep? → oneliner? → minimal
 | 图 | 内容 | 版本 |
 |---|---|---|
 | **`diagrams/16-architecture-v5.6.svg`** | **★ 九层全栈架构（最新）** | v5.6 |
-| `diagrams/12-architecture-v5.4.svg` | 七层架构（含进智层） | v5.4 · 历史 |
-| `diagrams/04-architecture.svg` | 六层架构（治理层在顶） | v5.3 · 历史 |
 | `diagrams/13-cognition-full.svg` | 进智脊柱全景 | v5.4 |
 | `diagrams/14-loop-closure.svg` | Loop Driver 闭环（阈值三档） | v5.4 |
 | `diagrams/05-governance-flow.svg` | 治理流（写操作必经 evaluate） | v5.3 |

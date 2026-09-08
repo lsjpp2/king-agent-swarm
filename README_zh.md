@@ -7,7 +7,7 @@
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org)
 [![520-Compliant](https://img.shields.io/badge/520-Rule%20Compliant-ff69b4.svg)](#-520-法则四原则三铁律)
 [![Platform-agnostic](https://img.shields.io/badge/Platform-Agnostic-lightgrey.svg)](#-平台适配器)
-[![Governance v5.3](https://img.shields.io/badge/Governance-Layer%20v5.3-7c3aed.svg)](#-架构六层治理层在顶)
+[![KAF v5.6](https://img.shields.io/badge/KAF-v5.6-7c3aed.svg)](#-架构九层全栈v56)
 [![Audit Chain](https://img.shields.io/badge/Audit-防篡改审计链-2d6cdf.svg)](#-治理层v53)
 [![Stars](https://img.shields.io/github/stars/lsjpp2/king-agent-swarm?style=social)](https://github.com/lsjpp2/king-agent-swarm/stargazers)
 [![MIT License](https://img.shields.io/github/license/lsjpp2/king-agent-swarm?color=green)](LICENSE)
@@ -83,9 +83,9 @@ guard.pre_execute({"type": "rm", "target": "D:/x", "script": "clean.py", "verifi
 
 ---
 
-## 🏛️ 架构：六层（治理层在顶）
+## 🏛️ 架构：九层全栈（v5.6）
 
-![KAF v5.3 六层架构](diagrams/04-architecture.svg)
+![KAF v5.6 九层全栈架构](diagrams/16-architecture-v5.6.svg)
 
 ```
 ┌─────────────────────────────────────────────┐

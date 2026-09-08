@@ -97,9 +97,9 @@ guard.pre_execute({"type": "rm", "target": "D:/x", "script": "clean.py", "verifi
 
 ---
 
-## 🏛️ Architecture — six layers (governance on top)
+## 🏛️ Architecture — nine layers, full stack (v5.6)
 
-![KAF v5.3 Layered Architecture](diagrams/04-architecture.svg)
+![KAF v5.6 Full-Stack Architecture](diagrams/16-architecture-v5.6.svg)
 
 > Click any diagram to open it full-size on GitHub. All eight are in [`diagrams/`](diagrams/).
 
@@ -246,4 +246,4 @@ MIT-licensed. Fork it, deploy it, make it yours. PRs welcome — especially new 
 
 ## 📌 Version
 
-**Current: v5.3** — governance layer + dynamic King (Deployer=King). See `RELEASE_v5.3.md` for the full changelog and the advantage over v5.0/v5.1/v5.2.
+**Current: v5.6** — nine-layer full-stack: governance layer + dynamic King (v5.3) → cognition spine (v5.4) → L2 pre-execution decision layer (v5.5) → pre-execution economics: **T2 complexity routing 80/15/5** + **T1 four-layer token governance** (v5.6). See `RELEASE_v5.6.md` for the full changelog; spec in `docs/architecture_v5.6.md`.

@@ -29,9 +29,9 @@ Resolution order (`kaf/king.py:resolve_king()`): `KAF_KING env > kaf_config.json
 
 See `../diagrams/` for the full SVG set. The three most relevant to this document:
 
-**Layered architecture** — Governance layer sits on top of the five classic layers; the King is resolved dynamically:
+**Layered architecture** — nine full-stack layers (v5.6); the King is resolved dynamically:
 
-![KAF v5.3 Architecture](../diagrams/04-architecture.svg)
+![KAF v5.6 Architecture](../diagrams/16-architecture-v5.6.svg)
 
 **Governance flow** — every write action passes `Governance.evaluate()`: `kill-switch → agent HMAC attestation → 520 guard → policy`, hash-linked to the audit chain:
 
