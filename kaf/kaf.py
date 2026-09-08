@@ -7,6 +7,7 @@ Usage:
     kaf check     — 520自检（可追溯/可恢复/可修复/可进化/已强制）
     kaf verify    — 记忆完整性校验（指纹+drift检测）
     kaf guard     — 打印运行时护栏检查点说明
+    kaf gate      — 强制门禁代理（删/移/覆盖前 MUST 过此门禁）
     kaf honest    — 诚实扫描（检测文档/代码残留的'自动拦截'假话）
     kaf rotate <agent> — 宰相轮值
     kaf status    — 查看集群状态
@@ -38,6 +39,31 @@ while _HERE in sys.path:
 sys.path.insert(0, _HERE)                # 同目录模块最高优先
 
 
+def _gate_call(argv):
+    """调用强制门禁 kaf_gate.py（subprocess 隔离，避免 import 副作用）。
+    返回 (returncode, combined_output)。供 kaf gate 代理 / kaf check 探针 / init·rotate 集成使用。"""
+    import subprocess
+    gate = os.path.join(_HERE, "kaf_gate.py")
+    if not os.path.exists(gate):
+        return (1, "(kaf_gate.py 不存在)")
+    try:
+        r = subprocess.run([sys.executable, gate] + list(argv),
+                           capture_output=True, text=True, timeout=30)
+        return (r.returncode, (r.stdout or "") + (r.stderr or ""))
+    except Exception as e:
+        return (1, f"gate 调用失败: {e}")
+
+
+def _gate_write(target, content, reason):
+    """写操作前过强制门禁；OK 继续，BLOCK 中止（尊重门禁结果，非绕过）。"""
+    rc, out = _gate_call(["check", "--op", "write", "--target", target,
+                         "--content", content, "--confirmed", "--reason", reason])
+    if rc != 0:
+        print(f"  ⛔ 门禁拦截({target}):\n{out.strip()}")
+        return False
+    return True
+
+
 def cmd_init():
     """初始化KAF"""
     print("=" * 50)
@@ -52,6 +78,10 @@ def cmd_init():
         template = os.path.join(os.path.dirname(__file__), "constitution.json")
         if os.path.exists(template):
             import shutil
+            # v5.6 强制门禁：写配置前过门禁（尊重 BLOCK，非绕过）
+            if not _gate_write(constitution, "<constitution.json 模板>",
+                              reason="kaf init 生成 constitution.json"):
+                return 1
             shutil.copy(template, constitution)
             print(f"  ✅ 生成 constitution.json")
         else:
@@ -82,6 +112,10 @@ def cmd_init():
             },
             "rotation_history": [],
         }
+        # v5.6 强制门禁：写配置前过门禁（尊重 BLOCK，非绕过）
+        if not _gate_write(coord_file, json.dumps(coord_tmpl, ensure_ascii=False),
+                          reason="kaf init 生成 coordinator.json（本地，已 gitignore）"):
+            return 1
         with open(coord_file, "w", encoding="utf-8") as f:
             json.dump(coord_tmpl, f, indent=2, ensure_ascii=False)
         print(f"  ✅ 生成 coordinator.json（本地，已 gitignore）— 国王={king_name}")
@@ -95,6 +129,10 @@ def cmd_check():
     """520自检"""
     from guard520 import Guard520
     guard = Guard520()
+
+    # v5.6 强制门禁活跃探针：kaf check 本身先调用门禁，证明其可达且真在跑
+    # （杜绝"文件在但从不调用"的装饰强制；审计日志写入即证明）
+    _gate_call(["check", "--op", "ping"])
 
     print("=" * 50)
     print("  KAF 520 自检")
@@ -165,6 +203,14 @@ def cmd_guard():
     return 0
 
 
+def cmd_gate(argv):
+    """v5.6 强制门禁代理：kaf gate check --op delete --target X [--confirmed --reason ...]
+    删/移/覆盖前 MUST 过此门禁并服从 BLOCK 结果（无 OS hook 平台的 agent 侧强制层）。"""
+    rc, out = _gate_call(argv)
+    print(out.strip())
+    return rc
+
+
 def cmd_rotate(agent_name):
     """宰相轮值"""
     coord_file = os.path.join(os.getcwd(), "coordinator.json")
@@ -192,6 +238,10 @@ def cmd_rotate(agent_name):
         "replaced": old
     })
 
+    # v5.6 强制门禁：写配置前过门禁（尊重 BLOCK，非绕过）
+    if not _gate_write(coord_file, json.dumps(coord, ensure_ascii=False),
+                      reason=f"kaf rotate 轮值 {old} → {agent_name}"):
+        return 1
     with open(coord_file, "w", encoding="utf-8") as f:
         json.dump(coord, f, indent=2, ensure_ascii=False)
 
@@ -536,6 +586,8 @@ def main():
         return cmd_guard()
     elif cmd == "honest":
         return cmd_honest()
+    elif cmd == "gate":
+        return cmd_gate(sys.argv[2:])
     elif cmd == "rotate":
         if len(sys.argv) < 3:
             print("  Usage: kaf rotate <agent_name>")

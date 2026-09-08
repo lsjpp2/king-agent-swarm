@@ -8,8 +8,8 @@
 [![520-Compliant](https://img.shields.io/badge/520-Rule%20Compliant-ff69b4.svg)](#-the-520-rule)
 [![Platform-agnostic](https://img.shields.io/badge/Platform-Agnostic-lightgrey.svg)](#-platform-adapters)
 [![Deployer is King](https://img.shields.io/badge/Deployer%3DKing-orange.svg)](#-who-is-the-king)
-[![Governance v5.3](https://img.shields.io/badge/Governance-Layer%20v5.3-7c3aed.svg)](#-architecture--six-layers--governance-on-top)
-[![Audit Chain](https://img.shields.io/badge/Audit-Tamper--Evident-2d6cdf.svg)](#-governance-layer-v53)
+[![Governance v5.6](https://img.shields.io/badge/Governance-Layer%20v5.6-65330a.svg)](#-architecture--nine-layers-full-stack-v56)
+[![Audit Chain](https://img.shields.io/badge/Audit-Tamper--Evident-2d6cdf.svg)](#-architecture--nine-layers-full-stack-v56)
 [![Stars](https://img.shields.io/github/stars/lsjpp2/king-agent-swarm?style=social)](https://github.com/lsjpp2/king-agent-swarm/stargazers)
 [![MIT License](https://img.shields.io/github/license/lsjpp2/king-agent-swarm?color=green)](LICENSE)
 [![Latest Release](https://img.shields.io/github/v/release/lsjpp2/king-agent-swarm?label=Release)](https://github.com/lsjpp2/king-agent-swarm/releases)
@@ -101,22 +101,28 @@ guard.pre_execute({"type": "rm", "target": "D:/x", "script": "clean.py", "verifi
 
 ![KAF v5.6 Full-Stack Architecture](diagrams/16-architecture-v5.6.svg)
 
-> Click any diagram to open it full-size on GitHub. All eight are in [`diagrams/`](diagrams/).
+> Click any diagram to open it full-size on GitHub. All 14 are in [`diagrams/`](diagrams/).
 
 ```
-┌─────────────────────────────────────────────┐
-│  Governance Layer (v5.3)  策略即代码/急停/审计 │  所有写操作必经评估，hash链防篡改
-├─────────────────────────────────────────────┤
-│  Platform Adapters   (Claude/Cursor/...)     │  5 lines of code to plug in
-├─────────────────────────────────────────────┤
-│  Coordinator Protocol  (Prime Minister rotate)│  who's in charge, right now
-├─────────────────────────────────────────────┤
-│  520 Runtime Guard     (4 checkpoints)        │  blocks Law 8/9/10 violations
-├─────────────────────────────────────────────┤
-│  Constitution-as-Code (JSON, machine-readable)│  rules you can diff & CI-test
-├─────────────────────────────────────────────┤
-│  Memory Integrity      (SHA-256 fingerprint)  │  detect unauthorized drift
-└─────────────────────────────────────────────┘
+┌─────────────────────────────────────────┐
+│  预执行经济学(v5.6)                      │  T2 复杂度路由 80/15/5 · T1 四层 token 治理
+├─────────────────────────────────────────┤
+│  L2 预执行决策层(v5.5·Ponytail)          │  7级梯 need?→exists?→stdlib?→native?→dep?→oneliner?→minimal
+├─────────────────────────────────────────┤
+│  Cognition Spine  进智脊柱(v5.4)         │  反模式/检索注入/蒸馏/校准/deliberate/闭环(与治理层正交)
+├─────────────────────────────────────────┤
+│  Governance Layer  治理层(v5.3)          │  策略即代码/急停/审计链/身份归因
+├─────────────────────────────────────────┤
+│  Platform Adapters  平台适配器            │  5行代码接入任意平台
+├─────────────────────────────────────────┤
+│  Coordinator Protocol  宰相轮值协议       │
+├─────────────────────────────────────────┤
+│  520 Runtime Guard  运行时护栏            │
+├─────────────────────────────────────────┤
+│  Constitution-as-Code  声明式宪法         │
+├─────────────────────────────────────────┤
+│  Memory Integrity  记忆完整性             │
+└─────────────────────────────────────────┘
 ```
 
 Why JSON, not a markdown doc? So your constitution can be **parsed, diffed, and CI-tested** — not just read.
@@ -167,7 +173,7 @@ Your governance is a JSON file, not a vibe:
 
 ```json
 {
-  "version": "5.3",
+  "version": "5.6",
   "sovereign": { "king_resolver": "deployer" },
   "governance": {
     "kill_switch": true,
@@ -217,15 +223,15 @@ See `adapters/` for Claude / Cursor / OpenCode / WorkBuddy / generic templates.
 
 ## 🗺️ Diagrams
 
-**Governance flow (v5.3)** — every write action is evaluated: `kill-switch → agent attestation → 520 guard → policy`, and hash-linked to the audit chain:
+**Governance flow** — every write action is evaluated: `kill-switch → agent attestation → 520 guard → policy`, and hash-linked to the audit chain:
 
-![KAF v5.3 Governance Flow](diagrams/05-governance-flow.svg)
+![KAF Governance Flow](diagrams/05-governance-flow.svg)
 
 **King resolution** — `Deployer = King`, no hardcoded owner:
 
-![KAF v5.3 King Resolution](diagrams/08-king-resolution.svg)
+![KAF King Resolution](diagrams/08-king-resolution.svg)
 
-Full set in [`diagrams/`](diagrams/) — architecture (01/04), memory isolation (02), PM rotation (03), governance flow (05), audit chain (06), shared state (07), king resolution (08), plus an offline [`index.html`](diagrams/index.html) tour.
+Full set of 14 diagrams in [`diagrams/`](diagrams/) — architecture (16), memory isolation (02), PM rotation (03), governance flow (05), audit chain (06), shared state (07), king resolution (08), cognition spine (09), cognition flow (10), cognition roadmap (11), cognition full (13), loop closure (14), alignment-deepseek-harness (15), plus an offline [`index.html`](diagrams/index.html) tour.
 
 ---
 

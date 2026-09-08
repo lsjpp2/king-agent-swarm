@@ -1,217 +1,298 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>KAF v5.3 · 详细图解与交叉验证</title>
+<html lang="zh-CN" data-page-node-id="JNSbZjQjV28FVoE4CeddkJ">
+<head data-page-node-id="ttbcBknDCxgpaSaWxMnDqX">
+<meta charset="utf-8" data-page-node-id="CoTEhtqBHO9XstOQBffCjc">
+<meta name="viewport" content="width=device-width, initial-scale=1" data-page-node-id="WTmyWgpzz9BRq1h0WsxRmh">
+<title>KAF v5.6 · 完整图解导览（九层全栈 + 16 图）</title>
 <style>
   :root { color-scheme: dark; }
   * { box-sizing: border-box; }
   body { margin:0; background:#0d1117; color:#c9d1d9; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; line-height:1.6; }
   header { padding:28px 24px 18px; border-bottom:1px solid #21262d; }
-  h1 { margin:0 0 6px; font-size:22px; color:#f0f0f0; }
+  h1 { margin:0 0 6px; font-size:24px; color:#f0f0f0; }
   .sub { color:#8b949e; font-size:13px; }
-  main { max-width:960px; margin:0 auto; padding:24px; }
-  section { margin:32px 0; }
-  h2 { font-size:17px; color:#f0c040; border-left:4px solid #f0c040; padding-left:10px; margin:0 0 10px; }
-  h3 { font-size:14px; color:#7be0a0; margin:18px 0 6px; }
+  main { max-width:980px; margin:0 auto; padding:24px; }
+  section { margin:36px 0; }
+  h2 { font-size:18px; color:#f0c040; border-left:4px solid #f0c040; padding-left:10px; margin:0 0 12px; }
+  h3 { font-size:15px; color:#7be0a0; margin:20px 0 8px; }
+  h4 { font-size:13px; color:#a5d6ff; margin:16px 0 6px; }
   .card { background:#161b22; border:1px solid #30363d; border-radius:12px; padding:14px; overflow:auto; }
   .card svg { width:100%; height:auto; display:block; }
-  img.diag { width:100%; height:auto; border-radius:12px; border:1px solid #30363d; }
+  img.diag { width:100%; height:auto; border-radius:12px; border:1px solid #30363d; display:block; }
   pre { background:#0d1117; border:1px solid #30363d; border-radius:8px; padding:12px 14px; overflow:auto; font-size:12px; color:#c9d1d9; }
-  .ok { color:#7be0a0; } .bad { color:#f78166; } .warn { color:#f0c040; }
+  .ok { color:#7be0a0; } .bad { color:#f78166; } .warn { color:#f0c040; } .dim { color:#8b949e; }
   .meta { font-size:12px; color:#8b949e; }
-  .tag { display:inline-block; background:#1c2128; border:1px solid #30363d; border-radius:999px; padding:2px 10px; font-size:11px; color:#8b949e; margin-right:6px; }
-  footer { text-align:center; color:#8b949e; font-size:12px; padding:30px; border-top:1px solid #21262d; }
+  .tag { display:inline-block; background:#1c2128; border:1px solid #30363d; border-radius:999px; padding:2px 10px; font-size:11px; color:#c9d1d9; margin-right:6px; margin-bottom:4px; }
+  .tag.v56 { border-color:#d97706; color:#fbbf24; }
+  .tag.v55 { border-color:#7c3aed; color:#c4b5fd; }
+  .tag.v54 { border-color:#059669; color:#6ee7b7; }
+  .tag.v53 { border-color:#2563eb; color:#7dd3fc; }
+  .tag.guard { border-color:#526173; color:#b6c2d1; }
+  .toc { background:#161b22; border:1px solid #30363d; border-radius:12px; padding:16px 20px; }
+  .toc ol { margin:8px 0 0 0; padding-left:20px; }
+  .toc li { margin:3px 0; }
+  .toc a { color:#7dd3fc; text-decoration:none; }
+  .toc a:hover { text-decoration:underline; }
+  .featured { background:linear-gradient(180deg,#161b22,#0d1117); border:1px solid #d97706; border-radius:14px; padding:18px; margin-top:8px; }
+  .featured .badge { display:inline-block; background:#d97706; color:#0d1117; font-weight:800; font-size:11px; padding:3px 10px; border-radius:999px; margin-left:8px; }
+  .appendix { background:#0d1117; border:1px dashed #30363d; border-radius:12px; padding:16px; opacity:0.78; }
+  footer { text-align:center; color:#8b949e; font-size:12px; padding:30px; border-top:1px solid #21262d; margin-top:40px; }
 </style>
 </head>
-<body>
-<header>
-  <h1>🛡️ KAF v5.3 · 详细图解与交叉验证</h1>
-  <div class="sub">国王-Agent蜂群 · Constitution-as-Code + Governance Layer · 宣称 = 实现（实地跑通证据见文末）</div>
-  <div style="margin-top:10px">
-    <span class="tag">策略即代码</span><span class="tag">kill-switch 急停</span><span class="tag">防篡改审计链</span>
-    <span class="tag">Agent 身份归因</span><span class="tag">Deployer = King（动态国王）</span>
+<body data-page-node-id="kpkVFxG2DjdNYH11Cvdy6H">
+<header data-page-node-id="RTOozylTFewDWnp0DaCgvH">
+  <h1 data-page-node-id="kWQbTejApQZ8OTCHsTB6MO">🛡️ KAF v5.6 · 完整图解导览<span class="badge" data-page-node-id="3QW2mDPaxzYjEuBDQnhdnd">最新</span></h1>
+  <div class="sub" data-page-node-id="8uVCqR4HiiAbrSF6yNDYUE">国王-Agent蜂群 · 九层全栈架构（v5.3→v5.6 演进）· 平台无关 · 部署者即国王 · 宣称 = 实现（实地跑通证据见文末）</div>
+  <div style="margin-top:12px" data-page-node-id="5kZkLbJr1pmXXl2LOS56CT">
+    <span class="tag v56" data-page-node-id="zXUPfNZPxbLTgnqOdSuKqU">v5.6 预执行经济学 · T2 复杂度 80/15/5 · T1 token 四层治理</span>
+    <span class="tag v55" data-page-node-id="HIEvX2Z2qZ5VxVz3b23dPV">v5.5 L2 预执行决策 · Ponytail 7级梯</span>
+    <span class="tag v54" data-page-node-id="XgkGHfIFjjfJES4PF4BBC7">v5.4 进智脊柱 · 反模式/检索/蒸馏/校准/deliberate/Loop</span>
+    <span class="tag v53" data-page-node-id="3Tlz1PPS0Boxnj3UT2kkGA">v5.3 治理层 · 策略即代码/急停/审计/归因</span>
+    <span class="tag guard" data-page-node-id="Airm6Msox1b5YbVj5MRs2E">520 运行时护栏 · 铁律 8/9/10/12</span>
   </div>
 </header>
-<main>
+<main data-page-node-id="cxtZIDajIDlaQeVroy2MOK">
 
-<section>
-  <h2>① 六层架构（含 v5.3 治理层）</h2>
-  <div class="card">
-    <svg viewBox="0 0 680 580" xmlns="http://www.w3.org/2000/svg" style="font-family: system-ui, sans-serif;">
-      <defs>
-        <filter id="sh" x="-4%" y="-4%" width="108%" height="116%"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.18"/></filter>
-        <linearGradient id="gA" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#58a6ff"/><stop offset="1" stop-color="#2d6cdf"/></linearGradient>
-        <linearGradient id="gC" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7be0a0"/><stop offset="1" stop-color="#4dc970"/></linearGradient>
-        <linearGradient id="gG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a78bfa"/><stop offset="1" stop-color="#7c3aed"/></linearGradient>
-        <linearGradient id="gR" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f78166"/><stop offset="1" stop-color="#d45a3e"/></linearGradient>
-        <linearGradient id="gK" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f0c040"/><stop offset="1" stop-color="#d4a030"/></linearGradient>
-        <linearGradient id="gM" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#79c0ff"/><stop offset="1" stop-color="#388bfd"/></linearGradient>
+<div class="toc" data-page-node-id="emKGFKW5KVymWLIltiCbsM">
+  <strong data-page-node-id="9CAzcn139XeDjxXuUfZngq">📑 目录（共 16 图，按阅读顺序）</strong>
+  <ol data-page-node-id="JRuVgAWTHtdd0j1qUzLbkn">
+    <li data-page-node-id="Cl83r7LjfdfGCvyybJ9kCE"><a href="#sec-v56-arch" data-page-node-id="fUmn6HoIo8FT7BpEiQkojF">★ ① v5.6 九层全栈架构（最新主图）</a></li>
+    <li data-page-node-id="AumGwtwe8YT91s8kyqj5Y2"><a href="#sec-power" data-page-node-id="fWR9HpqSdE8ykwfzNGeOlX">② 权力结构 Power Structure</a></li>
+    <li data-page-node-id="RfHyGenD4tN8oP4ytIwSKN"><a href="#sec-memiso" data-page-node-id="8hSoTO6vu3hXFHZvHGqkbS">③ 记忆隔离墙 Memory Isolation</a></li>
+    <li data-page-node-id="h0iSY3gcK3UtA5MI1BBYjr"><a href="#sec-rotation" data-page-node-id="AJHmlq27FnMJbugPBFRPHx">④ 宰相轮值协议 PM Rotation</a></li>
+    <li data-page-node-id="dnilPlKJMqxbdqDG2oJH9d"><a href="#sec-gov-flow" data-page-node-id="nFEOcsJcyJ9SR754s1d41R">⑤ 治理评估流程 Governance.evaluate()</a></li>
+    <li data-page-node-id="rb8WvL5NDkHnmdDKih9j6Q"><a href="#sec-audit" data-page-node-id="0MwWu5FtjQCQUiSOErlWKz">⑥ 防篡改审计链 Audit Chain</a></li>
+    <li data-page-node-id="GV71FMvmPaBruRbTnEVvnK"><a href="#sec-shared" data-page-node-id="1fME6KF4PqEIRbSK8WbDGD">⑦ 共享状态拓扑 Shared State</a></li>
+    <li data-page-node-id="1aiGskfhBoCoI2Ss4JIjnL"><a href="#sec-king" data-page-node-id="NpOE7i77ZH1FxlNi1VxehI">⑧ 国王身份动态解析 Deployer = King</a></li>
+    <li data-page-node-id="nZkhAiXiOZmgDfQ6UPNsAt"><a href="#sec-cog" data-page-node-id="ONI9RTqD3BwzItvkE5NKZ4">⑨ 进智脊柱 Cognition Spine</a></li>
+    <li data-page-node-id="uswEASeSuOmdXBcAzLLdKz"><a href="#sec-cog-flow" data-page-node-id="chlGC5zUQBsoDDkyCOZ46K">⑩ 蒸馏/校准/deliberate 数据流</a></li>
+    <li data-page-node-id="QI13p07RCcgehr6htKWDCU"><a href="#sec-cog-roadmap" data-page-node-id="DMA24H50DjYVhn1eKZDbwP">⑪ 进智脊柱路线图</a></li>
+    <li data-page-node-id="eHWwMC2zmjSxEzQlNOyblQ"><a href="#sec-cog-full" data-page-node-id="SVPVTzXmssoabayXy8bWLV">⑫ 进智全景（五零件+闭环）</a></li>
+    <li data-page-node-id="5DxhKjSpW2ZMA6YcjlXdRU"><a href="#sec-loop" data-page-node-id="c6LlmELBIN7uXS0q21XzMU">⑬ 交付质量闭环 Loop Driver</a></li>
+    <li data-page-node-id="aHENoeR5c1DFIbPimm0D5t"><a href="#sec-align" data-page-node-id="BA0KSkP8HFt7XwQGkzjzcR">⑭ DeepSeek 对齐 harness</a></li>
+    <li data-page-node-id="BvCNPxDoQixm6ESeeqC3n7"><a href="#sec-verify" data-page-node-id="4u32VSlCwFQHpvgC7xIQRh">🔬 交叉验证证据（v5.6 实地跑通）</a></li>
+    <li data-page-node-id="qWOaclKoyKIdbxDfqCvJ91"><a href="#sec-history" data-page-node-id="5EQoU2LwbEo5MrFUUl1Zvr">📦 历史附录：v5.3 六层架构（已弃用，仅留对照）</a></li>
+  </ol>
+</div>
+
+<section id="sec-v56-arch" data-page-node-id="abBNsDukYJxxAFKODCACIB">
+  <h2 data-page-node-id="WiGgOBoJEU2dgPr4vlFHva">★ ① v5.6 九层全栈架构（最新主图）</h2>
+  <div class="featured" data-page-node-id="Rs8zbHL3v4NdAZSVsICzpg">
+    <div class="meta" style="margin-bottom:10px" data-page-node-id="WSX6pSd9LEm3whliOEtpA6">
+      <strong data-page-node-id="Oaprxlzm3grA4dsteYapCT">v5.6 完整系统架构</strong> · 九层治理栈 · 平台无关 · 部署者即国王（Deployer = King）<br data-page-node-id="zFNnNfbX8QhyyPopa8B2uX">
+      完整规范见 <code data-page-node-id="DB6haHoWhDZRpbNa9YDGPH">docs/architecture_v5.6.md</code>（13KB）。
+    </div>
+    <img class="diag" src="16-architecture-v5.6.svg" alt="KAF v5.6 完整系统架构（九层全栈）" data-page-node-id="0FK5Cgc1ZBGFQDGewbvJTz">
+    <div class="meta" style="margin-top:10px" data-page-node-id="ez3bMhOmLgkYiiGg3HrYWY">
+      9 层（自顶向下）：① 预执行经济学(v5.6) · ② L2 预执行决策(v5.5) · ③ 进智脊柱(v5.4) · ④ 治理层(v5.3) · ⑤ 平台适配器 · ⑥ 宰相轮值协议 · ⑦ 520 运行时护栏 · ⑧ 声明式宪法 · ⑨ 记忆完整性
+    </div>
+  </div>
+</section>
+
+<section id="sec-power" data-page-node-id="FLCST41j9VeJDrD9msZOAd">
+  <h2 data-page-node-id="Yq71nxGpPXhZ1n2jE7AD9l">② 权力结构 Power Structure</h2>
+  <img class="diag" src="01-power-structure.svg" alt="Power Structure" data-page-node-id="59V2aKIxFLHEv2Wr1izTXs">
+</section>
+
+<section id="sec-memiso" data-page-node-id="V8HHIHm7QZpd8o7pWwrXRo">
+  <h2 data-page-node-id="UZ2nzeEgjE3aMdfBGRdwMb">③ 记忆隔离墙 Memory Isolation</h2>
+  <img class="diag" src="02-memory-isolation.svg" alt="Memory Isolation" data-page-node-id="3sN86iL5erjYg1OeBTCDa5">
+</section>
+
+<section id="sec-rotation" data-page-node-id="lmQdHqjHlZFsego3hFq7Eo">
+  <h2 data-page-node-id="1oexhxdG4Ub8mlDGZ1RkcW">④ 宰相轮值协议 PM Rotation</h2>
+  <img class="diag" src="03-rotation-flow.svg" alt="PM Rotation" data-page-node-id="yqPHgiakf6PdCHikKFnm0H">
+</section>
+
+<section id="sec-gov-flow" data-page-node-id="HCQp88bqC2giVnE7HLiPBA">
+  <h2 data-page-node-id="nGh5UucSbJ1azoQcpBH9Ks">⑤ 治理评估流程 Governance.evaluate()</h2>
+  <div class="card" data-page-node-id="MFNG1ILxCvi46HeDoKBy90">
+    <svg viewBox="0 0 680 560" xmlns="http://www.w3.org/2000/svg" style="font-family: system-ui, sans-serif;" data-page-node-id="nT1CCTxS6wyMOr0LpMlrCT">
+      <defs data-page-node-id="6FCbabphTW5UZiWr20yQIa">
+        <filter id="sh" x="-4%" y="-4%" width="108%" height="116%" data-page-node-id="MM3NYJQGgvaz42sOHpOEUs"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.18" data-page-node-id="iGbLF9l95iSKJJck1ClOgj"/></filter>
+        <marker id="ar" markerWidth="9" markerHeight="9" refX="4" refY="4.5" data-page-node-id="3ghH84VHBzgKKjrLSSPOly"><path d="M0,0 L9,4.5 L0,9 Z" fill="#8b949e" data-page-node-id="lRSfUkh81ynpgtYnWnE2YB"/></marker>
+        <marker id="arD" markerWidth="9" markerHeight="9" refX="4" refY="4.5" data-page-node-id="AoFiJLzlAzAWgQ6zdErGIH"><path d="M0,0 L9,4.5 L0,9 Z" fill="#f78166" data-page-node-id="mQvVcZgn2Re8Q5ZxuE8BqX"/></marker>
+        <marker id="arG" markerWidth="9" markerHeight="9" refX="4" refY="4.5" data-page-node-id="U6m63gh8fJbancYyS6oKjE"><path d="M0,0 L9,4.5 L0,9 Z" fill="#7be0a0" data-page-node-id="mUSO4DLr6y3wMtBHrXEDS8"/></marker>
       </defs>
-      <rect width="680" height="580" rx="14" fill="#0d1117"/>
-      <text x="340" y="36" text-anchor="middle" font-size="18" font-weight="800" fill="#f0f0f0">🏛️  KAF v5.3 · Layered Architecture</text>
-      <text x="340" y="58" text-anchor="middle" font-size="11" fill="#8b949e" font-style="italic">Governance layer (NEW) cross-cuts every action · King identity is dynamic (resolve_king)</text>
-      <rect x="40" y="78" width="600" height="58" rx="10" fill="url(#gA)" filter="url(#sh)"/>
-      <text x="60" y="104" font-size="13" font-weight="800" fill="white">🧩  Platform Adapters</text>
-      <text x="60" y="124" font-size="10" fill="rgba(255,255,255,0.85)">WorkBuddy / Claude / OpenCode / Cursor / Kimi — 5 行代码接入任意平台；dispatch 派发到共享队列</text>
-      <rect x="40" y="144" width="600" height="58" rx="10" fill="url(#gC)" filter="url(#sh)"/>
-      <text x="60" y="170" font-size="13" font-weight="800" fill="#1a1a2e">🔄  Coordinator Protocol</text>
-      <text x="60" y="190" font-size="10" fill="rgba(26,26,46,0.85)">宰相轮值 · 3票 vs 1票 · 国王一票否决 · handover_state 交接</text>
-      <rect x="40" y="210" width="600" height="62" rx="10" fill="url(#gG)" filter="url(#sh)" stroke="#c4b5fd" stroke-width="1.5"/>
-      <text x="60" y="236" font-size="13" font-weight="800" fill="white">🛡️  Governance Layer  ★ v5.3 NEW</text>
-      <text x="60" y="256" font-size="10" fill="rgba(255,255,255,0.9)">策略即代码(policy.json) · 急停(kill-switch) · 防篡改审计链 · Agent 身份归因(HMAC)</text>
-      <text x="560" y="232" font-size="9" fill="#ede9fe" font-weight="700">evaluate(): kill→attest→guard520→policy</text>
-      <text x="560" y="248" font-size="9" fill="#ede9fe" font-weight="700">全程写审计链</text>
-      <rect x="40" y="280" width="600" height="58" rx="10" fill="url(#gR)" filter="url(#sh)"/>
-      <text x="60" y="306" font-size="13" font-weight="800" fill="white">⚡  520 Runtime Guard</text>
-      <text x="60" y="326" font-size="10" fill="rgba(255,255,255,0.85)">4 检查点(pre:delete/pre:destructive_op/post:write_memory/startup) · 铁律8/9/10 · agent侧门禁 kaf_gate.py</text>
-      <rect x="40" y="346" width="600" height="58" rx="10" fill="url(#gK)" filter="url(#sh)"/>
-      <text x="60" y="372" font-size="13" font-weight="800" fill="#1a1a2e">📜  Constitution-as-Code</text>
-      <text x="60" y="392" font-size="10" fill="rgba(26,26,46,0.85)">声明式宪法 JSON · economics_routing/dispatch/review_loop/shared_ledger/governance · sovereign.king_resolver 动态国王</text>
-      <rect x="40" y="412" width="600" height="58" rx="10" fill="url(#gM)" filter="url(#sh)"/>
-      <text x="60" y="438" font-size="13" font-weight="800" fill="white">🔐  Memory Integrity</text>
-      <text x="60" y="458" font-size="10" fill="rgba(255,255,255,0.85)">SHA-256 指纹 + drift 检测 + protect_write · 隔离墙 strict · 共享账本 .memory_ledger.db</text>
-      <rect x="14" y="78" width="20" height="392" rx="6" fill="#21262d" stroke="#30363d"/>
-      <text x="24" y="270" text-anchor="middle" font-size="9" fill="#8b949e" transform="rotate(-90 24 270)">AGENT ACTION ↓</text>
-      <rect x="40" y="486" width="600" height="78" rx="10" fill="#161b22" stroke="#7c3aed" stroke-width="1.5"/>
-      <text x="60" y="510" font-size="12" font-weight="800" fill="#c4b5fd">👑  King = resolve_king()  (v5.3 修正：不再硬编码${KING_NAME})</text>
-      <text x="60" y="530" font-size="10" fill="#8b949e">本地作者环境 → ${KING_NAME}    ｜    远程新手复制 → 当前 OS 用户 / operator</text>
-      <text x="60" y="548" font-size="10" fill="#8b949e">显式覆盖：环境变量 KAF_KING 或 kaf_config.json 的 {"king":"你的名字"}</text>
+      <rect width="680" height="560" rx="14" fill="#0d1117" data-page-node-id="muMEMJvbXTtdvDRQOrlYUh"/>
+      <text x="340" y="36" text-anchor="middle" font-size="18" font-weight="800" fill="#f0f0f0" data-page-node-id="ZOZDDRQqWqiQyg0DsOEHFi">🛡️  Governance.evaluate() 评估流程（v5.3+ 沿用至 v5.6）</text>
+      <text x="340" y="58" text-anchor="middle" font-size="11" fill="#8b949e" font-style="italic" data-page-node-id="6Tk5fiAlDahqCMk4Drf9Y5">每一步拒绝都写入防篡改审计链；DENY 优先于 ALLOW</text>
+      <rect x="270" y="74" width="140" height="40" rx="20" fill="#21262d" stroke="#58a6ff" stroke-width="1.5" data-page-node-id="FhWsA6zF1wn9aBhFAzxvEW"/>
+      <text x="340" y="99" text-anchor="middle" font-size="12" font-weight="700" fill="#58a6ff" data-page-node-id="4aLFZcLIMcm3YB1brqBtzg">Agent 动作 (action)</text>
+      <path d="M340 114 L340 134" stroke="#8b949e" stroke-width="2" fill="none" marker-end="url(#ar)" data-page-node-id="nHXGodUXhGxSaDNXPMBI2V"/>
+      <polygon points="340,138 286,178 394,178" fill="#1c2128" stroke="#f78166" stroke-width="1.5" data-page-node-id="YvOv56Y0hlot5iRnRG7NhY"/>
+      <text x="340" y="166" text-anchor="middle" font-size="11" font-weight="700" fill="#f78166" data-page-node-id="HlerbZSqnvtOk1sJ1H1Sbu">kill-switch 激活?</text>
+      <path d="M394 158 L470 158 L470 300 L520 300" stroke="#f78166" stroke-width="2" fill="none" marker-end="url(#arD)" data-page-node-id="SPnAYg32zgJwZKHpIIIwlj"/>
+      <text x="478" y="230" font-size="10" fill="#f78166" font-weight="600" data-page-node-id="EDo0ufGWVyw27uK0fjRa6J">YES</text>
+      <path d="M340 178 L340 210" stroke="#8b949e" stroke-width="2" fill="none" marker-end="url(#ar)" data-page-node-id="40vdhXj5AGiNk7AxHvBwax"/>
+      <polygon points="340,214 284,254 396,254" fill="#1c2128" stroke="#f0c040" stroke-width="1.5" data-page-node-id="Fgwr5oJvPh1LLkUsVrrbTw"/>
+      <text x="340" y="242" text-anchor="middle" font-size="11" font-weight="700" fill="#f0c040" data-page-node-id="0l6mMPM4ZQGH6TGZDrFKkP">agent 已 attest?</text>
+      <path d="M396 234 L470 234 L470 300 L520 300" stroke="#f78166" stroke-width="2" fill="none" marker-end="url(#arD)" data-page-node-id="pDcaGSTaJS4atodymwEygI"/>
+      <text x="478" y="214" font-size="10" fill="#f78166" font-weight="600" data-page-node-id="wfIE5Bwix810Tr6F5CfrGb">NO</text>
+      <path d="M340 254 L340 286" stroke="#8b949e" stroke-width="2" fill="none" marker-end="url(#ar)" data-page-node-id="EDF6kLBLJgSKaKrPburjrB"/>
+      <polygon points="340,290 284,330 396,330" fill="#1c2128" stroke="#f78166" stroke-width="1.5" data-page-node-id="l47DfZaQJoCJEkJ2hQ2PLF"/>
+      <text x="340" y="313" text-anchor="middle" font-size="11" font-weight="700" fill="#f78166" data-page-node-id="gpFl8YBGP5N8engRLYy16z">520 护栏拦截?</text>
+      <path d="M396 310 L470 310 L470 300 L520 300" stroke="#f78166" stroke-width="2" fill="none" marker-end="url(#arD)" data-page-node-id="NWUMyN5bmeUsFUBXhgMiMA"/>
+      <text x="478" y="290" font-size="10" fill="#f78166" font-weight="600" data-page-node-id="hHwzo8avV0CGdKcFRW8xas">YES</text>
+      <path d="M340 330 L340 362" stroke="#8b949e" stroke-width="2" fill="none" marker-end="url(#ar)" data-page-node-id="DIUiEO9vNHUdTK47tFI59U"/>
+      <rect x="230" y="366" width="220" height="46" rx="10" fill="#7c3aed" filter="url(#sh)" data-page-node-id="ErJRBH32YRdHvDBbdqid3R"/>
+      <text x="340" y="388" text-anchor="middle" font-size="12" font-weight="800" fill="white" data-page-node-id="MrLJ2gsbLvkOyC8D7c5yDc">PolicyEngine.evaluate()</text>
+      <text x="340" y="404" text-anchor="middle" font-size="9.5" fill="rgba(255,255,255,0.9)" data-page-node-id="7rWGyEE6boR7bnTCYJ6gFr">DENY优先 · require 为豁免条件</text>
+      <path d="M340 412 L340 444" stroke="#8b949e" stroke-width="2" fill="none" marker-end="url(#ar)" data-page-node-id="7hxcrBJFCFophQeage4lGc"/>
+      <polygon points="340,448 286,488 394,488" fill="#1c2128" stroke="#a78bfa" stroke-width="1.5" data-page-node-id="nilYbmai5fWYPTmBXM1Ks4"/>
+      <text x="340" y="471" text-anchor="middle" font-size="11" font-weight="700" fill="#c4b5fd" data-page-node-id="QDCfBG5EUdJzw2o0fggfr5">命中 deny 规则</text>
+      <text x="340" y="476" text-anchor="middle" font-size="9" fill="#8b949e" data-page-node-id="DYkVWeVAI1pBSc0yykzACT">(无豁免)</text>
+      <path d="M340 488 L340 510" stroke="#8b949e" stroke-width="2" fill="none" marker-end="url(#ar)" data-page-node-id="rciHbJhY2bcNkfUbfmFzRd"/>
+      <rect x="500" y="280" width="160" height="40" rx="10" fill="#f78166" filter="url(#sh)" data-page-node-id="1OFEB0D14PycM4ftLzWa5K"/>
+      <text x="580" y="305" text-anchor="middle" font-size="12" font-weight="800" fill="white" data-page-node-id="BumWPWWsqOPSBcKs12UVjj">⛔ DENY</text>
+      <rect x="500" y="498" width="160" height="40" rx="10" fill="#7be0a0" filter="url(#sh)" data-page-node-id="Uv03WdxFZP7Bmfuetxxp9d"/>
+      <text x="580" y="523" text-anchor="middle" font-size="12" font-weight="800" fill="#1a1a2e" data-page-node-id="IQU3y0VXBoDatSAmLUibyl">✅ ALLOW</text>
+      <path d="M394 468 L500 468" stroke="#f78166" stroke-width="2" fill="none" marker-end="url(#arD)" data-page-node-id="4JoXiujr90c650h21nzTao"/>
+      <path d="M500 468 L500 320" stroke="#f78166" stroke-width="2" fill="none" marker-end="url(#arD)" data-page-node-id="kktR71AKecjVpAlZlf4AJA"/>
+      <path d="M340 510 L340 540 L500 540 L500 538" stroke="#7be0a0" stroke-width="2" fill="none" marker-end="url(#arG)" data-page-node-id="WTjF13GtkKbQ2yj0aHycqb"/>
+      <text x="60" y="540" font-size="10" fill="#8b949e" font-style="italic" data-page-node-id="EmoDXzUYG4QDn3WrceEml9">每条结果（含 DENY/ALLOW）均 hash 上链 → audit_chain.log (verify() 可检测篡改)</text>
     </svg>
   </div>
 </section>
 
-<section>
-  <h2>② 治理评估流程 Governance.evaluate()</h2>
-  <div class="card">
-    <svg viewBox="0 0 680 560" xmlns="http://www.w3.org/2000/svg" style="font-family: system-ui, sans-serif;">
-      <defs>
-        <filter id="sh" x="-4%" y="-4%" width="108%" height="116%"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.18"/></filter>
-        <marker id="ar" markerWidth="9" markerHeight="9" refX="4" refY="4.5"><path d="M0,0 L9,4.5 L0,9 Z" fill="#8b949e"/></marker>
-        <marker id="arD" markerWidth="9" markerHeight="9" refX="4" refY="4.5"><path d="M0,0 L9,4.5 L0,9 Z" fill="#f78166"/></marker>
-        <marker id="arG" markerWidth="9" markerHeight="9" refX="4" refY="4.5"><path d="M0,0 L9,4.5 L0,9 Z" fill="#7be0a0"/></marker>
+<section id="sec-audit" data-page-node-id="HwHAZnI4W0WD975nfLfG88">
+  <h2 data-page-node-id="FFBGukIQIIoaSppjfaa5rx">⑥ 防篡改审计链 Audit Chain</h2>
+  <div class="card" data-page-node-id="wZoKBdCQrdGQwAsYM27Z1p">
+    <svg viewBox="0 0 680 360" xmlns="http://www.w3.org/2000/svg" style="font-family: system-ui, sans-serif;" data-page-node-id="zGLOrUtIP73uQIk5MSY4Kb">
+      <defs data-page-node-id="VyKkDdUD8rcwl75PcmCBWc">
+        <filter id="sh" x="-4%" y="-4%" width="108%" height="116%" data-page-node-id="xE1WUHP4oAOrTHUjTDCfRH"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.18" data-page-node-id="TpPBSXhyyLaqLuaCXIDiVY"/></filter>
+        <marker id="ah" markerWidth="9" markerHeight="9" refX="4" refY="4.5" data-page-node-id="IaqdGU6jN9NGUKUi3NimTF"><path d="M0,0 L9,4.5 L0,9 Z" fill="#7be0a0" data-page-node-id="vePnPUTcVUHe2CMpLFwZxp"/></marker>
       </defs>
-      <rect width="680" height="560" rx="14" fill="#0d1117"/>
-      <text x="340" y="36" text-anchor="middle" font-size="18" font-weight="800" fill="#f0f0f0">🛡️  Governance.evaluate() 评估流程</text>
-      <text x="340" y="58" text-anchor="middle" font-size="11" fill="#8b949e" font-style="italic">每一步拒绝都写入防篡改审计链；DENY 优先于 ALLOW</text>
-      <rect x="270" y="74" width="140" height="40" rx="20" fill="#21262d" stroke="#58a6ff" stroke-width="1.5"/>
-      <text x="340" y="99" text-anchor="middle" font-size="12" font-weight="700" fill="#58a6ff">Agent 动作 (action)</text>
-      <path d="M340 114 L340 134" stroke="#8b949e" stroke-width="2" fill="none" marker-end="url(#ar)"/>
-      <polygon points="340,138 286,178 394,178" fill="#1c2128" stroke="#f78166" stroke-width="1.5"/>
-      <text x="340" y="166" text-anchor="middle" font-size="11" font-weight="700" fill="#f78166">kill-switch 激活?</text>
-      <path d="M394 158 L470 158 L470 300 L520 300" stroke="#f78166" stroke-width="2" fill="none" marker-end="url(#arD)"/>
-      <text x="478" y="230" font-size="10" fill="#f78166" font-weight="600">YES</text>
-      <path d="M340 178 L340 210" stroke="#8b949e" stroke-width="2" fill="none" marker-end="url(#ar)"/>
-      <polygon points="340,214 284,254 396,254" fill="#1c2128" stroke="#f0c040" stroke-width="1.5"/>
-      <text x="340" y="242" text-anchor="middle" font-size="11" font-weight="700" fill="#f0c040">agent 已 attest?</text>
-      <path d="M396 234 L470 234 L470 300 L520 300" stroke="#f78166" stroke-width="2" fill="none" marker-end="url(#arD)"/>
-      <text x="478" y="214" font-size="10" fill="#f78166" font-weight="600">NO</text>
-      <path d="M340 254 L340 286" stroke="#8b949e" stroke-width="2" fill="none" marker-end="url(#ar)"/>
-      <polygon points="340,290 284,330 396,330" fill="#1c2128" stroke="#f78166" stroke-width="1.5"/>
-      <text x="340" y="313" text-anchor="middle" font-size="11" font-weight="700" fill="#f78166">520 护栏拦截?</text>
-      <path d="M396 310 L470 310 L470 300 L520 300" stroke="#f78166" stroke-width="2" fill="none" marker-end="url(#arD)"/>
-      <text x="478" y="290" font-size="10" fill="#f78166" font-weight="600">YES</text>
-      <path d="M340 330 L340 362" stroke="#8b949e" stroke-width="2" fill="none" marker-end="url(#ar)"/>
-      <rect x="230" y="366" width="220" height="46" rx="10" fill="#7c3aed" filter="url(#sh)"/>
-      <text x="340" y="388" text-anchor="middle" font-size="12" font-weight="800" fill="white">PolicyEngine.evaluate()</text>
-      <text x="340" y="404" text-anchor="middle" font-size="9.5" fill="rgba(255,255,255,0.9)">DENY优先 · require 为豁免条件</text>
-      <path d="M340 412 L340 444" stroke="#8b949e" stroke-width="2" fill="none" marker-end="url(#ar)"/>
-      <polygon points="340,448 286,488 394,488" fill="#1c2128" stroke="#a78bfa" stroke-width="1.5"/>
-      <text x="340" y="471" text-anchor="middle" font-size="11" font-weight="700" fill="#c4b5fd">命中 deny 规则</text>
-      <text x="340" y="476" text-anchor="middle" font-size="9" fill="#8b949e">(无豁免)</text>
-      <path d="M340 488 L340 510" stroke="#8b949e" stroke-width="2" fill="none" marker-end="url(#ar)"/>
-      <rect x="500" y="280" width="160" height="40" rx="10" fill="#f78166" filter="url(#sh)"/>
-      <text x="580" y="305" text-anchor="middle" font-size="12" font-weight="800" fill="white">⛔ DENY</text>
-      <rect x="500" y="498" width="160" height="40" rx="10" fill="#7be0a0" filter="url(#sh)"/>
-      <text x="580" y="523" text-anchor="middle" font-size="12" font-weight="800" fill="#1a1a2e">✅ ALLOW</text>
-      <path d="M394 468 L500 468" stroke="#f78166" stroke-width="2" fill="none" marker-end="url(#arD)"/>
-      <path d="M500 468 L500 320" stroke="#f78166" stroke-width="2" fill="none" marker-end="url(#arD)"/>
-      <path d="M340 510 L340 540 L500 540 L500 538" stroke="#7be0a0" stroke-width="2" fill="none" marker-end="url(#arG)"/>
-      <text x="60" y="540" font-size="10" fill="#8b949e" font-style="italic">每条结果（含 DENY/ALLOW）均 hash 上链 → audit_chain.log (verify() 可检测篡改)</text>
+      <rect width="680" height="360" rx="14" fill="#0d1117" data-page-node-id="UXGIpXJJniZN6LBydH18fn"/>
+      <text x="340" y="36" text-anchor="middle" font-size="18" font-weight="800" fill="#f0f0f0" data-page-node-id="bYPw3O2AtHDO3yDDWJdNAl">🔗  Tamper-evident Audit Chain</text>
+      <text x="340" y="58" text-anchor="middle" font-size="11" fill="#8b949e" font-style="italic" data-page-node-id="PguuhOfDO99193CQvFtf8G">每条记录 hash(prev_hash + payload) ；改任意一行 → verify() 判定断裂</text>
+      <rect x="30" y="90" width="150" height="150" rx="10" fill="#161b22" stroke="#30363d" stroke-width="1.5" filter="url(#sh)" data-page-node-id="ENxmNS2J72CUkK7SmPF4ro"/>
+      <text x="105" y="116" text-anchor="middle" font-size="11" font-weight="800" fill="#8b949e" data-page-node-id="N7UZbXPEKYh473pSadjbxi">GENESIS</text>
+      <text x="105" y="140" text-anchor="middle" font-size="9" fill="#8b949e" data-page-node-id="BAPymf0D9YxBCkjZxHeWOh">prev =</text>
+      <text x="105" y="156" text-anchor="middle" font-size="9" fill="#58a6ff" font-family="monospace" data-page-node-id="eYvpBHLX8kCjkmXN9CIink">"0"*64</text>
+      <text x="105" y="180" text-anchor="middle" font-size="9" fill="#8b949e" data-page-node-id="xeuQBERnsyzdx5LWeCFiXD">entry =</text>
+      <text x="105" y="196" text-anchor="middle" font-size="9" fill="#c9d1d9" font-family="monospace" data-page-node-id="aVwkjun7QgzqmJ3vh8qxYA">{...}</text>
+      <text x="105" y="222" text-anchor="middle" font-size="9" fill="#8b949e" data-page-node-id="KqUSsoQRfxmoMb4ttlCBOm">hash =</text>
+      <text x="105" y="238" text-anchor="middle" font-size="8" fill="#7be0a0" font-family="monospace" data-page-node-id="p52kNSFOwmpjFrWB9UWk9y">sha256(...)</text>
+      <rect x="265" y="90" width="150" height="150" rx="10" fill="#161b22" stroke="#7c3aed" stroke-width="1.5" filter="url(#sh)" data-page-node-id="3lcjMN79ySDrBeoHuJijeh"/>
+      <text x="340" y="116" text-anchor="middle" font-size="11" font-weight="800" fill="#c4b5fd" data-page-node-id="deRfP6E50UO24o11WFrmZ0">RECORD[i]</text>
+      <text x="340" y="140" text-anchor="middle" font-size="9" fill="#8b949e" data-page-node-id="RkUZuK27QmxRmX9v50NiHH">prev =</text>
+      <text x="340" y="156" text-anchor="middle" font-size="8" fill="#58a6ff" font-family="monospace" data-page-node-id="fJT3J7uOC8xMQVgEUfakxY">hash[i-1]</text>
+      <text x="340" y="180" text-anchor="middle" font-size="9" fill="#8b949e" data-page-node-id="ZEFIRUQ1pfChQKOAT5unFP">entry =</text>
+      <text x="340" y="196" text-anchor="middle" font-size="8" fill="#c9d1d9" font-family="monospace" data-page-node-id="OMM95bzF5OiUv2JGPQdk8G">{action,agent}</text>
+      <text x="340" y="214" text-anchor="middle" font-size="8" fill="#c9d1d9" font-family="monospace" data-page-node-id="MCFbcAgaHqCWO4ENuI9VP9">{resource,...}</text>
+      <text x="340" y="238" text-anchor="middle" font-size="9" fill="#8b949e" data-page-node-id="yMOXuEPPzwUIHH4aBHGBG5">hash =</text>
+      <text x="340" y="254" text-anchor="middle" font-size="8" fill="#7be0a0" font-family="monospace" data-page-node-id="Ls7LFbwAHdB5zVvp9zSNWE">sha256(prev|entry)</text>
+      <rect x="500" y="90" width="150" height="150" rx="10" fill="#161b22" stroke="#7c3aed" stroke-width="1.5" filter="url(#sh)" data-page-node-id="EkPqmDLe0zPtrPHCch69xR"/>
+      <text x="575" y="116" text-anchor="middle" font-size="11" font-weight="800" fill="#c4b5fd" data-page-node-id="1PioiLbDi9dB06dE9D3NbI">RECORD[i+1]</text>
+      <text x="575" y="140" text-anchor="middle" font-size="9" fill="#8b949e" data-page-node-id="AMNeZrABNMExIp0GRagDUx">prev =</text>
+      <text x="575" y="156" text-anchor="middle" font-size="8" fill="#58a6ff" font-family="monospace" data-page-node-id="zrfLWtnliIVrA5tG8e31ru">hash[i]</text>
+      <text x="575" y="180" text-anchor="middle" font-size="9" fill="#8b949e" data-page-node-id="ubm37L63yOCMSgca7j2MDD">entry =</text>
+      <text x="575" y="196" text-anchor="middle" font-size="8" fill="#c9d1d9" font-family="monospace" data-page-node-id="9FOje0EJBvSUNTKBfJ0QjM">{action,agent}</text>
+      <text x="575" y="214" text-anchor="middle" font-size="8" fill="#c9d1d9" font-family="monospace" data-page-node-id="X9foraN23sGHmXHV69wvdl">{resource,...}</text>
+      <text x="575" y="238" text-anchor="middle" font-size="9" fill="#8b949e" data-page-node-id="X150o7wLUPIU3WIglwGUkv">hash =</text>
+      <text x="575" y="254" text-anchor="middle" font-size="8" fill="#7be0a0" font-family="monospace" data-page-node-id="sX3GRUW0mFzEBxBTLL7UFD">sha256(prev|entry)</text>
+      <path d="M180 165 L263 165" stroke="#7be0a0" stroke-width="2.5" fill="none" marker-end="url(#ah)" data-page-node-id="Ia1rb6wZwqujKPn1sSdTAp"/>
+      <path d="M415 165 L498 165" stroke="#7be0a0" stroke-width="2.5" fill="none" marker-end="url(#ah)" data-page-node-id="B1FZh5U9ygqFoBvDZcfSAo"/>
+      <rect x="30" y="270" width="620" height="64" rx="10" fill="#161b22" stroke="#30363d" stroke-width="1" data-page-node-id="sk55tmNqAMDEgGDlaA2N7s"/>
+      <text x="46" y="294" font-size="12" font-weight="700" fill="#7be0a0" data-page-node-id="t0wgFvGfxIY1thWQ991pv7">🔍  verify()：从 GENESIS 重算每条 hash 并与存储值比对</text>
+      <text x="46" y="314" font-size="10" fill="#8b949e" data-page-node-id="cnO4KwhDC4RMDFvr9i59RI">• 全部一致 → (True, None)   ✅ 审计链完整</text>
+      <text x="46" y="328" font-size="10" fill="#f78166" data-page-node-id="obhWb4MDxhQbXdF30hntYJ">• 任一行被篡改 → (False, broken_index)   ⛔ 防篡改生效（自测已证明：篡改中行后 verify=False）</text>
     </svg>
   </div>
 </section>
 
-<section>
-  <h2>③ 防篡改审计链 Audit Chain</h2>
-  <div class="card">
-    <svg viewBox="0 0 680 360" xmlns="http://www.w3.org/2000/svg" style="font-family: system-ui, sans-serif;">
-      <defs>
-        <filter id="sh" x="-4%" y="-4%" width="108%" height="116%"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.18"/></filter>
-        <marker id="ah" markerWidth="9" markerHeight="9" refX="4" refY="4.5"><path d="M0,0 L9,4.5 L0,9 Z" fill="#7be0a0"/></marker>
-      </defs>
-      <rect width="680" height="360" rx="14" fill="#0d1117"/>
-      <text x="340" y="36" text-anchor="middle" font-size="18" font-weight="800" fill="#f0f0f0">🔗  Tamper-evident Audit Chain</text>
-      <text x="340" y="58" text-anchor="middle" font-size="11" fill="#8b949e" font-style="italic">每条记录 hash(prev_hash + payload) ；改任意一行 → verify() 判定断裂</text>
-      <rect x="30" y="90" width="150" height="150" rx="10" fill="#161b22" stroke="#30363d" stroke-width="1.5" filter="url(#sh)"/>
-      <text x="105" y="116" text-anchor="middle" font-size="11" font-weight="800" fill="#8b949e">GENESIS</text>
-      <text x="105" y="140" text-anchor="middle" font-size="9" fill="#8b949e">prev =</text>
-      <text x="105" y="156" text-anchor="middle" font-size="9" fill="#58a6ff" font-family="monospace">"0"*64</text>
-      <text x="105" y="180" text-anchor="middle" font-size="9" fill="#8b949e">entry =</text>
-      <text x="105" y="196" text-anchor="middle" font-size="9" fill="#c9d1d9" font-family="monospace">{...}</text>
-      <text x="105" y="222" text-anchor="middle" font-size="9" fill="#8b949e">hash =</text>
-      <text x="105" y="238" text-anchor="middle" font-size="8" fill="#7be0a0" font-family="monospace">sha256(...)</text>
-      <rect x="265" y="90" width="150" height="150" rx="10" fill="#161b22" stroke="#7c3aed" stroke-width="1.5" filter="url(#sh)"/>
-      <text x="340" y="116" text-anchor="middle" font-size="11" font-weight="800" fill="#c4b5fd">RECORD[i]</text>
-      <text x="340" y="140" text-anchor="middle" font-size="9" fill="#8b949e">prev =</text>
-      <text x="340" y="156" text-anchor="middle" font-size="8" fill="#58a6ff" font-family="monospace">hash[i-1]</text>
-      <text x="340" y="180" text-anchor="middle" font-size="9" fill="#8b949e">entry =</text>
-      <text x="340" y="196" text-anchor="middle" font-size="8" fill="#c9d1d9" font-family="monospace">{action,agent}</text>
-      <text x="340" y="214" text-anchor="middle" font-size="8" fill="#c9d1d9" font-family="monospace">{resource,...}</text>
-      <text x="340" y="238" text-anchor="middle" font-size="9" fill="#8b949e">hash =</text>
-      <text x="340" y="254" text-anchor="middle" font-size="8" fill="#7be0a0" font-family="monospace">sha256(prev|entry)</text>
-      <rect x="500" y="90" width="150" height="150" rx="10" fill="#161b22" stroke="#7c3aed" stroke-width="1.5" filter="url(#sh)"/>
-      <text x="575" y="116" text-anchor="middle" font-size="11" font-weight="800" fill="#c4b5fd">RECORD[i+1]</text>
-      <text x="575" y="140" text-anchor="middle" font-size="9" fill="#8b949e">prev =</text>
-      <text x="575" y="156" text-anchor="middle" font-size="8" fill="#58a6ff" font-family="monospace">hash[i]</text>
-      <text x="575" y="180" text-anchor="middle" font-size="9" fill="#8b949e">entry =</text>
-      <text x="575" y="196" text-anchor="middle" font-size="8" fill="#c9d1d9" font-family="monospace">{action,agent}</text>
-      <text x="575" y="214" text-anchor="middle" font-size="8" fill="#c9d1d9" font-family="monospace">{resource,...}</text>
-      <text x="575" y="238" text-anchor="middle" font-size="9" fill="#8b949e">hash =</text>
-      <text x="575" y="254" text-anchor="middle" font-size="8" fill="#7be0a0" font-family="monospace">sha256(prev|entry)</text>
-      <path d="M180 165 L263 165" stroke="#7be0a0" stroke-width="2.5" fill="none" marker-end="url(#ah)"/>
-      <path d="M415 165 L498 165" stroke="#7be0a0" stroke-width="2.5" fill="none" marker-end="url(#ah)"/>
-      <rect x="30" y="270" width="620" height="64" rx="10" fill="#161b22" stroke="#30363d" stroke-width="1"/>
-      <text x="46" y="294" font-size="12" font-weight="700" fill="#7be0a0">🔍  verify()：从 GENESIS 重算每条 hash 并与存储值比对</text>
-      <text x="46" y="314" font-size="10" fill="#8b949e">• 全部一致 → (True, None)   ✅ 审计链完整</text>
-      <text x="46" y="328" font-size="10" fill="#f78166">• 任一行被篡改 → (False, broken_index)   ⛔ 防篡改生效（自测已证明：篡改中行后 verify=False）</text>
-    </svg>
-  </div>
+<section id="sec-shared" data-page-node-id="7G2yvFeWgBP46jYr4Na4um">
+  <h2 data-page-node-id="CtaE87ro96tST1IwgLECFl">⑦ 共享状态拓扑 Shared State</h2>
+  <img class="diag" src="07-shared-state.svg" alt="Shared State Topology" data-page-node-id="bAXoA7dumv5VBuHas79hkv">
 </section>
 
-<section>
-  <h2>④ 共享状态拓扑 Shared State</h2>
-  <img class="diag" src="07-shared-state.svg" alt="Shared State Topology">
+<section id="sec-king" data-page-node-id="2YVCd4azDz3jDEs6RXHHuH">
+  <h2 data-page-node-id="sSOKhhNgmFSyULqv8A6xvM">⑧ 国王身份动态解析 Deployer = King</h2>
+  <img class="diag" src="08-king-resolution.svg" alt="King Resolution" data-page-node-id="Hnkq7tjwTTelNP7k8qDbam">
 </section>
 
-<section>
-  <h2>⑤ 国王身份动态解析 (Deployer = King)</h2>
-  <img class="diag" src="08-king-resolution.svg" alt="King Resolution">
+<section id="sec-cog" data-page-node-id="SEii58itxxkl4mzEl3GAVO">
+  <h2 data-page-node-id="FOgKtauhBHGgOQAga5Nx8V">⑨ 进智脊柱 Cognition Spine（v5.4 引入）</h2>
+  <img class="diag" src="09-cognition-spine.svg" alt="Cognition Spine" data-page-node-id="QoQgDUim8PFu2cTxIC8sey">
 </section>
 
-<section>
-  <h2>附：v5.2 基础图解（权力结构 / 记忆隔离 / 宰相轮值）</h2>
-  <h3>权力结构 Power Structure</h3>
-  <img class="diag" src="01-power-structure.svg" alt="Power Structure">
-  <h3>记忆隔离墙 Memory Isolation</h3>
-  <img class="diag" src="02-memory-isolation.svg" alt="Memory Isolation">
-  <h3>宰相轮值流程 PM Rotation</h3>
-  <img class="diag" src="03-rotation-flow.svg" alt="PM Rotation">
+<section id="sec-cog-flow" data-page-node-id="FVz9cUFvhNOHzyugbmkFz9">
+  <h2 data-page-node-id="kA9jr0GVj9NsNsVha7uEEv">⑩ 蒸馏/校准/deliberate 数据流</h2>
+  <img class="diag" src="10-cognition-flow.svg" alt="Cognition Flow" data-page-node-id="8BAXcmEnVdscH8T1NYXEJc">
 </section>
 
-<section>
-  <h2>🔬 交叉验证证据（宣称 = 实现，已实地跑通）</h2>
-  <p class="meta">以下为本地（${KING_NAME}环境）真实执行输出，复现命令见每行注释。</p>
+<section id="sec-cog-roadmap" data-page-node-id="4nDFE11Lmx9UaUCCV2UcmS">
+  <h2 data-page-node-id="9KgmEKGvM5fuN1Nups6l2K">⑪ 进智脊柱路线图</h2>
+  <img class="diag" src="11-cognition-roadmap.svg" alt="Cognition Roadmap" data-page-node-id="wr9YJPWHeZee2BEV8MjXS4">
+</section>
 
-  <h3>[1] 国王解析 <span class="meta"># python kaf/king.py</span></h3>
-  <pre><span class="ok">=== KAF v5.3 King Resolution ===
-  当前国王(King): ${KING_NAME}
-  解析来源(source): author_env(本地作者)
-  优先级: env:KAF_KING &gt; kaf_config.json &gt; 本地作者(${KING_NAME}) &gt; 当前OS用户/operator</span></pre>
+<section id="sec-cog-full" data-page-node-id="s4uys1hAijuSkOc02WvVPy">
+  <h2 data-page-node-id="7RgSY8OZgUEpuynUkJk1lc">⑫ 进智全景（五零件 + 闭环）</h2>
+  <img class="diag" src="13-cognition-full.svg" alt="Cognition Full" data-page-node-id="4kK83K710CcX6PwSH8z8Tw">
+</section>
 
-  <h3>[2] 治理层自测 <span class="meta"># python kaf/governance_selftest.py</span></h3>
-  <pre><span class="ok">  ✅ 受保护资产(MEMORY.md)删除无 king_confirmed → DENY
+<section id="sec-loop" data-page-node-id="xar5DuGlg7DFavyVfSC5Ds">
+  <h2 data-page-node-id="JugKyzbmVCKZcjrxkkOYTw">⑬ 交付质量闭环 Loop Driver</h2>
+  <img class="diag" src="14-loop-closure.svg" alt="Loop Closure" data-page-node-id="OLrJM5zRYu3ScziKc4mdos">
+</section>
+
+<section id="sec-align" data-page-node-id="UWdrDb8cRzYKVVPBrNnUtv">
+  <h2 data-page-node-id="BNrtFUZ9NR0Qsv5JK9nz67">⑭ DeepSeek 对齐 harness</h2>
+  <img class="diag" src="15-alignment-deepseek-harness.svg" alt="DeepSeek Alignment Harness" data-page-node-id="1U4unR6z5Gx2gJmLCJAMUL">
+</section>
+
+<section id="sec-verify" data-page-node-id="5XVsgaqfI9AFWDQmbctAbB">
+  <h2 data-page-node-id="WP573gmmXTO1HYIPmIsYUo">🔬 交叉验证证据（v5.6 实地跑通）</h2>
+  <p class="meta" data-page-node-id="L7ZgGopsBOBi1kYx4p2Q4j">以下为 v5.6 真身 <code data-page-node-id="EBOP30hRB68bNleYxuh8z7">D:\Agent集群共享\国王技能KAF\v5.4\kaf\kaf.py</code> 与 <code data-page-node-id="9PuGiwRBu50h3KpHnkYozd">audit_kaf_v56_closure.py</code> 真实执行输出。</p>
+
+  <h3 data-page-node-id="wfGZQJ6HgTIBUKsizVvYG9">[1] 520 自检（在正确工作目录 D:\WorkBuddy\Claw）<span class="meta" data-page-node-id="n39yTTZrbpF8fWtlJXYH7T"># python kaf/kaf.py check</span></h3>
+  <pre data-page-node-id="pN4lR029wntD2HypuxAEeU"><span class="ok" data-page-node-id="kP5Otb7AIXBQXW4R7fCRkF">==================================================
+  KAF 520 自检
+==================================================</span>
+  <span class="ok" data-page-node-id="RJ8UDTyZbkJu3nvlPa2v4U">✅ traceable: 操作日志存在且有记录: 536 字节 (可追溯)</span>
+  <span class="ok" data-page-node-id="clkxPqeFD2z7bv3kArIsS8">✅ recoverable: 存在备份: kaf-backup-2026-08-30 (可恢复)</span>
+  <span class="ok" data-page-node-id="y8dMRID6cvaDZfAHzImvMl">✅ fixable: 失败回滚方案指向真实备份: kaf-backup-2026-08-30 (可修复)</span>
+  <span class="ok" data-page-node-id="9EZBFCBGLPjsggq0xwDltd">✅ evolvable: skill目录: C:\Users\山禾/.workbuddy/skills (41个skill)</span>
+  <span class="bad" data-page-node-id="w0ZxPVEOSSlUZSRdhMkeTa">❌ enforced: 未真正强制: 缺 ['kaf_gate_audit.log 无运行记录(门禁从未被调用=装饰)']</span>
+
+  <span class="warn" data-page-node-id="oWype7OzgHLnXTLLysQvD3">总体: FAIL（仅 1/5 红，且为已知缺口：强制门禁未接进实际操作）</span></pre>
+  <p class="meta warn" data-page-node-id="23D26T086qPuihU1X88vSr">⚠️ 注意：kaf check 必须在工作区根目录跑（cd D:\WorkBuddy\Claw），不要在 .../kaf/ 子目录跑——后者会因找不到 archive/ 而假红（traceable/recoverable/fixable 三项均假阴）。</p>
+
+  <h3 data-page-node-id="rt2tcxtRC83UxPI2DyLXZe">[2] 三仓一致性审计（v5.6 净化版）<span class="meta" data-page-node-id="MdfPqcGi5bmFjh5lSzQuC8"># python audit_kaf_v56_closure.py</span></h3>
+  <pre data-page-node-id="ny5XYfqa2yDEEAXMm3bL67"><span class="ok" data-page-node-id="BFbwHSUi7XTm4SSjeTCQ62">VERDICT ①vs②=OK  ③vs②=OK  私货净化=OK  ③缺口=0
+AUDIT_EXIT=0
+三仓 sha256 100% 一致 · GitHub 远端已含 ② 全部文件</span></pre>
+
+  <h3 data-page-node-id="3tvafdkNt6AamHZ5XRou1Q">[3] T2 复杂度分级路由（v5.6）<span class="meta" data-page-node-id="pasSwjVzrKSnURgtZSL4lw"># python kaf/kaf.py route "批量迁移数据库并处理跨模块事务与并发一致性"</span></h3>
+  <pre data-page-node-id="fTGVYQCsJOb9PQPMib8bLr"><span class="ok" data-page-node-id="z4Ck2L3bSG4DPsSuib0lgs">任务分类: complex
+推荐: planner=opencode(frontier) / worker=claude(economy)
+原因: 跨模块/高风险/需权衡设计 → 升档保质
+v5.6 新增：80/15/5 分布（routine 80% / moderate 15% / complex 5%）</span></pre>
+
+  <h3 data-page-node-id="ru9CJDvdMc3HEp38zaXyan">[4] T1 四层 token 治理（v5.6 诚实边界）<span class="meta" data-page-node-id="soC0a5aub4DwQDZbA3mIPm"># python kaf/kaf.py tokens "定位并修复登录接口的空指针"</span></h3>
+  <pre data-page-node-id="GtHvbSDmRc5ybjE1TgjOvR"><span class="ok" data-page-node-id="uOJFu9XkTlZVEY6KBd5qcr">L1 code_read       −66%  ← serena (MCP·LSP 符号级检索)        ❌ KAF 未集成
+L2 command_output  −65%  ← rtk (输出裁剪)                      ❌ KAF 未集成
+L3 prose_output    −6%   ← caveman (精简语体)                  ❌ KAF 未集成
+L4 code_gen        −40%  ← Ponytail L2 决策梯 (v5.5 已集成)   ✅ KAF 已集成
+
+本任务命中层: L1 code_read ◀ 精筒代码救不了成本，须外接 serena
+KAF 诚实口径：宣称"KAF 省 69.6% token"是假话；实际只吃到 code_gen 一层 −40%</span></pre>
+
+  <h3 data-page-node-id="eAixQn38P31vZCc3Guu6ev">[5] Ponytail 7 级梯（v5.5 L2 预执行决策）<span class="meta" data-page-node-id="m3M3aGC0pECxWU8h1qZtUl"># python kaf/kaf.py ponytail "实现日期选择器组件"</span></h3>
+  <pre data-page-node-id="tlUQiZ4LEzQrgIVvfjCRCy"><span class="ok" data-page-node-id="IHBO4x2Wxkh9rLl8zjRWE6">need?     → 需要
+exists?   → 已有同功能
+stdlib?   → N/A
+native?   → &lt;input type="date"&gt; ◀ 停梯（最大削减来源）
+dep?      → (跳过)
+oneliner? → (跳过)
+minimal?  → (跳过)
+
+决策: HOLD · 不写自组件，用原生 date input
+安全红线: N/A</span></pre>
+
+  <h3 data-page-node-id="nvw7w07jBi1EphSDCGTn61">[6] 治理层自测（v5.3 沿用至 v5.6）<span class="meta" data-page-node-id="oC9cWfQFIGuLQIzNTzZMT1"># python kaf/governance_selftest.py</span></h3>
+  <pre data-page-node-id="8A0PkdF3MWQ1Fr1zDMxRnH"><span class="ok" data-page-node-id="sORezqmJ3epd5AY1lBtCig">  ✅ 受保护资产(MEMORY.md)删除无 king_confirmed → DENY
   ✅ 受保护资产删除 + king_confirmed+user_confirmed+has_script → ALLOW
   ✅ kill-switch ON → 任何动作 DENY
   ✅ kill-switch OFF → 恢复 ALLOW
@@ -222,33 +303,81 @@
 
 [self-test] PASS=8 FAIL=0</span></pre>
 
-  <h3>[3] 治理评估 DENY <span class="meta"># python kaf/kaf.py govern "delete" --resource "D:/x/MEMORY.md" --user_confirmed --has_script</span></h3>
-  <pre><span class="bad">  ⛔ 决策: DENY
-  动作: delete  资源: D:/x/MEMORY.md
-  触发规则: gov-520-write-protect
-  原因: 宪法/520/铁律/记忆为受保护资产，须国王显式确认(king_confirmed)方可写/删/移</span></pre>
+  <h3 data-page-node-id="S9p0Bo7vi9xJI1TFHaRuL9">[7] 国王解析（v5.3 修正）<span class="meta" data-page-node-id="HlVDliGBmbaDs8igfkvbGc"># python kaf/king.py</span></h3>
+  <pre data-page-node-id="BWAXNDCRxVOAqultJ0rRIV"><span class="ok" data-page-node-id="933vnBdFZENyOlHX7PSY78">=== KAF v5.6 King Resolution ===
+  当前国王(King): ${KING_NAME}
+  解析来源(source): author_env(本地作者)
+  优先级: env:KAF_KING &gt; kaf_config.json &gt; 本地作者(${KING_NAME}) &gt; 当前OS用户/operator</span></pre>
 
-  <h3>[4] 治理评估 ALLOW <span class="meta"># ... --king_confirmed (全确认)</span></h3>
-  <pre><span class="ok">  ✅ 决策: ALLOW
-  动作: delete  资源: D:/x/MEMORY.md
-  触发规则: default</span></pre>
+  <h3 class="warn" data-page-node-id="W4awzWxLcBXSjToAwnmdej">[8] 已知真缺口：强制门禁未通电（enforced 柱）</h3>
+  <pre data-page-node-id="fEF6Ib0Ok4hlShtrbvDEzt"><span class="bad" data-page-node-id="aRwcdHXjI0nYyqpJ54yEOG">❌ enforced: kaf_gate_audit.log 无运行记录(门禁从未被调用=装饰)</span>
+  <span class="dim" data-page-node-id="4whWqOmnJe4AGxRFAa9nJt">说明：kaf_gate.py 已实现（删/移/覆盖前必过门禁），但 WorkBuddy 无原生 hook 接口
+（hooks.json/PreToolUse 字段实测均无），agent 侧强制策略 adapters/workbuddy.py 已写实，
+但实际执行流中从未被任何 operation 调用——属"框架写好了没通电"。
+修复路径：把 kaf_gate.py check 接入每一次破坏性操作（agent 自觉调用并服从 BLOCK）。</span></pre>
+</section>
 
-  <h3>[5] 审计链完整性 <span class="meta"># python kaf/kaf.py audit-tail 6</span></h3>
-  <pre><span class="ok">  完整性: ✅ 有效
-  [2026-08-04T13:45:17] deny  | delete | ? | D:/x/MEMORY.md | gov-520-write-protect | ...
-  [2026-08-04T14:07:09] deny  | delete | ? | D:/x/MEMORY.md | gov-520-write-protect | ...
-  [2026-08-04T14:07:09] allow | delete | ? | D:/x/MEMORY.md | default              | ...</span></pre>
+<section id="sec-history" data-page-node-id="DD6Sa1g0yItan3T2zB06S7">
+  <h2 data-page-node-id="9vSzT7YDQRwZlNhSTgsN1l">📦 历史附录：v5.3 六层架构（已弃用，仅留对照）</h2>
+  <div class="appendix" data-page-node-id="53VOByXiBsF3mDtCfoJGer">
+    <p class="meta" data-page-node-id="ni4ji8i9bCbpRYgUxmBXYc">⚠️ 此图为 v5.3 时代产物（6 层：Adapter / Coordinator / Governance / Guard / Constitution / Memory），不含 v5.4 进智脊柱、v5.5 Ponytail 预执行决策、v5.6 预执行经济学。已被 ① 节的 v5.6 九层全栈架构取代。保留仅为版本对照。</p>
+    <div class="card" data-page-node-id="5Fbd0MFAKEe5KdiqCKfyKZ">
+      <svg viewBox="0 0 680 580" xmlns="http://www.w3.org/2000/svg" style="font-family: system-ui, sans-serif;" data-page-node-id="L1oZ7B5ModdWl4hCIObIa3">
+        <defs data-page-node-id="dlLFW7HrUIkwEiqYkVOmep">
+          <filter id="sh" x="-4%" y="-4%" width="108%" height="116%" data-page-node-id="ZMV09Zwv0o2MBrsfdSV1ru"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.18" data-page-node-id="inYRZgZzq6ghPwxJkXf8f6"/></filter>
+          <linearGradient id="gA" x1="0" y1="0" x2="1" y2="1" data-page-node-id="ZchLeo5YYCBCUpsZQMYryG"><stop offset="0" stop-color="#58a6ff" data-page-node-id="vl7rMAcjEHHQYPZTVNc3Zy"/><stop offset="1" stop-color="#2d6cdf" data-page-node-id="FhT6sGhla4fJ30KFMkaj7K"/></linearGradient>
+          <linearGradient id="gC" x1="0" y1="0" x2="1" y2="1" data-page-node-id="WT64SqJC8VJQpfJxJfZkoF"><stop offset="0" stop-color="#7be0a0" data-page-node-id="6z5MPhYBINBLdYstMAvPRC"/><stop offset="1" stop-color="#4dc970" data-page-node-id="Q0HviypDEeBmhTS4Ca3AAA"/></linearGradient>
+          <linearGradient id="gG" x1="0" y1="0" x2="1" y2="1" data-page-node-id="SoDJVyHkhMIIcgbqAZaO9n"><stop offset="0" stop-color="#a78bfa" data-page-node-id="nPRQam7954HUNJSLIe1BLr"/><stop offset="1" stop-color="#7c3aed" data-page-node-id="WUQSiJALeRf2ZqHDXkeGVJ"/></linearGradient>
+          <linearGradient id="gR" x1="0" y1="0" x2="1" y2="1" data-page-node-id="M7AJ0SbalLtBUmmHOdBqZ0"><stop offset="0" stop-color="#f78166" data-page-node-id="ldAEDnlgaFEehnvAYFHohD"/><stop offset="1" stop-color="#d45a3e" data-page-node-id="xOqpdkNf7qqxf0CKrr7UjE"/></linearGradient>
+          <linearGradient id="gK" x1="0" y1="0" x2="1" y2="1" data-page-node-id="sfdyHHp4sVHhrXHRyjQx6n"><stop offset="0" stop-color="#f0c040" data-page-node-id="Rt9cLjtXH5FtMCotBs1VAa"/><stop offset="1" stop-color="#d4a030" data-page-node-id="O1osZnRHlIcNifG7GODCVG"/></linearGradient>
+          <linearGradient id="gM" x1="0" y1="0" x2="1" y2="1" data-page-node-id="sEBMiv04NYyHIEqbDJag37"><stop offset="0" stop-color="#79c0ff" data-page-node-id="ZFuJGuKJYlAaAijvIRZYhh"/><stop offset="1" stop-color="#388bfd" data-page-node-id="looQ6sNzmHLxRJzKa2pB3V"/></linearGradient>
+        </defs>
+        <rect width="680" height="580" rx="14" fill="#0d1117" data-page-node-id="qpWxRQuB2dsqmPurcNbhCt"/>
+        <text x="340" y="36" text-anchor="middle" font-size="18" font-weight="800" fill="#f0f0f0" data-page-node-id="BMGCF4MBNQQI4YNFbmxgvv">🏛️  KAF v5.3 · Layered Architecture（历史版本）</text>
+        <text x="340" y="58" text-anchor="middle" font-size="11" fill="#8b949e" font-style="italic" data-page-node-id="dCqHjWn2IMd7CpR8NWTSlQ">仅留对照 · 已被 v5.6 九层架构取代</text>
+        <rect x="40" y="78" width="600" height="58" rx="10" fill="url(#gA)" filter="url(#sh)" data-page-node-id="ihgKoLbc2QxhYfafRSsx4A"/>
+        <text x="60" y="104" font-size="13" font-weight="800" fill="white" data-page-node-id="Z1lGdMNblRiAyCnFXBCxbQ">🧩  Platform Adapters</text>
+        <text x="60" y="124" font-size="10" fill="rgba(255,255,255,0.85)" data-page-node-id="w1F9ZD0enA7KNwxfYpEP5D">WorkBuddy / Claude / OpenCode / Cursor / Kimi — 5 行代码接入任意平台；dispatch 派发到共享队列</text>
+        <rect x="40" y="144" width="600" height="58" rx="10" fill="url(#gC)" filter="url(#sh)" data-page-node-id="Dx9y7eosoAjcBHEcyag49n"/>
+        <text x="60" y="170" font-size="13" font-weight="800" fill="#1a1a2e" data-page-node-id="Bj3xuLSAaHQiKGSRtfbvlz">🔄  Coordinator Protocol</text>
+        <text x="60" y="190" font-size="10" fill="rgba(26,26,46,0.85)" data-page-node-id="uA3iTTfqSpiskwwiZjMzXR">宰相轮值 · 3票 vs 1票 · 国王一票否决 · handover_state 交接</text>
+        <rect x="40" y="210" width="600" height="62" rx="10" fill="url(#gG)" filter="url(#sh)" stroke="#c4b5fd" stroke-width="1.5" data-page-node-id="kwz75dKr4SH3BnvNtJRn5L"/>
+        <text x="60" y="236" font-size="13" font-weight="800" fill="white" data-page-node-id="3kOGo7KvXkFxrULjukgYF1">🛡️  Governance Layer  ★ v5.3 NEW</text>
+        <text x="60" y="256" font-size="10" fill="rgba(255,255,255,0.9)" data-page-node-id="ffmIznio2NO3S3Ga0KfQES">策略即代码(policy.json) · 急停(kill-switch) · 防篡改审计链 · Agent 身份归因(HMAC)</text>
+        <text x="560" y="232" font-size="9" fill="#ede9fe" font-weight="700" data-page-node-id="OJCfiRZla4u5DaCNFPuzm6">evaluate(): kill→attest→guard520→policy</text>
+        <text x="560" y="248" font-size="9" fill="#ede9fe" font-weight="700" data-page-node-id="jvYaykijlEpB6lvly2FJWV">全程写审计链</text>
+        <rect x="40" y="280" width="600" height="58" rx="10" fill="url(#gR)" filter="url(#sh)" data-page-node-id="72ThuKwPT9JVVZjskYHHu3"/>
+        <text x="60" y="306" font-size="13" font-weight="800" fill="white" data-page-node-id="NJvHzgH5sXx3ZDABz4Qboe">⚡  520 Runtime Guard</text>
+        <text x="60" y="326" font-size="10" fill="rgba(255,255,255,0.85)" data-page-node-id="iE2KpTJSlmS56NCGjAeG8L">4 检查点(pre:delete/pre:destructive_op/post:write_memory/startup) · 铁律8/9/10 · agent侧门禁 kaf_gate.py</text>
+        <rect x="40" y="346" width="600" height="58" rx="10" fill="url(#gK)" filter="url(#sh)" data-page-node-id="zRuYgFzjH8aoyINZpLl3qB"/>
+        <text x="60" y="372" font-size="13" font-weight="800" fill="#1a1a2e" data-page-node-id="3FoVMwfS627k3UMoFDPiZK">📜  Constitution-as-Code</text>
+        <text x="60" y="392" font-size="10" fill="rgba(26,26,46,0.85)" data-page-node-id="6lyMfnvWFEMmQDT0aNG4GA">声明式宪法 JSON · economics_routing/dispatch/review_loop/shared_ledger/governance · sovereign.king_resolver 动态国王</text>
+        <rect x="40" y="412" width="600" height="58" rx="10" fill="url(#gM)" filter="url(#sh)" data-page-node-id="ZBr8dtzHSpfFwPhmViPeSx"/>
+        <text x="60" y="438" font-size="13" font-weight="800" fill="white" data-page-node-id="OiwBnXgMbSCRtVxfBPzpGk">🔐  Memory Integrity</text>
+        <text x="60" y="458" font-size="10" fill="rgba(255,255,255,0.85)" data-page-node-id="khBbP8aG2WCHzatRpYcld9">SHA-256 指纹 + drift 检测 + protect_write · 隔离墙 strict · 共享账本 .memory_ledger.db</text>
+        <rect x="14" y="78" width="20" height="392" rx="6" fill="#21262d" stroke="#30363d" data-page-node-id="qnxFEIL6KC7Hiba2BUxkTM"/>
+        <text x="24" y="270" text-anchor="middle" font-size="9" fill="#8b949e" transform="rotate(-90 24 270)" data-page-node-id="yqmFYoBcBIFWfXa6547bUB">AGENT ACTION ↓</text>
+        <rect x="40" y="486" width="600" height="78" rx="10" fill="#161b22" stroke="#7c3aed" stroke-width="1.5" data-page-node-id="fCfCi0Np7lQWns5fn662xz"/>
+        <text x="60" y="510" font-size="12" font-weight="800" fill="#c4b5fd" data-page-node-id="AgDzOB9F29hepAETBLDVwZ">👑  King = resolve_king()  (v5.3 修正：不再硬编码${KING_NAME})</text>
+        <text x="60" y="530" font-size="10" fill="#8b949e" data-page-node-id="Cgy3hl5KvN16pAcQBYEqEU">本地作者环境 → ${KING_NAME}    ｜    远程新手复制 → 当前 OS 用户 / operator</text>
+        <text x="60" y="548" font-size="10" fill="#8b949e" data-page-node-id="llT1K88KvfaZqoNX32qQnG">显式覆盖：环境变量 KAF_KING 或 kaf_config.json 的 {"king":"你的名字"}</text>
+      </svg>
+    </div>
 
-  <h3 class="warn">[6] 520 自检 traceable 项（已知前置状态，非 v5.3 回归）</h3>
-  <pre><span class="bad">  ❌ traceable: 尚无操作日志：护栏从未实际拦截/记录过任何操作 (不可追溯)</span>
-  <span class="ok">  ✅ recoverable / fixable / evolvable / enforced 均 PASS</span>
-  <span class="meta">说明：traceable 依赖 kaf_operations.log 有真实拦截记录，当前环境从未写入该日志 —— 属 520 自检前置状态，
-  v5.3 未改动 guard520；治理审计链 audit_chain.log 现已提供互补的防篡改操作记录。</span></pre>
+    <h3 data-page-node-id="soOQEc7AINRs4XaUGibS6j">v5.2 基础图解（权力结构 / 记忆隔离 / 宰相轮值）</h3>
+    <h4 data-page-node-id="k3E7xWGESvc2ZaTJQKyOSa">权力结构 Power Structure</h4>
+    <img class="diag" src="01-power-structure.svg" alt="Power Structure" data-page-node-id="2HSDM8CmZGWfrzv5PkSCZa">
+    <h4 data-page-node-id="v5k9RcaKGPshKuImoR9EAo">记忆隔离墙 Memory Isolation</h4>
+    <img class="diag" src="02-memory-isolation.svg" alt="Memory Isolation" data-page-node-id="npqOT0KBGCajKK63xPVhWx">
+    <h4 data-page-node-id="OBw60cYHhQDadsKqFSiWwR">宰相轮值流程 PM Rotation</h4>
+    <img class="diag" src="03-rotation-flow.svg" alt="PM Rotation" data-page-node-id="XuK1E1DgiSzY1LDurZXuKx">
+  </div>
 </section>
 
 </main>
-<footer>
-  KAF v5.3 · 离线自包含页面（零外部依赖）· 国王-Agent蜂群 Skill · MIT License
+<footer data-page-node-id="BiycMUVgkiC4vZW4FM3ulO">
+  KAF v5.6 · 离线自包含页面（零外部依赖）· 国王-Agent蜂群 Skill · MIT License
+  <br data-page-node-id="VAsTFxsQEZ1xRkM1QQ9exh">主图：<code data-page-node-id="VH9AyMt3Nke8l3OC0gD1ng">diagrams/16-architecture-v5.6.svg</code> · 规范：<code data-page-node-id="CNAgiAvmBIif3QfZoyevMu">docs/architecture_v5.6.md</code>
 </footer>
 </body>
 </html>

@@ -75,7 +75,7 @@ def main():
     p = argparse.ArgumentParser(description="KAF 强制门禁")
     p.add_argument("action", choices=["check", "retrieve", "loop"], help="门禁动作(check=强制门禁 / retrieve=输出历史反模式注入块 / loop=交付质量闭环)")
     p.add_argument("--op", required=False, default="",
-                   choices=["", "delete", "rm", "move", "mv", "write", "copy", "rmtree"],
+                   choices=["", "delete", "rm", "move", "mv", "write", "copy", "rmtree", "ping"],
                    help="操作类型(check 必填；retrieve 无需)")
     p.add_argument("--target", default="", help="目标路径")
     p.add_argument("--script", default="", help="破坏性操作的脚本路径(铁律8)")
@@ -123,8 +123,14 @@ def main():
 
     # check 动作必须提供 --op
     if not args.op:
-        print("BLOCK: check 动作须提供 --op <delete|rm|move|mv|write|copy|rmtree>")
+        print("BLOCK: check 动作须提供 --op <delete|rm|move|mv|write|copy|rmtree|ping>")
         return 1
+
+    # 活跃探针(op=ping)：供 kaf check 验证"门禁可达且真在跑"——写入审计日志即证明可达
+    if args.op == "ping":
+        audit("ping", args.target or "liveness", "OK", False, args.reason or "liveness probe")
+        print("OK: gate liveness probe — 门禁可达且可调用 (已写入审计日志)")
+        return 0
 
     # 归一化别名：move→mv, rm/rmtree→delete，确保破坏性判定一致（修 move 绕过门禁的 bug）
     op = {"move": "mv", "rm": "delete", "rmtree": "delete"}.get(args.op, args.op)

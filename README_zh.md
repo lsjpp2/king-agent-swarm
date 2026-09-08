@@ -8,7 +8,7 @@
 [![520-Compliant](https://img.shields.io/badge/520-Rule%20Compliant-ff69b4.svg)](#-520-法则四原则三铁律)
 [![Platform-agnostic](https://img.shields.io/badge/Platform-Agnostic-lightgrey.svg)](#-平台适配器)
 [![KAF v5.6](https://img.shields.io/badge/KAF-v5.6-7c3aed.svg)](#-架构九层全栈v56)
-[![Audit Chain](https://img.shields.io/badge/Audit-防篡改审计链-2d6cdf.svg)](#-治理层v53)
+[![Audit Chain](https://img.shields.io/badge/Audit-防篡改审计链-2d6cdf.svg)](#-架构九层全栈v56)
 [![Stars](https://img.shields.io/github/stars/lsjpp2/king-agent-swarm?style=social)](https://github.com/lsjpp2/king-agent-swarm/stargazers)
 [![MIT License](https://img.shields.io/github/license/lsjpp2/king-agent-swarm?color=green)](LICENSE)
 [![Latest Release](https://img.shields.io/github/v/release/lsjpp2/king-agent-swarm?label=Release)](https://github.com/lsjpp2/king-agent-swarm/releases)
@@ -88,17 +88,25 @@ guard.pre_execute({"type": "rm", "target": "D:/x", "script": "clean.py", "verifi
 ![KAF v5.6 九层全栈架构](diagrams/16-architecture-v5.6.svg)
 
 ```
-┌─────────────────────────────────────────────┐
-│  平台适配器   (WorkBuddy/Claude/...)          │  5 行代码接入
-├─────────────────────────────────────────────┤
-│  协调协议   (宰相轮值)                         │  此刻谁说了算
-├─────────────────────────────────────────────┤
-│  520 运行时护栏 (4 个检查点)                   │  拦截铁律8/9/10 违规
-├─────────────────────────────────────────────┤
-│  宪法即代码 (JSON，可机读)                     │  规则可 diff、可 CI 测试
-├─────────────────────────────────────────────┤
-│  记忆完整性 (SHA-256 指纹)                     │  检测未授权漂移
-└─────────────────────────────────────────────┘
+┌─────────────────────────────────────────┐
+│  预执行经济学(v5.6)                      │  T2 复杂度路由 80/15/5 · T1 四层 token 治理
+├─────────────────────────────────────────┤
+│  L2 预执行决策层(v5.5·Ponytail)          │  7级梯 need?→exists?→stdlib?→native?→dep?→oneliner?→minimal
+├─────────────────────────────────────────┤
+│  进智脊柱 Cognition Spine(v5.4)          │  反模式/检索注入/蒸馏/校准/deliberate/闭环(与治理层正交)
+├─────────────────────────────────────────┤
+│  治理层 Governance(v5.3)                 │  策略即代码/急停/审计链/身份归因
+├─────────────────────────────────────────┤
+│  平台适配器 Platform Adapters            │  5行代码接入任意平台
+├─────────────────────────────────────────┤
+│  协调协议 Coordinator(宰相轮值)           │
+├─────────────────────────────────────────┤
+│  520 运行时护栏 Runtime Guard            │
+├─────────────────────────────────────────┤
+│  宪法即代码 Constitution-as-Code         │
+├─────────────────────────────────────────┤
+│  记忆完整性 Memory Integrity             │
+└─────────────────────────────────────────┘
 ```
 
 为什么用 JSON 而不是 markdown 文档？因为你的宪法要能**被解析、被 diff、被 CI 测试**，而不只是被读。
@@ -202,15 +210,15 @@ class MyAdapter(PlatformAdapter):
 
 ## 🗺️ 图解
 
-**治理流（v5.3）** —— 每个写操作都经 `Governance.evaluate()`：`急停 → 身份归因 → 520护栏 → 策略`，并写入防篡改审计链：
+**治理流** —— 每个写操作都经 `Governance.evaluate()`：`急停 → 身份归因 → 520护栏 → 策略`，并写入防篡改审计链：
 
-![KAF v5.3 治理流](diagrams/05-governance-flow.svg)
+![KAF 治理流](diagrams/05-governance-flow.svg)
 
 **国王解析** —— `部署者即国王`，不硬编码任何所有者：
 
-![KAF v5.3 国王解析](diagrams/08-king-resolution.svg)
+![KAF 国王解析](diagrams/08-king-resolution.svg)
 
-完整图解见 [`diagrams/`](diagrams/)：架构(01/04)、记忆隔离(02)、宰相轮值(03)、治理流(05)、审计链(06)、共享状态(07)、国王解析(08)，外加离线 [`index.html`](diagrams/index.html) 导览。
+完整图解共 14 张见 [`diagrams/`](diagrams/)：九层架构(16)、记忆隔离(02)、宰相轮值(03)、治理流(05)、审计链(06)、共享状态(07)、国王解析(08)、进智脊柱(09)、认知流(10)、认知路线图(11)、进智全景(13)、闭环(14)、对齐 DeepSeek 约束(15)，外加离线 [`index.html`](diagrams/index.html) 导览。
 
 ---
 
