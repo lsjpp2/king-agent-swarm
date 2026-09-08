@@ -92,7 +92,8 @@ L6 520 自检 + 审计链
 - 国王解析（部署者即国王）：`diagrams/08-king-resolution.svg`
 
 完整图解清单（01 权力结构 / 02 记忆隔离 / 03 宰相轮值 / 04 架构 / 05 治理流 / 06 审计链 / 07 共享状态 / 08 国王解析 / 12 v5.4架构 / 13 进智全景 / 14 闭环 / 15 对齐harness / **16 v5.6全栈架构**）+ 离线 `index.html` 导览，见技能根目录 `diagrams/`。
-完整架构规范见 `docs/architecture_v5.4.md`。
+完整架构规范见 **`docs/architecture_v5.6.md`**（含 v5.5 L2 预执行决策层与 v5.6 预执行经济学的完整设计说明）；
+`docs/architecture_v5.4.md` 为历史版本，保留供对照。
 
 ---
 
