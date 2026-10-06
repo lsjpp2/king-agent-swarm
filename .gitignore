@@ -16,3 +16,6 @@ _release_body.md
 # v5.7: runtime state files (contain local paths / timestamps, never publish)
 .spine_state.json
 .verify_log.jsonl
+
+# v5.7: runtime dispatch queue (written by adapters, never publish)
+kaf/shared/dispatch_queue.json
