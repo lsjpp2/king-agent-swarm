@@ -10,6 +10,31 @@ agent_created: true
 
 ---
 
+## §0 强制引导（v5.7 新增 · 加载本 skill 后必做，不是可选项）
+
+> **为什么要有这一节**（2026-10-07 开源对标实证）：
+> superpowers(295k★) 用 SessionStart hook 注入 bootstrap、compound(25k★) 把经验沉淀设为循环第 6 步、claude-mem(97k★) 用 5 个生命周期钩子全自动——**三者无一例外是自动触发**。
+> 而 KAF 曾出现：反模式库 34 条、**全天零调用**、联动率 **0%**。库再全，没有触发链路就是坟场。
+> 结论：**把「必做」挂进流程，不挂在我的自觉上。**
+
+本 skill 被加载后，按当前阶段执行对应命令（命令均在 `kaf/cognition/` 下）：
+
+| 阶段 | 必跑命令 | 作用 |
+|:--|:--|:--|
+| **任务起点** | `python kaf_bootstrap.py --task "<本次任务描述>"` | 自动检索历史反模式 + 脊柱体检 + **陈旧告警**（联动率 <80% 或超 1 天未蒸馏会报） |
+| **会话收尾** | `python kaf_compound.py run --log <当日日志> --commit` | 挖候选经验 + 打时间戳。**只有真沉淀了才加 `--commit`** |
+| **交付前** | `python kaf_verify.py --claim "<主张>" --evidence-cmd "<验证命令>"` | 交付验收：无实跑证据不许说「已修复」（见 P0-3） |
+
+**加 `--strict` 可在有告警时返回 exit 2**，供有 hook 接口的平台直接阻断（Claude Code / Codex 等）。
+无 hook 接口平台（如 WorkBuddy）由 agent 侧强制：见 §0 末尾的「验收三条」。
+
+**验收三条（防自欺）**
+1. 起点跑过 bootstrap 且**读过**返回的反模式，不是点了就跳
+2. 收尾跑过 compound，且 `--commit` 只在本轮真的沉淀了经验后才加
+3. 交付前跑过 verify 且**证据是实跑输出**，不是"应该没问题"
+
+---
+
 ## 核心理念：KAF v5.6 = 代码化治理框架 + 进智脊柱 + 预执行经济学（平台无关 + 部署者即国王）
 
 > v4 是 md 文档约定；**v5.0 是代码化框架**——宪法从 md 变成可机器解析的 JSON，护栏从事后检查变成运行时强制（有 hook 接口的平台走 hook；无 hook 平台走 agent 侧强制门禁 `kaf_gate.py`），记忆从"丢失后恢复"变成"写入前阻止覆盖"。
@@ -132,18 +157,20 @@ kaf/
 ## 快速开始（CLI）
 
 > ⚠️ **运行目录铁律（2026-08-30 实证，踩过坑）**
-> `kaf.py check` / `verify` 等**必须在工作区根目录运行**（如 `cd D:\WorkBuddy\Claw`），
+> `kaf.py check` / `verify` 等**必须在工作区根目录运行**（如 `cd <你的工作区根目录>`），
 > **不要在 `~/.workbuddy/skills/国王-Agent蜂群/kaf/` 目录里跑**。
 > 原因：520 自检的 recoverable/fixable 项按**当前工作目录**找 `archive/` 备份，
 > 在 skill 目录跑会找不到备份而误报 FAIL（假阴性）。实证对照：
 > - 在 `.../kaf/` 跑 → recoverable ❌ fixable ❌ enforced ❌（**全是假的**）
-> - 在 `D:\WorkBuddy\Claw` 跑 → 五项全 ✅ PASS
+> - 在 `<你的工作区根目录>` 跑 → 五项全 ✅ PASS
 > 备份目录也须已存在（`archive/kaf-backup-YYYY-MM-DD/manifest.json`），否则同样 FAIL。
 
 ```bash
 # ✅ 正确：在工作区根目录调用，指向 skill 里的 kaf.py
-cd D:\WorkBuddy\Claw
-python C:/Users/山禾/.workbuddy/skills/国王-Agent蜂群/kaf/kaf.py check
+#    KAF_HOME = 本 skill 的安装目录（各平台不同，如 ~/.claude/skills/国王-Agent蜂群
+#    或 ~/.workbuddy/skills/国王-Agent蜂群），用你自己的实际路径替换
+cd <你的工作区根目录>
+python "$KAF_HOME/kaf/kaf.py" check
 
 cd kaf/
 python kaf.py init      # 初始化：生成 constitution.json + 注册记忆指纹

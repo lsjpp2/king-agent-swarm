@@ -12,3 +12,7 @@ _release_body.md
 # never publish local sync backups
 *.bak.*
 *.bak
+
+# v5.7: runtime state files (contain local paths / timestamps, never publish)
+.spine_state.json
+.verify_log.jsonl
