@@ -43,6 +43,11 @@ except Exception:
 
 AUDIT_LOG = os.path.join(os.path.dirname(os.path.abspath(__file__)), "kaf_gate_audit.log")
 DESTRUCTIVE = {"delete", "rm", "rmtree", "mv", "copy", "write"}
+# v5.7 P1-C：仅「不可逆」操作才把认知命中升级为硬拦（归一化后 rm/rmtree 已并入 delete）。
+# 依据：实测关键词命中误伤率 67%（6 条日常任务 4 条 HOLD 且全为误伤，
+# 含"备份已推送，远端验证通过"这类正确操作），故只对不可逆动作硬拦，
+# mv/copy/write 等可回滚动作维持软提示，避免"狼来了"导致一律 --cog-ack 绕过。
+IRREVERSIBLE = {"delete"}
 # 进智自省触发集（与 deliberate.HIGH_STAKES 对齐）
 COG_HIGH_STAKES = {
     "delete", "rm", "rmtree", "mv", "move", "write", "copy",
@@ -74,8 +79,12 @@ def _read_candidate(s):
 def main():
     p = argparse.ArgumentParser(description="KAF 强制门禁")
     p.add_argument("action", choices=["check", "retrieve", "loop"], help="门禁动作(check=强制门禁 / retrieve=输出历史反模式注入块 / loop=交付质量闭环)")
+    # v5.7 P1：补齐 COG_HIGH_STAKES 中原本无法从 CLI 传入的 4 类操作
+    # （publish/archive/rename/batch_write 在 deliberate 的高利害集合里，
+    #   却不在 --op choices 中 → 认知检查对它们永远不可达，属"花架子"同类缺陷）
     p.add_argument("--op", required=False, default="",
-                   choices=["", "delete", "rm", "move", "mv", "write", "copy", "rmtree", "ping"],
+                   choices=["", "delete", "rm", "move", "mv", "write", "copy", "rmtree",
+                            "ping", "publish", "archive", "rename", "batch_write"],
                    help="操作类型(check 必填；retrieve 无需)")
     p.add_argument("--target", default="", help="目标路径")
     p.add_argument("--script", default="", help="破坏性操作的脚本路径(铁律8)")
@@ -84,6 +93,10 @@ def main():
     p.add_argument("--reason", default="", help="操作理由(铁律12：确认删除/移动/覆盖须可追溯)")
     p.add_argument("--content", default="", help="write 操作的新内容(用于520保护检查)")
     p.add_argument("--task", default="", help="任务描述(供 deliberate 反模式匹配 / retrieve 检索)")
+    p.add_argument("--cog-ack", default="", dest="cog_ack",
+                   help="v5.7 P1-A：显式确认「已读该反模式且确认本次不适用」——"
+                        "填命中的 AP 编号(如 AP035)。写审计不打断用户；"
+                        "不可逆操作(delete/rm/rmtree)命中时，未提供精确 ack 即硬拦。")
     p.add_argument("--instruction", default="", help="loop 模式：原始指令(逐条比对候选物)")
     p.add_argument("--candidate", default="", help="loop 模式：候选交付物(文本或文件路径)")
     p.add_argument("--mode", default="soft", choices=["hard", "soft", "king"], help="loop 对齐阈值三档")
@@ -145,20 +158,36 @@ def main():
         "user_confirmed": args.confirmed,
     }
 
-    # --- 进智脊柱⑤：元认知门控(软刹车) ---
-    # 高利害动作前自省，命中历史反模式则降级为「列清单+等你确认」。
-    # 仅软提示(不返回非零)，520 护栏仍负责硬拦；不高于国王否决权。
+    # --- 进智脊柱⑤：元认知门控 ---
+    # v5.7 P1 (A+C)：命中 high 反模式时按「操作是否不可逆」分档——
+    #   不可逆(delete/rm/rmtree) → 硬拦，须 --cog-ack <AP编号> 精确确认才放行
+    #   其余(mv/copy/write/...)  → 软提示，不阻断（实测关键词误伤率 67%，
+    #                             全面硬拦会导致"狼来了"→ 一律 ack 绕过 → 又成装饰）
+    # 两者都写审计：COG_ACK(已确认) / COG_UNACK(未确认)，供后续按周统计 ack 真实性。
     if _COG_OK and op in COG_HIGH_STAKES:
         cog = Deliberate()
         v = cog.check(op, args.target, args.task or args.content or "")
         if v.status == "HOLD":
-            print(f"DELIBERATE_HOLD: 命中历史反模式 [{v.matched}]")
+            print(f"DELIBERATE_HOLD: 命中历史反模式 [{v.matched}] ({v.ap_id})")
             print(f"  错误做法: {v.wrong}")
             print(f"  正确替代: {v.right}")
-            print("  => 等同 520 软刹车：请先列清单并向用户确认后，再 --confirmed 执行。")
-            audit(op, args.target, "DELIBERATE_HOLD", args.confirmed, args.reason)
+            ack_ok = bool(v.ap_id) and args.cog_ack.strip().upper() == v.ap_id.upper()
+            if op in IRREVERSIBLE and not ack_ok:
+                print(f"  => 不可逆操作：须 --cog-ack {v.ap_id} 显式确认「已读且本次不适用」方可放行。")
+                print("     （只填 --confirmed 不够；ack 会写入审计日志备查）")
+                audit(op, args.target, "COG_BLOCK", args.confirmed,
+                      args.reason or f"unacked:{v.ap_id}")
+                return 1
+            if ack_ok:
+                print(f"  => 已确认不适用（--cog-ack {v.ap_id}），记审计后放行。")
+                audit(op, args.target, "COG_ACK", args.confirmed,
+                      args.reason or f"ack:{v.ap_id}")
+            else:
+                print("  => 可回滚操作：软刹车，不阻断；建议自查后再执行。")
+                audit(op, args.target, "COG_UNACK", args.confirmed,
+                      args.reason or f"unacked:{v.ap_id}")
         elif v.status == "WARN":
-            print(f"DELIBERATE_WARN: 注意历史反模式 [{v.matched}] —— 正确替代: {v.right}")
+            print(f"DELIBERATE_WARN: 注意历史反模式 [{v.matched}] ({v.ap_id}) —— 正确替代: {v.right}")
             audit(op, args.target, "DELIBERATE_WARN", args.confirmed, args.reason)
 
     # --- write 操作：520 记忆保护(防止删除受保护段落) ---

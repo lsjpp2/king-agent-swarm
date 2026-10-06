@@ -32,12 +32,14 @@ class CogVerdict:
     HOLD = "HOLD"
     WARN = "WARN"
 
-    def __init__(self, status, matched=None, message="", wrong="", right=""):
+    def __init__(self, status, matched=None, message="", wrong="", right="", ap_id=None):
         self.status = status
         self.matched = matched
         self.message = message
         self.wrong = wrong
         self.right = right
+        # v5.7 P1-A: 供 kaf_gate 的 --cog-ack 做精确确认（比对 AP 编号而非名称）
+        self.ap_id = ap_id
 
     def __repr__(self):
         return f"CogVerdict({self.status}:{self.matched})"
@@ -67,11 +69,13 @@ class Deliberate:
                     CogVerdict.HOLD, best.get("name"),
                     f"命中历史反模式 [{best.get('name')}]（severity=high）",
                     wrong=best.get("wrong", ""), right=best.get("right", ""),
+                    ap_id=best.get("id"),
                 )
             return CogVerdict(
                 CogVerdict.WARN, best.get("name"),
                 f"注意历史反模式 [{best.get('name')}]",
                 wrong=best.get("wrong", ""), right=best.get("right", ""),
+                ap_id=best.get("id"),
             )
         return CogVerdict(CogVerdict.GO, None, "未命中已知反模式")
 
